@@ -73,7 +73,7 @@ main { padding:12px; max-width:480px; margin:0 auto; }
 .progress-container { height:8px; background:#eee; border-radius:5px; margin-top:6px; overflow:hidden; }
 .progress-bar { height:100%; width:0%; background:var(--warn); transition:width 0.5s linear; }
 
-/* Giao diện Admin - Cập nhật theo hình ảnh */
+/* Giao diện Admin */
 .admin-section {
     background: white; padding: 16px; border-radius: 12px;
     margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
@@ -95,8 +95,6 @@ main { padding:12px; max-width:480px; margin:0 auto; }
 }
 .current-device-info { font-size: 12px; background: #e0e7ff; padding: 8px; border-radius: 6px; color: #3730a3; margin-bottom: 12px; word-break: break-all;}
 .admin-notice { font-size: 14px; color: var(--gray-700); }
-
-/* Thẻ nhân viên đã gán - Theo hình ảnh */
 .assigned-item {
     display: flex;
     justify-content: space-between;
@@ -160,7 +158,7 @@ main { padding:12px; max-width:480px; margin:0 auto; }
 
 <script>
 // ===== Data & State, Hàm tiện ích & Lưu trữ =====
-// (Giữ nguyên toàn bộ, không thay đổi)
+// (Không thay đổi)
 const BREAKS = [10,40,10,10];
 const timers = {};
 let AppState = { employees: [], registry: {}, times: {} };
@@ -219,7 +217,7 @@ function getCurrentLocation(cb){
 }
 
 // ===== Chức năng Thông báo & Service Worker =====
-// (Giữ nguyên toàn bộ, không thay đổi)
+// (Không thay đổi)
 async function requestNotificationPermission() {
     if (!('Notification' in window)) {
         showModal('Trình duyệt này không hỗ trợ thông báo.');
@@ -241,7 +239,7 @@ function scheduleBackgroundNotification(empName, breakMinutes) {
 }
 
 // ===== Chức năng Phía Nhân viên =====
-// (Giữ nguyên toàn bộ, không thay đổi)
+// (Không thay đổi)
 async function startBreak(empId){
   if(AppState.registry[empId]?.device !== getDeviceId()){ showModal('Thiết bị không hợp lệ.'); return; }
   const times = getTimes(empId);
@@ -298,7 +296,7 @@ function renderEmployees(){
     } else {
         statusHtml = `<div class="status-badge status-pending">Chưa có lịch</div>`;
     }
-    card.innerHTML=`<div class="card-header"><div class="emp-info"><i class="fa-solid fa-user icon"></i><div><div class="emp-name">${emp.name}</div><div class="emp-id">ID: ${emp.id}</div></div></div>${statusHtml}</div><div class="card-body"><div class="status-grid"><div class="status-item"><div class="label">Bắt đầu lúc</div><div class="value">${times.scheduledTime || 'Chưa đặt'}</div></div><div class="status-item"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${BREAKS.length}</div></div></div><div class="timer-container" style="${isOnBreak ? '' : 'display:none;'}"><div class="timer" id="timer-${empId}"></div><div class="progress-container"><div class="progress-bar" id="progress-${empId}"></div></div></div><button class="btn-break" ${breakDisabled} onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> Bắt đầu nghỉ</button></div>`;
+    card.innerHTML=`<div class="card-header"><div class="emp-info"><i class="fa-solid fa-user icon"></i><div><div class="emp-name">${emp.name}</div><div class="emp-id">ID: ${emp.id}</div></div></div>${statusHtml}</div><div class="card-body"><div class="status-grid"><div class="status-item"><div class="label">Bắt đầu lúc</div><div class="value">${times.scheduledTime || 'Chưa đặt'}</div></div><div class="status-item"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${BREAKS.length}</div></div></div><div class="timer-container" style="${isOnBreak ? '' : 'display:none;'}"><div class="timer" id="timer-${empId}"></div><div class="progress-container"><div class="progress-bar" id="progress-${empId}"></div></div></div><button class="btn-break" ${breakDisabled} onclick="startBreak('${empId}')"><i class="fa-solid fa-mug-hot"></i> Bắt đầu nghỉ</button></div>`;
     empListEl.appendChild(card);
     if (isOnBreak) {
         const breakDuration = BREAKS[times.breakIndex - 1] * 60;
@@ -308,7 +306,7 @@ function renderEmployees(){
 }
 
 // ===== Chức năng Phía ADMIN =====
-// (Hàm unassignDevice và assignDevice giữ nguyên)
+
 function unassignDevice(empId) {
     showModal(`Bạn có chắc muốn hủy gán thiết bị cho nhân viên ${empId}?`, () => {
         delete AppState.registry[empId];
@@ -317,31 +315,42 @@ function unassignDevice(empId) {
         renderAdminPanel();
     });
 }
+
+// === CẬP NHẬT HÀM ASSIGNDEVICE ĐỂ HIỂN THỊ THÔNG BÁO TỐT HƠN ===
 function assignDevice() {
     const selectedEmpId = document.getElementById('assign-device-select').value;
     if (!selectedEmpId) { showModal('Vui lòng chọn một nhân viên để gán.'); return; }
+
     getCurrentLocation(loc => {
         if (!loc) return;
         const currentDeviceId = getDeviceId();
-        for (const empId in AppState.registry) {
-            if (AppState.registry[empId].device === currentDeviceId) {
-                showModal(`Lỗi: Thiết bị này đã được gán cho ${empId}. Vui lòng hủy gán trước.`);
+
+        for (const existingEmpId in AppState.registry) {
+            if (AppState.registry[existingEmpId].device === currentDeviceId) {
+                // Tìm tên nhân viên để hiển thị thông báo thân thiện hơn
+                const holder = AppState.employees.find(e => e.id === existingEmpId);
+                const holderName = holder ? holder.name : existingEmpId;
+
+                showModal(`Lỗi: Thiết bị này đã được gán cho ${holderName}. Vui lòng hủy gán trước.`);
                 return;
             }
         }
+
         AppState.registry[selectedEmpId] = { device: currentDeviceId, location: loc };
         saveRegistry();
-        showModal(`Đã gán thành công thiết bị này cho nhân viên ${selectedEmpId}.`);
+        
+        const assignedEmployee = AppState.employees.find(e => e.id === selectedEmpId);
+        const assignedEmployeeName = assignedEmployee ? assignedEmployee.name : selectedEmpId;
+
+        showModal(`Đã gán thành công thiết bị này cho nhân viên ${assignedEmployeeName}.`);
         renderAdminPanel();
     });
 }
 
-// ===== Giao diện Admin (VIẾT LẠI HOÀN TOÀN) =====
 function renderAdminPanel(){
   const adminContentEl = document.getElementById('admin-content');
   const currentDeviceId = getDeviceId();
   
-  // Chuẩn bị dữ liệu
   const assignedEmployees = [];
   const unassignedEmployees = [];
   let currentDeviceHolder = null;
@@ -358,7 +367,6 @@ function renderAdminPanel(){
       }
   });
 
-  // Section 1: Thiết bị đã gán
   let assignedHtml = `
     <div class="admin-section">
         <h3><i class="fa-solid fa-link"></i> Thiết bị đã gán</h3>`;
@@ -373,15 +381,13 @@ function renderAdminPanel(){
                   <button class="btn-unassign-new" onclick="unassignDevice('${emp.id}')">
                       <i class="fa-solid fa-trash"></i>
                   </button>
-              </div>
-          `;
+              </div>`;
       });
   } else {
       assignedHtml += '<p class="admin-notice">Chưa có thiết bị nào được gán.</p>';
   }
   assignedHtml += '</div>';
   
-  // Section 2: Gán thiết bị này
   let assignDeviceHtml = `
     <div class="admin-section">
         <h3><i class="fa-solid fa-mobile-screen-button"></i> Gán thiết bị này</h3>
@@ -409,7 +415,7 @@ function renderAdminPanel(){
 }
 
 // ===== Tự động kiểm tra lịch và Check-in =====
-// (Giữ nguyên, không thay đổi)
+// (Không thay đổi)
 function checkSchedules() {
     const now = new Date();
     const todayString = now.toISOString().slice(0, 10);
@@ -437,7 +443,7 @@ function checkSchedules() {
 }
 
 // ==== Tabs ====
-// (Giữ nguyên, không thay đổi)
+// (Không thay đổi)
 document.getElementById('tab-emp').onclick = ()=>{
   document.getElementById('view-emp').style.display='block';
   document.getElementById('view-admin').style.display='none';
@@ -453,7 +459,7 @@ document.getElementById('tab-admin').onclick = ()=>{
 };
 
 // ==== Init ====
-// (Giá trị khởi tạo Service Worker đã được tích hợp từ trước)
+// (Không thay đổi)
 async function initializeApp() {
     if ('serviceWorker' in navigator) {
         try {
