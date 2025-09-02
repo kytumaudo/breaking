@@ -4,174 +4,427 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Check-in WebApp Mobile</title>
+<!-- Thêm Google Fonts & Font Awesome -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <style>
-:root { --primary:#2563eb; --danger:#dc2626; --ok:#16a34a; --bg:#f6f7fb; --warn:#facc15;}
-* { box-sizing:border-box; margin:0; padding:0; font-family:system-ui, Arial, sans-serif; }
-body { background:var(--bg); color:#111; }
-header { position:sticky; top:0; background:#fff; border-bottom:1px solid #e5e7eb; padding:12px; z-index:100; display:flex; gap:4px; }
-.tab { flex:1; text-align:center; padding:12px; border-radius:8px; background:#f3f4f6; font-weight:600; }
-.tab.active { background:var(--primary); color:#fff; }
+:root { 
+  --primary:#2563eb; --danger:#dc2626; --ok:#16a34a; --bg:#f6f7fb; 
+  --warn:#f59e0b; --gray-100:#f3f4f6; --gray-500:#6b7280; --gray-700:#374151;
+  --text-light: #fff; --text-dark:#1f2937;
+}
+* { 
+  box-sizing:border-box; margin:0; padding:0; 
+  font-family:'Be Vietnam Pro', system-ui, Arial, sans-serif; 
+}
+body { background:var(--bg); color:var(--text-dark); }
+header { 
+  position:sticky; top:0; background:var(--text-light); 
+  border-bottom:1px solid #e5e7eb; padding:12px; z-index:100; display:flex; gap:8px; 
+}
+.tab { 
+  flex:1; text-align:center; padding:12px; border-radius:8px; 
+  background:var(--gray-100); font-weight:600; cursor:pointer;
+  transition: all 0.2s ease-in-out;
+}
+.tab:hover { background: #e5e7eb; }
+.tab.active { background:var(--primary); color:var(--text-light); }
 main { padding:12px; max-width:480px; margin:0 auto; }
-.card { background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 2px 6px rgba(0,0,0,0.05);}
-.emp-name { font-weight:700; font-size:16px; }
-.status { font-size:14px; color:#555; margin-top:4px; }
-.btn { display:block; width:100%; padding:12px; margin-top:8px; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; }
-.btn-in { background:var(--primary); color:#fff; }
-.btn-out { background:var(--danger); color:#fff; }
-.timer { font-size:14px; color:#333; margin-top:4px; font-weight:500; text-align:center; }
+
+/* Cải tiến giao diện Card */
+.card {
+  background:var(--text-light); border-radius:12px; margin-bottom:16px; 
+  box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:hidden;
+}
+.card-header {
+  display:flex; align-items:center; gap:12px;
+  padding:12px; border-bottom:1px solid var(--gray-100);
+}
+.card-header .icon { font-size: 20px; color: var(--primary); }
+.emp-name { font-weight:700; font-size:18px; }
+.emp-id { font-size:12px; color:var(--gray-500); }
+.card-body { padding:12px; }
+.status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+.status-item {
+    background-color: var(--gray-100);
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+}
+.status-item .label { font-weight: 500; color: var(--gray-500); font-size: 12px; }
+.status-item .value { font-weight: 600; color: var(--text-dark); }
+
+.btn-group { display:flex; gap:8px; margin-top:8px; }
+.btn { 
+  flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; padding:12px; border:none; border-radius:10px; 
+  font-size:16px; font-weight:600; cursor:pointer;
+  transition: all 0.2s ease-in-out;
+}
+.btn:disabled { background-color: #d1d5db; cursor: not-allowed; }
+.btn-in { background:var(--ok); color:var(--text-light); }
+.btn-break { background:var(--warn); color:var(--text-light); }
+.timer { 
+  font-size:14px; color:var(--gray-700); margin-top:12px; font-weight:500; text-align:center; 
+}
 .progress-container { height:8px; background:#eee; border-radius:5px; margin-top:6px; overflow:hidden; }
-.progress-bar { height:100%; width:0%; background:linear-gradient(90deg, #4caf50, #81c784); transition:width 1s linear; }
-.muted { font-size:12px; color:#888; text-align:center; margin-top:4px; }
+.progress-bar { 
+  height:100%; width:0%; background:var(--warn); 
+  transition:width 0.5s linear; 
+}
+.muted { font-size:12px; color:var(--gray-500); text-align:center; margin-top:16px; }
+
+/* Giao diện Admin MỚI */
+.admin-section {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.admin-section h3 {
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+    padding-bottom: 8px;
+}
+.assigned-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: var(--gray-100);
+    margin-bottom: 8px;
+}
+.assigned-info span { display: block; }
+.assigned-info .name { font-weight: 600; }
+.assigned-info .device-id { font-size: 11px; color: var(--gray-500); word-break: break-all; }
+.btn-unassign {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+#assign-device-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+#assign-device-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+#assign-device-btn:disabled { background: #999; }
+.current-device-info { font-size: 12px; background: #e0e7ff; padding: 8px; border-radius: 6px; color: #3730a3; margin-bottom: 12px; word-break: break-all;}
+
+
+/* Modal tùy chỉnh */
+#modal-backdrop {
+    position: fixed; inset: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: none; align-items: center; justify-content: center;
+}
+#modal {
+    background: white; padding: 24px; border-radius: 12px;
+    width: 90%; max-width: 350px; text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+#modal-message { font-size: 16px; margin-bottom: 20px; color: var(--gray-700); }
+#modal-ok {
+    padding: 10px 20px; border-radius: 8px; border: none;
+    background: var(--primary); color: white;
+    font-size: 16px; cursor: pointer;
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div id="tab-emp" class="tab active">Employee</div>
-  <div id="tab-admin" class="tab">Admin</div>
+  <div id="tab-emp" class="tab active">Nhân viên</div>
+  <div id="tab-admin" class="tab">Quản trị</div>
 </header>
 
 <main>
-<!-- Employee View -->
 <section id="view-emp">
-  <h2>Danh sách nhân viên</h2>
   <div id="emp-list"></div>
-  <p class="muted">Lưu ý: Kiểm tra thiết bị & vị trí trước khi check-in/out.</p>
+  <p class="muted">Lưu ý: Kiểm tra thiết bị & vị trí trước khi thực hiện.</p>
 </section>
 
-<!-- Admin View -->
 <section id="view-admin" style="display:none">
-  <h2>Admin Panel</h2>
-  <div id="admin-list"></div>
+  <!-- Giao diện Admin mới sẽ được render ở đây -->
+  <div id="admin-content"></div>
 </section>
 </main>
+
+<div id="modal-backdrop">
+    <div id="modal">
+        <p id="modal-message"></p>
+        <button id="modal-ok">OK</button>
+    </div>
+</div>
 
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 
 <script>
 // ===== Data =====
-const EMPLOYEES = [{id:'E1',name:'Nhân viên 1'}]; // ví dụ 1 nhân viên
-const BREAKS = [10,40,10,10]; // phút
+const EMPLOYEES = [{id:'E1',name:'Nguyễn Văn An'}, {id:'E2',name:'Trần Thị Bình'}, {id:'E3', name:'Lê Thị Cúc'}];
+const BREAKS = [10,40,10,10];
 const timers = {};
 
-// ==== Device ID tự động ====
+// ===== Hàm tiện ích & Lưu trữ =====
 function getDeviceId(){
   let id = localStorage.getItem('deviceId');
   if(!id){
-    id = btoa(navigator.userAgent + '|' + navigator.platform + '|' + Date.now()).slice(0,16);
+    id = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now();
     localStorage.setItem('deviceId', id);
   }
   return id;
 }
-
-// ==== Registry ====
 function loadRegistry(){ return JSON.parse(localStorage.getItem('registry')||'{}'); }
 function saveRegistry(reg){ localStorage.setItem('registry',JSON.stringify(reg)); }
-
-// ==== Times & Break count ====
 function getTimes(empId){ 
   const data = JSON.parse(localStorage.getItem('times')||'{}'); 
-  return data[empId]||{breakIndex:0, ci:null, co:null}; 
+  return data[empId]||{ checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0 }; 
 }
 function saveTimes(empId,times){
   const data = JSON.parse(localStorage.getItem('times')||'{}');
   data[empId] = times;
   localStorage.setItem('times',JSON.stringify(data));
 }
-
-// ==== Check In/Out with breaks ====
-function getCurrentLocation(cb){
-  if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(pos=>{
-    cb(pos.coords.latitude+','+pos.coords.longitude);
-  },()=>cb(null)); } else cb(null);
+const modalBackdrop = document.getElementById('modal-backdrop');
+const modalMessage = document.getElementById('modal-message');
+const modalOk = document.getElementById('modal-ok');
+let onModalOk = null;
+function showModal(message, onOkCallback) {
+    modalMessage.textContent = message;
+    onModalOk = onOkCallback;
+    modalBackdrop.style.display = 'flex';
 }
+modalOk.onclick = () => {
+    modalBackdrop.style.display = 'none';
+    if (onModalOk) onModalOk();
+};
+function getCurrentLocation(cb){
+  if(navigator.geolocation){ 
+    navigator.geolocation.getCurrentPosition(
+        pos => cb(pos.coords.latitude+','+pos.coords.longitude),
+        () => { showModal('Không thể lấy vị trí. Vui lòng bật định vị.'); cb(null); }
+    ); 
+  } else { showModal('Trình duyệt không hỗ trợ định vị.'); cb(null); }
+}
+
+// ===== Chức năng Phía Nhân viên =====
 function doCheckIn(empId){
   const reg = loadRegistry();
-  if(reg[empId]?.device!==getDeviceId()){ alert('Thiết bị không hợp lệ'); return; }
+  if(!reg[empId] || reg[empId].device !== getDeviceId()){ 
+    showModal('Thiết bị không hợp lệ. Vui lòng liên hệ Admin để đăng ký thiết bị.'); 
+    return; 
+  }
   getCurrentLocation(loc=>{
+    if (!loc) return;
     const times = getTimes(empId);
-    times.ci = new Date();
+    times.checkInTime = new Date().toISOString();
     saveTimes(empId,times);
     renderEmployees();
   });
 }
-function doCheckOut(empId){
+function startBreak(empId){
   const reg = loadRegistry();
-  if(reg[empId]?.device!==getDeviceId()){ alert('Thiết bị không hợp lệ'); return; }
-  getCurrentLocation(loc=>{
-    const times = getTimes(empId);
-    const idx = times.breakIndex||0;
-    if(idx>=BREAKS.length){ alert('Đã hết các lần nghỉ'); return; }
-    alert(`Bắt đầu nghỉ lần ${idx+1}: ${BREAKS[idx]} phút`);
-    times.breakIndex = idx+1;
-    saveTimes(empId,times);
-    startBreakCountdown(empId,BREAKS[idx]*60);
+  if(reg[empId].device !== getDeviceId()){ showModal('Thiết bị không hợp lệ.'); return; }
+  const times = getTimes(empId);
+  const idx = times.breakIndex || 0;
+  if(idx >= BREAKS.length){ showModal('Bạn đã hết số lần nghỉ giải lao trong ngày.'); return; }
+
+  showModal(`Bắt đầu nghỉ lần ${idx+1}: ${BREAKS[idx]} phút.`, () => {
+      times.onBreak = true;
+      times.breakStartTime = new Date().toISOString();
+      times.breakIndex = idx + 1;
+      saveTimes(empId, times);
+      startBreakCountdown(empId, BREAKS[idx] * 60);
+      renderEmployees();
   });
 }
-
-// ==== Break countdown + notification ====
-function startBreakCountdown(empId,seconds){
-  const timerEl = document.getElementById(`timer-${empId}`);
-  let remaining = seconds;
+function startBreakCountdown(empId, totalSeconds){
+  if (timers[empId]) clearInterval(timers[empId]);
   const sound = document.getElementById('notif-sound');
   function tick(){
-    if(remaining<=0){ 
+    const timerEl = document.getElementById(`timer-${empId}`);
+    const progressEl = document.getElementById(`progress-${empId}`);
+    if(!timerEl || !progressEl) { clearInterval(timers[empId]); return; }
+    const times = getTimes(empId);
+    const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000;
+    let remaining = totalSeconds - elapsed;
+    if(remaining <= 0){ 
       sound.play();
-      alert(`Giờ nghỉ của ${empId} đã kết thúc!`);
       clearInterval(timers[empId]);
-      timerEl.textContent = '';
+      times.onBreak = false;
+      saveTimes(empId, times);
+      renderEmployees();
+      showModal(`Giờ nghỉ của ${EMPLOYEES.find(e=>e.id===empId).name} đã kết thúc!`);
       return;
     }
     const m = String(Math.floor(remaining/60)).padStart(2,'0');
-    const s = String(remaining%60).padStart(2,'0');
+    const s = String(Math.round(remaining%60)).padStart(2,'0');
     timerEl.textContent = `Đang nghỉ: ${m}:${s}`;
-    remaining--;
+    progressEl.style.width = (elapsed / totalSeconds) * 100 + '%';
   }
   tick();
   timers[empId] = setInterval(tick,1000);
 }
-
-// ==== Render Employees ====
 function renderEmployees(){
+  // (Giữ nguyên hàm renderEmployees từ phiên bản trước, không có thay đổi)
   const empListEl = document.getElementById('emp-list');
   empListEl.innerHTML = '';
-  const reg = loadRegistry();
   EMPLOYEES.forEach(emp=>{
     const times = getTimes(emp.id);
     const card = document.createElement('div');
     card.className='card';
-    card.innerHTML=`
-      <div class="emp-name">${emp.name} (${emp.id})</div>
-      <div class="status">Lần nghỉ: ${times.breakIndex||0}/${BREAKS.length}</div>
-      <button class="btn btn-in">Check In</button>
-      <button class="btn btn-out">Check Out</button>
-      <div class="timer" id="timer-${emp.id}"></div>
-    `;
-    card.querySelector('.btn-in').onclick=()=>doCheckIn(emp.id);
-    card.querySelector('.btn-out').onclick=()=>doCheckOut(emp.id);
+    const checkInTimeStr = times.checkInTime ? new Date(times.checkInTime).toLocaleTimeString('vi-VN') : 'Chưa có';
+    const isCheckedIn = !!times.checkInTime;
+    const isOnBreak = times.onBreak;
+    const checkInDisabled = isCheckedIn ? 'disabled' : '';
+    const breakDisabled = !isCheckedIn || isOnBreak ? 'disabled' : '';
+    card.innerHTML=`<div class="card-header"><i class="fa-solid fa-user icon"></i><div><div class="emp-name">${emp.name}</div><div class="emp-id">ID: ${emp.id}</div></div></div><div class="card-body"><div class="status-grid"><div class="status-item"><div class="label">Check-in lúc</div><div class="value">${checkInTimeStr}</div></div><div class="status-item"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${BREAKS.length}</div></div></div><div class="timer-container" style="${isOnBreak ? '' : 'display:none;'}"><div class="timer" id="timer-${emp.id}"></div><div class="progress-container"><div class="progress-bar" id="progress-${emp.id}"></div></div></div><div class="btn-group"><button class="btn btn-in" ${checkInDisabled}><i class="fa-solid fa-right-to-bracket"></i> ${isCheckedIn ? 'Đã Check In' : 'Check In'}</button><button class="btn btn-break" ${breakDisabled}><i class="fa-solid fa-mug-hot"></i> Bắt đầu nghỉ</button></div></div>`;
+    card.querySelector('.btn-in').onclick = () => doCheckIn(emp.id);
+    card.querySelector('.btn-break').onclick = () => startBreak(emp.id);
     empListEl.appendChild(card);
+    if (isOnBreak) {
+        const breakDuration = BREAKS[times.breakIndex - 1] * 60;
+        startBreakCountdown(emp.id, breakDuration);
+    }
   });
 }
 
-// ==== Admin ====
-function renderAdminList(){
-  const listEl = document.getElementById('admin-list');
-  listEl.innerHTML='';
-  EMPLOYEES.forEach(emp=>{
-    const btn = document.createElement('button');
-    btn.textContent=`Gán thiết bị & vị trí cho ${emp.id}`;
-    btn.onclick=()=>{
-      getCurrentLocation(loc=>{
+// ===== Chức năng Phía ADMIN (ĐÃ NÂNG CẤP) =====
+
+// Hủy gán thiết bị khỏi nhân viên
+function unassignDevice(empId) {
+    showModal(`Bạn có chắc muốn hủy gán thiết bị cho nhân viên ${empId}?`, () => {
         const reg = loadRegistry();
-        reg[emp.id] = {device:getDeviceId(), location:loc};
+        delete reg[empId];
         saveRegistry(reg);
-        alert(`Đã gán thiết bị & vị trí cho ${emp.id}`);
-        renderEmployees();
-      });
-    };
-    listEl.appendChild(btn);
-  });
+        showModal(`Đã hủy gán thiết bị cho ${empId}.`);
+        renderAdminPanel(); // Vẽ lại giao diện admin
+    });
 }
+
+// Gán thiết bị hiện tại cho nhân viên được chọn
+function assignDevice() {
+    const selectedEmpId = document.getElementById('assign-device-select').value;
+    if (!selectedEmpId) {
+        showModal('Vui lòng chọn một nhân viên để gán.');
+        return;
+    }
+
+    getCurrentLocation(loc => {
+        if (!loc) return; // Dừng lại nếu không lấy được vị trí
+
+        const reg = loadRegistry();
+        
+        // Kiểm tra xem thiết bị này đã gán cho ai khác chưa (bảo vệ kép)
+        const currentDeviceId = getDeviceId();
+        for (const empId in reg) {
+            if (reg[empId].device === currentDeviceId) {
+                showModal(`Lỗi: Thiết bị này đã được gán cho ${empId}. Vui lòng hủy gán trước.`);
+                return;
+            }
+        }
+
+        reg[selectedEmpId] = { device: currentDeviceId, location: loc };
+        saveRegistry(reg);
+        showModal(`Đã gán thành công thiết bị này cho nhân viên ${selectedEmpId}.`);
+        renderAdminPanel(); // Vẽ lại giao diện admin
+    });
+}
+
+// Vẽ toàn bộ giao diện Admin
+function renderAdminPanel(){
+  const adminContentEl = document.getElementById('admin-content');
+  const reg = loadRegistry();
+  const currentDeviceId = getDeviceId();
+  
+  const assignedEmployees = [];
+  const unassignedEmployees = [];
+  let currentDeviceHolder = null; // Nhân viên đang giữ thiết bị này
+
+  // 1. Phân loại nhân viên và tìm xem ai đang giữ thiết bị hiện tại
+  EMPLOYEES.forEach(emp => {
+      if (reg[emp.id]) {
+          assignedEmployees.push({ ...emp, deviceId: reg[emp.id].device });
+          if (reg[emp.id].device === currentDeviceId) {
+              currentDeviceHolder = emp;
+          }
+      } else {
+          unassignedEmployees.push(emp);
+      }
+  });
+
+  // 2. Tạo HTML
+  let assignedHtml = '<h3><i class="fa-solid fa-link"></i> Thiết bị đã gán</h3>';
+  if (assignedEmployees.length > 0) {
+      assignedEmployees.forEach(emp => {
+          assignedHtml += `
+              <div class="assigned-item">
+                  <div class="assigned-info">
+                      <span class="name">${emp.name} (${emp.id})</span>
+                      <span class="device-id">Device: ${emp.deviceId}</span>
+                  </div>
+                  <button class="btn-unassign" onclick="unassignDevice('${emp.id}')"><i class="fa-solid fa-trash"></i></button>
+              </div>
+          `;
+      });
+  } else {
+      assignedHtml += '<p>Chưa có thiết bị nào được gán.</p>';
+  }
+
+  let assignHtml = `
+      <h3><i class="fa-solid fa-mobile-screen-button"></i> Gán thiết bị này</h3>
+      <div class="current-device-info">ID thiết bị hiện tại: ${currentDeviceId}</div>
+  `;
+  if (currentDeviceHolder) {
+      assignHtml += `<p>Thiết bị này đã được gán cho <strong>${currentDeviceHolder.name}</strong>. Vui lòng hủy gán ở trên trước khi gán cho người mới.</p>`;
+  } else {
+      if (unassignedEmployees.length > 0) {
+          assignHtml += `
+              <select id="assign-device-select">
+                  <option value="">-- Chọn nhân viên --</option>
+                  ${unassignedEmployees.map(emp => `<option value="${emp.id}">${emp.name} (${emp.id})</option>`).join('')}
+              </select>
+              <button id="assign-device-btn" onclick="assignDevice()">Gán cho nhân viên đã chọn</button>
+          `;
+      } else {
+          assignHtml += '<p>Tất cả nhân viên đã được gán thiết bị.</p>';
+      }
+  }
+
+  adminContentEl.innerHTML = `
+      <div class="admin-section">${assignedHtml}</div>
+      <div class="admin-section">${assignHtml}</div>
+  `;
+}
+
 
 // ==== Tabs ====
 document.getElementById('tab-emp').onclick = ()=>{
@@ -185,11 +438,12 @@ document.getElementById('tab-admin').onclick = ()=>{
   document.getElementById('view-admin').style.display='block';
   document.getElementById('tab-admin').classList.add('active');
   document.getElementById('tab-emp').classList.remove('active');
-  renderAdminList();
+  renderAdminPanel(); // Sử dụng hàm render mới cho admin
 };
 
 // ==== Init ====
 renderEmployees();
+
 </script>
 
 </body>
