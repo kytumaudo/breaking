@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Check-in WebApp</title>
+<style>
+:root { --primary:#2563eb; --danger:#dc2626; --ok:#16a34a; --bg:#f6f7fb; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, Arial, sans-serif; background:var(--bg); color:#111; }
+header { position:sticky; top:0; background:#fff; border-bottom:1px solid #e5e7eb; padding:10px 12px; z-index:2; }
+.tabs { display:flex; gap:8px; }
+.tab { flex:1; padding:10px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; text-align:center; font-weight:600; cursor:pointer; }
+.tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+main { padding:12px; max-width:900px; margin:0 auto; }
+.card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:10px; margin-bottom:8px; }
+.card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.emp-info { min-width:0; }
+.emp-name { font-weight:700; }
+.status { font-size:12px; color:#555; margin-top:2px; }
+.dev-badge, .loc-badge { font-size:11px; color:#666; margin-top:2px; }
+.btns { display:flex; gap:6px; flex-wrap:wrap; }
+button { border:none; border-radius:8px; padding:8px 10px; font-weight:600; cursor:pointer; }
+.btn-in { background:var(--primary); color:#fff; }
+.btn-out { background:var(--danger); color:#fff; }
+.btn-reg { background:var(--ok); color:#fff; }
+.muted { color:#6b7280; }
+.progress-container { height:8px; background:#eee; border-radius:5px; margin-top:6px; overflow:hidden; }
+.progress-bar { height:100%; width:0%; background:linear-gradient(90deg, #4caf50, #81c784); transition:width 1s linear; }
+.timer { font-size:12px; color:#333; margin-top:4px; font-weight:500; }
+.panel { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin-bottom:12px; }
+.list { margin-top:8px; }
+.list-item { display:grid; grid-template-columns:1fr auto; gap:4px; align-items:center; padding:8px; border:1px solid #eee; border-radius:10px; margin-bottom:6px; background:#fafafa; font-size:12px; }
+@media (max-width:600px){ .list-item { grid-template-columns:1fr auto; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="tabs">
+    <button id="tab-emp" class="tab active">Employee</button>
+    <button id="tab-admin" class="tab">Admin</button>
+  </div>
+</header>
+
+<main>
+  <!-- Employee View -->
+  <section id="view-emp">
+    <h2 style="margin:6px 0 12px">Danh sách nhân viên</h2>
+    <div id="emp-list"></div>
+    <p class="small muted">
+      Lưu ý: Chỉ thiết bị đã đăng ký cho đúng nhân viên và ở đúng vị trí mới check-in/out được.
+    </p>
+  </section>
+
+  <!-- Admin View -->
+  <section id="view-admin" style="display:none">
+    <div class="panel">
+      <h3>Gán thiết bị & vị trí</h3>
+      <div class="list" id="admin-list"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// Employee list
+const EMPLOYEES = Array.from({length:20}, (_,i)=>({id:`E${i+1}`, name:`Nhân viên ${i+1}`}));
+const timers = {};
+
+// ==== Device ID tự động ====
+function getDeviceId(){
+  let id = localStorage.getItem('deviceId');
+  if(!id){
+    id = btoa(navigator.userAgent + '|' + navigator.platform + '|' + Date.now()).slice(0,16);
+    localStorage.setItem('deviceId', id);
+  }
+  return id;
+}
+
+// ==== Registry: device + location ====
+function loadRegistry(){ return JSON.parse(localStorage.getItem('registry')||'{}'); }
+function saveRegistry(reg){ localStorage.setItem('registry', JSON.stringify(reg)); }
+
+// ==== Times ====
+function getTimes(empId){
+  const data = JSON.parse(localStorage.getItem('times')||'{}');
+  return data[empId]||{};
+}
+function saveTimes(empId, times){
+  const data = JSON.parse(localStorage.getItem('times')||'{}');
+  data[empId] = times;
+  localStorage.setItem('times', JSON.stringify(data));
+}
+
+// ==== Status ====
+function statusOf(empId){
+  const {ci, co} = getTimes(empId);
+  if(ci && (!co || co < ci)) return {text:'Đang làm việc'};
+  if(co && (!ci || co > ci)) return {text:'Đang nghỉ'};
+  return {text:'Chưa check-in'};
+}
+
+// ==== Check In/Out với vị trí ====
+function getCurrentLocation(callback){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      callback(pos.coords.latitude + ',' + pos.coords.longitude);
+    }, ()=>{
+      callback(null);
+    });
+  } else callback(null);
+}
+
+function isLocationMatch(regLocation, currentLocation){
+  if(!regLocation || !currentLocation) return false;
+  const [lat1, lon1] = regLocation.split(',').map(Number);
+  const [lat2, lon2] = currentLocation.split(',').map(Number);
+  const distance = Math.sqrt(Math.pow(lat1-lat2,2)+Math.pow(lon1-lon2,2));
+  return distance < 0.01; // ~1km
+}
+
+function doCheckIn(empId){
+  const reg = loadRegistry();
+  getCurrentLocation(currentLoc=>{
+    if(reg[empId]?.device!==getDeviceId()){ alert('Thiết bị không hợp lệ'); return; }
+    if(!isLocationMatch(reg[empId]?.location,currentLoc)){ alert('Vị trí không hợp lệ'); return; }
+    const times = getTimes(empId);
+    times.ci = new Date();
+    saveTimes(empId, times);
+    renderEmployees();
+  });
+}
+
+function doCheckOut(empId){
+  const reg = loadRegistry();
+  getCurrentLocation(currentLoc=>{
+    if(reg[empId]?.device!==getDeviceId()){ alert('Thiết bị không hợp lệ'); return; }
+    if(!isLocationMatch(reg[empId]?.location,currentLoc)){ alert('Vị trí không hợp lệ'); return; }
+    const times = getTimes(empId);
+    times.co = new Date();
+    saveTimes(empId, times);
+    renderEmployees();
+  });
+}
+
+// ==== Timer & Progress ====
+function updateTimer(empId, working, startTime){
+  if(timers[empId]) clearInterval(timers[empId]);
+  function tick(){
+    const diff = Math.floor((new Date() - startTime)/1000);
+    const h = String(Math.floor(diff/3600)).padStart(2,'0');
+    const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+    const s = String(diff%60).padStart(2,'0');
+    document.getElementById(`timer-${empId}`).textContent =
+      (working ? "Đang làm việc: " : "Đang nghỉ: ") + `${h}:${m}:${s}`;
+    const percent = Math.min((diff%3600)/3600*100,100);
+    document.getElementById(`bar-${empId}`).style.width = percent + "%";
+  }
+  tick();
+  timers[empId] = setInterval(tick,1000);
+}
+
+// ==== Render Employees ====
+function renderEmployees(){
+  const empListEl = document.getElementById('emp-list');
+  empListEl.innerHTML = '';
+  const reg = loadRegistry();
+  EMPLOYEES.forEach(emp=>{
+    const {ci, co} = getTimes(emp.id);
+    let working = null, startTime = null;
+    if(ci && (!co || co < ci)){ working=true; startTime=ci; }
+    else if(co && (!ci || co > ci)){ working=false; startTime=co; }
+
+    const deviceOk = reg[emp.id]?.device===getDeviceId();
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML=`
+      <div class="card-top">
+        <div class="emp-info">
+          <div class="emp-name">${emp.name} <span class="muted">(${emp.id})</span></div>
+          <div class="status">${statusOf(emp.id).text}</div>
+          <div class="dev-badge">${deviceOk ? 'Thiết bị: ✅ hợp lệ' : 'Thiết bị: ❌ không hợp lệ'}</div>
+          <div class="loc-badge">Vị trí: ${reg[emp.id]?.location || 'chưa đăng ký'}</div>
+        </div>
+        <div class="btns">
+          <button class="btn-in">Check In</button>
+          <button class="btn-out">Check Out</button>
+        </div>
+      </div>
+      <div class="progress-container"><div id="bar-${emp.id}" class="progress-bar"></div></div>
+      <div id="timer-${emp.id}" class="timer"></div>
+    `;
+    card.querySelector('.btn-in').onclick = ()=>doCheckIn(emp.id);
+    card.querySelector('.btn-out').onclick = ()=>doCheckOut(emp.id);
+    empListEl.appendChild(card);
+    if(startTime) updateTimer(emp.id, working, new Date(startTime));
+  });
+}
+
+// ==== Admin functions ====
+// Tự động gán thiết bị + vị trí
+function assignDeviceLocation(empId){
+  getCurrentLocation(loc=>{
+    if(!loc){ alert('Không thể lấy vị trí'); return; }
+    const reg = loadRegistry();
+    reg[empId] = {device: getDeviceId(), location: loc};
+    saveRegistry(reg);
+    renderAdminList();
+    renderEmployees();
+    alert(`Đã gán ${empId} với DeviceID & vị trí hiện tại`);
+  });
+}
+
+// Render danh sách Admin: mỗi nhân viên có nút gán tự động
+function renderAdminList(){
+  const listEl = document.getElementById('admin-list');
+  listEl.innerHTML = '';
+  EMPLOYEES.forEach(emp=>{
+    const item = document.createElement('div');
+    item.className='list-item';
+    const reg = loadRegistry();
+    item.innerHTML = `<span>${emp.id} - ${emp.name} ${reg[emp.id]?.device ? '(Đã gán)' : ''}</span>
+                      <button class="btn-reg">Gán thiết bị & vị trí</button>`;
+    item.querySelector('button').onclick = ()=>assignDeviceLocation(emp.id);
+    listEl.appendChild(item);
+  });
+}
+
+// ==== Tabs ====
+document.getElementById('tab-emp').onclick = ()=>{
+  document.getElementById('view-emp').style.display='block';
+  document.getElementById('view-admin').style.display='none';
+  document.getElementById('tab-emp').classList.add('active');
+  document.getElementById('tab-admin').classList.remove('active');
+};
+
+document.getElementById('tab-admin').onclick = ()=>{
+  document.getElementById('view-emp').style.display='none';
+  document.getElementById('view-admin').style.display='block';
+  document.getElementById('tab-admin').classList.add('active');
+  document.getElementById('tab-emp').classList.remove('active');
+  renderAdminList();
+};
+
+// ==== Init ====
+renderEmployees();
+renderAdminList();
+</script>
+</body>
+</html>
