@@ -8,17 +8,14 @@
 <meta name="apple-mobile-web-app-title" content="Check-in App">
 <title>Check-in WebApp Mobile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<!-- FIX PWA: Sửa đường dẫn tới manifest.json -->
 <link rel="manifest" href="manifest.json">
-<!-- Cài đặt theme color cho thanh trạng thái PWA -->
-<meta name="theme-color" content="#2563eb">
-
+<meta name="theme-color" content="#ffffff">
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
-/* ... (GIỮ NGUYÊN TOÀN BỘ CSS) ... */
+/* ... (GIỮ NGUYÊN CSS KHÁC) ... */
 :root { --primary:#2563eb; --danger:#dc2626; --ok:#16a34a; --bg:#f6f7fb; --warn:#f59e0b; --gray-100:#f3f4f6; --gray-500:#6b7280; --gray-700:#374151; --text-light: #fff; --text-dark:#1f2937; }
 * { box-sizing:border-box; margin:0; padding:0; font-family:'Be Vietnam Pro', system-ui, Arial, sans-serif; }
 body { background:var(--bg); color:var(--text-dark); font-size: 14px; }
@@ -32,7 +29,32 @@ body { background:var(--bg); color:var(--text-dark); font-size: 14px; }
 #app-container { display: none; }
 header { position:sticky; top:0; background:var(--text-light); border-bottom:1px solid #e5e7eb; padding:8px; z-index:100; display:flex; align-items:center; gap:8px; }
 .tabs-container { display: flex; flex-grow: 1; gap: 8px; }
-.tab { flex:1; text-align:center; padding:10px; border-radius:8px; background:var(--gray-100); font-weight:600; cursor:pointer; transition: all 0.2s ease-in-out; font-size: 14px; }
+
+/* ===== START: THAY ĐỔI CSS CHO CÁC TAB ===== */
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-size: 14px;
+    color: var(--text-light); /* Chữ màu trắng trên nền màu */
+    opacity: 0.65; /* Tab không được chọn sẽ hơi mờ đi */
+}
+#tab-emp {
+    background-color: var(--primary); /* Màu xanh cho tab Nhân viên */
+}
+#tab-admin {
+    background-color: var(--danger); /* Màu đỏ cho tab Quản trị */
+}
+.tab.active {
+    opacity: 1; /* Tab được chọn sẽ hiển thị rõ */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); /* Thêm hiệu ứng nhấn xuống */
+}
+/* ===== END: THAY ĐỔI CSS CHO CÁC TAB ===== */
+
 #logout-btn, #change-password-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
 main { padding:8px; max-width:480px; margin:0 auto; }
 .card { background:var(--text-light); border-radius:8px; margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden; border: 1px solid #e5e7eb; transition: opacity 0.3s ease-in-out; }
@@ -438,14 +460,14 @@ function playSound(soundId) {
     } catch (error) { console.error("Lỗi khi phát âm thanh:", error); }
 }
 document.body.addEventListener('click', (event) => {
-    const target = event.target.closest('button, .btn, .clickable');
+    const target = event.target.closest('button, .btn, .clickable, .tab'); // Thêm .tab để có âm thanh khi chuyển tab
     if (target) { playSound('audio-click'); }
 });
 
-// ===== START: PWA SERVICE WORKER REGISTRATION =====
+// ===== PWA SERVICE WORKER REGISTRATION =====
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js') // Sử dụng đường dẫn tương đối
+        navigator.serviceWorker.register('./sw.js')
             .then(registration => {
                 console.log('PWA ServiceWorker registration successful with scope: ', registration.scope);
             })
@@ -454,8 +476,6 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
-// ===== END: PWA SERVICE WORKER REGISTRATION =====
-
 </script>
 </body>
 </html>
