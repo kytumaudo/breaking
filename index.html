@@ -13,7 +13,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="manifest" href="manifest.json">
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-
 <style>
 /* ... (GIỮ NGUYÊN TOÀN BỘ CSS) ... */
 :root { --primary:#2563eb; --danger:#dc2626; --ok:#16a34a; --bg:#f6f7fb; --warn:#f59e0b; --gray-100:#f3f4f6; --gray-500:#6b7280; --gray-700:#374151; --text-light: #fff; --text-dark:#1f2937; }
@@ -80,7 +79,6 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
-
 <script>
 // ===== JSONBin Config & App State =====
 // THÔNG TIN ĐÃ ĐƯỢỢC CẬP NHẬT
@@ -103,79 +101,83 @@ let faceDetectionInterval = null;
 
 // Hàm lưu trữ và tải dữ liệu từ JSONBin
 async function saveDataToCloud(data) {
-    // Để tránh ghi đè dữ liệu rỗng lên cloud khi mới khởi tạo
-    if (!data.employees || data.employees.length === 0) {
-        const currentEmployees = AppState.employees;
-        if (currentEmployees && currentEmployees.length > 0) {
-            data.employees = currentEmployees;
-        }
-    }
-    try {
-        await fetch(JSONBIN_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': JSONBIN_API_KEY,
-                'X-Bin-Versioning': 'false' // Tắt versioning để tránh đầy dung lượng
-            },
-            body: JSON.stringify(data)
-        });
-    } catch (error) {
-        console.error("Lỗi khi lưu dữ liệu:", error);
-        alert("Không thể đồng bộ dữ liệu. Vui lòng kiểm tra kết nối mạng.");
-    }
+// Để tránh ghi đè dữ liệu rỗng lên cloud khi mới khởi tạo
+if (!data.employees || data.employees.length === 0) {
+const currentEmployees = AppState.employees;
+if (currentEmployees && currentEmployees.length > 0) {
+data.employees = currentEmployees;
+}
+}
+try {
+await fetch(JSONBIN_URL, {
+method: 'PUT',
+headers: {
+'Content-Type': 'application/json',
+'X-Master-Key': JSONBIN_API_KEY,
+'X-Bin-Versioning': 'false' // Tắt versioning để tránh đầy dung lượng
+},
+body: JSON.stringify(data)
+});
+} catch (error) {
+console.error("Lỗi khi lưu dữ liệu:", error);
+alert("Không thể đồng bộ dữ liệu. Vui lòng kiểm tra kết nối mạng.");
+}
 }
 
 async function loadDataFromCloud() {
-    try {
-        const response = await fetch(`${JSONBIN_URL}/latest`, {
-             headers: { 'X-Master-Key': JSONBIN_API_KEY }
-        });
-        if (!response.ok) {
-            console.log("Không tìm thấy dữ liệu hoặc bin trống, đang tạo dữ liệu mới...");
-            const initialData = {
-                employees: generateInitialEmployees(),
-                times: {},
-                locationSettings: { lat: 0, lon: 0, radius: 50 } // Giá trị mặc định
-            };
-            await saveDataToCloud(initialData);
-            updateAppState(initialData);
-        } else {
-            const data = await response.json();
-            updateAppState(data.record);
-        }
-    } catch (error) {
-        console.error("Lỗi khi tải dữ liệu:", error);
-    }
+try {
+const response = await fetch(`${JSONBIN_URL}/latest`, {
+headers: { 'X-Master-Key': JSONBIN_API_KEY }
+});
+if (!response.ok) {
+console.log("Không tìm thấy dữ liệu hoặc bin trống, đang tạo dữ liệu mới...");
+const initialData = {
+employees: generateInitialEmployees(),
+times: {},
+locationSettings: { lat: 0, lon: 0, radius: 50 } // Giá trị mặc định
+};
+await saveDataToCloud(initialData);
+updateAppState(initialData);
+} else {
+const data = await response.json();
+updateAppState(data.record);
+}
+} catch (error) {
+console.error("Lỗi khi tải dữ liệu:", error);
+}
 }
 
 function updateAppState(newState) {
-    const newStateString = JSON.stringify(newState);
-    if (newStateString !== lastKnownState) {
-        console.log("Phát hiện thay đổi dữ liệu từ cloud, đang cập nhật...");
-        lastKnownState = newStateString;
-        AppState.employees = newState.employees || [];
-        AppState.times = newState.times || {};
-        AppState.locationSettings = newState.locationSettings || null;
-        renderAll();
-    }
+const newStateString = JSON.stringify(newState);
+if (newStateString !== lastKnownState) {
+console.log("Phát hiện thay đổi dữ liệu từ cloud, đang cập nhật...");
+lastKnownState = newStateString;
+AppState.employees = newState.employees || [];
+AppState.times = newState.times || {};
+AppState.locationSettings = newState.locationSettings || null;
+renderAll();
+}
 }
 
-function saveFullState() {
-    saveDataToCloud({
-        employees: AppState.employees,
-        times: AppState.times,
-        locationSettings: AppState.locationSettings
-    });
+// ===== START: FIXED CODE =====
+// Chuyển hàm thành async để có thể sử dụng await
+async function saveFullState() {
+// Đợi (await) cho đến khi hàm saveDataToCloud thực thi xong
+await saveDataToCloud({
+employees: AppState.employees,
+times: AppState.times,
+locationSettings: AppState.locationSettings
+});
 }
+// ===== END: FIXED CODE =====
 
 function renderAll() {
-    if (AppState.loggedInUserId) {
-        if (AppState.isAdmin) {
-            if (document.getElementById('view-admin').style.display === 'block') renderAdminPanel();
-        }
-        renderEmployees();
-    }
+if (AppState.loggedInUserId) {
+if (AppState.isAdmin) {
+if (document.getElementById('view-admin').style.display === 'block') renderAdminPanel();
+}
+renderEmployees();
+}
 }
 
 // Các hàm tiện ích
@@ -194,14 +196,14 @@ modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
 function formatSeconds(seconds) { if (seconds < 60) return `${seconds} giây`; const minutes = Math.floor(seconds / 60); const remainingSeconds = seconds % 60; return `${minutes} phút ${remainingSeconds} giây`; }
 
 function getWorkDayString(date) {
-    const workDate = new Date(date);
-    // Một ngày làm việc bắt đầu từ 13:00 (1 PM) hôm nay đến 6:00 (6 AM) sáng hôm sau.
-    // Do đó, nếu giờ hiện tại nhỏ hơn 13 (tức là từ 00:00 đến 12:59),
-    // nó vẫn được tính là ngày làm việc của ngày hôm TRƯỚC.
-    if (workDate.getHours() < 13) {
-        workDate.setDate(workDate.getDate() - 1);
-    }
-    return workDate.toISOString().slice(0, 10);
+const workDate = new Date(date);
+// Một ngày làm việc bắt đầu từ 13:00 (1 PM) hôm nay đến 6:00 (6 AM) sáng hôm sau.
+// Do đó, nếu giờ hiện tại nhỏ hơn 13 (tức là từ 00:00 đến 12:59),
+// nó vẫn được tính là ngày làm việc của ngày hôm TRƯỚC.
+if (workDate.getHours() < 13) {
+workDate.setDate(workDate.getDate() - 1);
+}
+return workDate.toISOString().slice(0, 10);
 }
 
 // Face API
@@ -232,7 +234,46 @@ function showBreakDetailModal(index, duration) { const contentHtml = `<h3>Chi ti
 function renderEmployees(){ const empListEl = document.getElementById('emp-list'); empListEl.innerHTML = ''; const totalAllowedBreakTimeInSeconds = BREAKS.reduce((a, b) => a + b, 0) * 60; if (!AppState.employees) return; AppState.employees.forEach(emp=>{ const times = getTimes(emp.id); const card = document.createElement('div'); card.className='card'; const isCheckedIn = !!times.checkInTime; const isOnBreak = times.onBreak; let statusHtml = ''; if (isOnBreak) statusHtml = `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>`; else if (isCheckedIn) statusHtml = `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>`; else if (times.scheduledTime) statusHtml = `<div class="status-badge status-scheduled">Đã lên lịch</div>`; else statusHtml = `<div class="status-badge status-pending">Chưa có lịch</div>`; let actionButtonsHtml = ''; if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) { const breakDisabled = !isCheckedIn || isOnBreak ? 'disabled' : ''; actionButtonsHtml = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${breakDisabled}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`; } let breakVisualizerHtml = ''; if (isOnBreak) { breakVisualizerHtml = `<div class="timer-container" id="timer-container-${emp.id}"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>`; } else if (times.breakHistory && times.breakHistory.length > 0) { let historyBars = ''; const breakColors = { 1: '#3b82f6', 2: '#22c55e', 3: '#f59e0b', 4: '#ef4444' }; times.breakHistory.forEach(item => { const widthPercent = (item.duration / totalAllowedBreakTimeInSeconds) * 100; const barColor = breakColors[item.index] || 'var(--gray-500)'; historyBars += `<div class="history-bar-item" style="width: ${widthPercent}%; background-color: ${barColor};" onclick="showBreakDetailModal(${item.index}, ${item.duration})"></div>`; }); breakVisualizerHtml = `<div class="history-bars-container">${historyBars}</div>`; } const breakCountClickable = (emp.id === AppState.loggedInUserId || AppState.isAdmin) ? 'clickable' : ''; const breakCountOnClick = (emp.id === AppState.loggedInUserId || AppState.isAdmin) ? `onclick="viewBreakStatsAdmin('${emp.id}')"` : ''; card.innerHTML= `<div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div><div class="card-body"><div class="status-section"><div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div><div class="status-item status-item-break ${breakCountClickable}" ${breakCountOnClick}><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${BREAKS.length}</div></div></div><div class="action-buttons">${actionButtonsHtml}</div></div><div class="break-visualizer">${breakVisualizerHtml}</div>`; empListEl.appendChild(card); if (isOnBreak) { const timerContainerEl = card.querySelector(`#timer-container-${emp.id}`); if(timerContainerEl) timerContainerEl.style.display = 'block'; if (!timers[emp.id]) startBreakCountdown(emp.id); } }); }
 function viewBreakStatsAdmin(empId) { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0); let contentHtml = `<h3>Thống kê nghỉ - ${emp.name}</h3><p><strong>Tổng thời gian đã nghỉ:</strong> ${formatSeconds(totalBreakSeconds)}</p>`; if (!times.breakHistory || times.breakHistory.length === 0) { contentHtml += "<p>Chưa có dữ liệu nghỉ trong ngày.</p>"; } else { contentHtml += "<ul>"; times.breakHistory.forEach(item => { contentHtml += `<li>Lần ${item.index}: <strong>${formatSeconds(item.duration)}</strong></li>`; }); contentHtml += "</ul>"; } showModal(contentHtml); }
 function resetBreaks(empId) { const emp = AppState.employees.find(e => e.id === empId); showModal(`<h3>Xác nhận</h3><p>Reset số lần nghỉ của <strong>${emp.name}</strong>?</p>`, () => { AppState.times[empId] = getTimes(empId); AppState.times[empId].breakIndex = 0; AppState.times[empId].breakHistory = []; saveFullState(); showModal(`<h3>Thành công</h3><p>Đã reset số lần nghỉ cho ${emp.name}.</p>`); }, true); }
-function addEmployee() { const name = document.getElementById('new-emp-name').value; const id = document.getElementById('new-emp-id').value.toUpperCase(); const code = document.getElementById('new-emp-code').value; if (!name || !id || !code) { showModal("<h3>Lỗi</h3><p>Vui lòng nhập đủ Tên, ID và Mã số.</p>"); return; } if (AppState.employees.some(e => e.id === id)) { showModal("<h3>Lỗi</h3><p>ID nhân viên đã tồn tại.</p>"); return; } if (AppState.employees.some(e => e.code == code)) { showModal("<h3>Lỗi</h3><p>Mã số đăng nhập đã tồn tại.</p>"); return; } AppState.employees.push({ id, name, code }); saveFullState(); showModal("<h3>Thành công</h3><p>Thêm nhân viên thành công!</p>"); }
+
+// ===== START: FIXED CODE =====
+// Chuyển hàm thành async và sửa lại logic để tránh race condition
+async function addEmployee() {
+const name = document.getElementById('new-emp-name').value;
+const id = document.getElementById('new-emp-id').value.toUpperCase();
+const code = document.getElementById('new-emp-code').value;
+
+// Giữ nguyên các bước kiểm tra dữ liệu đầu vào
+if (!name || !id || !code) {
+showModal("<h3>Lỗi</h3><p>Vui lòng nhập đủ Tên, ID và Mã số.</p>");
+return;
+}
+if (AppState.employees.some(e => e.id === id)) {
+showModal("<h3>Lỗi</h3><p>ID nhân viên đã tồn tại.</p>");
+return;
+}
+if (AppState.employees.some(e => e.code == code)) {
+showModal("<h3>Lỗi</h3><p>Mã số đăng nhập đã tồn tại.</p>");
+return;
+}
+
+// Cập nhật trạng thái ở trình duyệt trước để giao diện phản hồi ngay lập tức
+AppState.employees.push({ id, name, code });
+// Vẽ lại giao diện admin để hiển thị nhân viên mới ngay
+renderAdminPanel();
+
+try {
+// Đợi (await) cho đến khi dữ liệu được lưu thành công lên cloud
+await saveFullState();
+// Chỉ hiển thị thông báo thành công SAU KHI đã lưu xong
+showModal("<h3>Thành công</h3><p>Thêm nhân viên thành công!</p>");
+} catch (error) {
+console.error("Lỗi khi lưu nhân viên mới:", error);
+showModal("<h3>Lỗi</h3><p>Không thể lưu nhân viên mới. Dữ liệu sẽ sớm được đồng bộ lại.</p>");
+// Giao diện sẽ tự động được sửa lại đúng với dữ liệu trên server ở lần đồng bộ tiếp theo
+}
+}
+// ===== END: FIXED CODE =====
+
 function saveSchedule(empId) { const input = document.getElementById(`schedule-${empId}`); if (!input.value) { showModal("<h3>Lỗi</h3><p>Vui lòng chọn giờ hợp lệ.</p>"); return; } AppState.times[empId] = getTimes(empId); AppState.times[empId].scheduledTime = input.value; saveFullState(); showModal(`<h3>Thành công</h3><p>Đã cập nhật lịch làm việc cho ${empId}.</p>`); }
 function deleteEmployee(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; showModal(`<h3>Xác nhận Xóa</h3><p>Bạn có chắc muốn xóa nhân viên <strong>${emp.name}</strong>?</p>`, () => { AppState.employees = AppState.employees.filter(e => e.id !== empId); delete AppState.times[empId]; saveFullState(); showModal(`<h3>Thành công</h3><p>Đã xóa nhân viên ${emp.name}.</p>`); }, true); }
 async function openFaceModalForRegistration(empId) { currentFaceAction = { actionType: 'register', empId }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); faceModalMessage.textContent = 'Đang khởi tạo camera...'; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); showModal("<h3>Lỗi Camera</h3><p>Không thể truy cập camera. Vui lòng cấp quyền.</p>"); return; } faceModalMessage.textContent = 'Giữ yên khuôn mặt trong khung hình...'; let registrationDescriptor = null; let stableCounter = 0; faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { if (!registrationDescriptor) { registrationDescriptor = detection.descriptor; } const distance = faceapi.euclideanDistance(detection.descriptor, registrationDescriptor); if (distance < 0.1) { stableCounter++; faceModalMessage.textContent = `Giữ yên... ${stableCounter}/5`; if (stableCounter >= 5) { stopVideoAndCloseModal(); const empIndex = AppState.employees.findIndex(e => e.id === empId); if (empIndex !== -1) { AppState.employees[empIndex].faceDescriptor = Array.from(registrationDescriptor); saveFullState(); showModal(`<h3>Thành công</h3><p>Đã đăng ký khuôn mặt cho ${AppState.employees[empIndex].name}.</p>`); } } } else { registrationDescriptor = detection.descriptor; stableCounter = 0; faceModalMessage.textContent = 'Khuôn mặt di chuyển, đang ổn định lại...'; } } }, 400); }
@@ -240,58 +281,58 @@ function renderAdminPanel(){ const adminContentEl = document.getElementById('adm
 
 // ===== START: UPDATED AND FIXED checkSchedules FUNCTION =====
 function checkSchedules() {
-    if (!AppState.employees || AppState.employees.length === 0) return;
+if (!AppState.employees || AppState.employees.length === 0) return;
 
-    const now = new Date();
-    const currentWorkDayString = getWorkDayString(now);
-    let needsSave = false;
+const now = new Date();
+const currentWorkDayString = getWorkDayString(now);
+let needsSave = false;
 
-    AppState.employees.forEach(emp => {
-        let times = getTimes(emp.id);
+AppState.employees.forEach(emp => {
+let times = getTimes(emp.id);
 
-        // 1. Logic reset trạng thái khi bắt đầu ngày làm việc mới
-        // Nếu đã có check-in từ ngày trước và ngày đó khác ngày làm việc hiện tại
-        if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) {
-            // TẠO MỘT TRẠNG THÁI MỚI: CHỈ reset các trạng thái trong ngày, GIỮ LẠI scheduledTime
-            AppState.times[emp.id] = {
-                scheduledTime: times.scheduledTime, // Giữ lại lịch đã đặt
-                lastCheckInDay: null,
-                checkInTime: null,
-                onBreak: false,
-                breakStartTime: null,
-                breakIndex: 0,
-                breakHistory: []
-            };
-            // Lấy lại trạng thái mới nhất sau khi reset
-            times = AppState.times[emp.id];
-            needsSave = true;
-        }
+// 1. Logic reset trạng thái khi bắt đầu ngày làm việc mới
+// Nếu đã có check-in từ ngày trước và ngày đó khác ngày làm việc hiện tại
+if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) {
+// TẠO MỘT TRẠNG THÁI MỚI: CHỈ reset các trạng thái trong ngày, GIỮ LẠI scheduledTime
+AppState.times[emp.id] = {
+scheduledTime: times.scheduledTime, // Giữ lại lịch đã đặt
+lastCheckInDay: null,
+checkInTime: null,
+onBreak: false,
+breakStartTime: null,
+breakIndex: 0,
+breakHistory: []
+};
+// Lấy lại trạng thái mới nhất sau khi reset
+times = AppState.times[emp.id];
+needsSave = true;
+}
 
-        // 2. Logic tự động check-in nếu đã đến giờ
-        // Kiểm tra xem nhân viên có lịch và chưa check-in trong ngày hôm nay không
-        if (times.scheduledTime && !times.checkInTime) {
-            // Tạo đối tượng Date cho thời gian đã lên lịch của ngày làm việc hiện tại
-            const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`);
+// 2. Logic tự động check-in nếu đã đến giờ
+// Kiểm tra xem nhân viên có lịch và chưa check-in trong ngày hôm nay không
+if (times.scheduledTime && !times.checkInTime) {
+// Tạo đối tượng Date cho thời gian đã lên lịch của ngày làm việc hiện tại
+const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`);
 
-            // Nếu giờ hiện tại đã qua hoặc bằng giờ lên lịch
-            if (now >= scheduledDateTime) {
-                // Thực hiện check-in
-                times.checkInTime = new Date().toISOString();
-                times.lastCheckInDay = currentWorkDayString;
-                needsSave = true;
+// Nếu giờ hiện tại đã qua hoặc bằng giờ lên lịch
+if (now >= scheduledDateTime) {
+// Thực hiện check-in
+times.checkInTime = new Date().toISOString();
+times.lastCheckInDay = currentWorkDayString;
+needsSave = true;
 
-                // Gửi thông báo cho người dùng nếu đó là họ
-                if (AppState.loggedInUserId === emp.id) {
-                    showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`);
-                }
-            }
-        }
-    });
+// Gửi thông báo cho người dùng nếu đó là họ
+if (AppState.loggedInUserId === emp.id) {
+showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`);
+}
+}
+}
+});
 
-    // Chỉ lưu vào cloud nếu có bất kỳ thay đổi nào
-    if (needsSave) {
-        saveFullState();
-    }
+// Chỉ lưu vào cloud nếu có bất kỳ thay đổi nào
+if (needsSave) {
+saveFullState();
+}
 }
 // ===== END: UPDATED AND FIXED checkSchedules FUNCTION =====
 
@@ -305,30 +346,29 @@ document.getElementById('change-password-btn').onclick = showChangePasswordModal
 document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
 
 async function initializeApp() {
-    await requestNotificationPermission();
-    await loadDataFromCloud(); 
+await requestNotificationPermission();
+await loadDataFromCloud();
 
-    const loggedInId = sessionStorage.getItem('loggedInUserId');
-    if (loggedInId) {
-        AppState.loggedInUserId = loggedInId;
-        AppState.isAdmin = (loggedInId === 'ADMIN');
-        document.getElementById('login-view').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
-        updateUIVisibility();
-        // Thêm dòng này để đảm bảo giao diện được vẽ lại sau khi tải lại trang
-        renderAll(); 
-    } else {
-        document.getElementById('login-view').style.display = 'flex';
-        document.getElementById('app-container').style.display = 'none';
-    }
+const loggedInId = sessionStorage.getItem('loggedInUserId');
+if (loggedInId) {
+AppState.loggedInUserId = loggedInId;
+AppState.isAdmin = (loggedInId === 'ADMIN');
+document.getElementById('login-view').style.display = 'none';
+document.getElementById('app-container').style.display = 'block';
+updateUIVisibility();
+// Thêm dòng này để đảm bảo giao diện được vẽ lại sau khi tải lại trang
+renderAll();
+} else {
+document.getElementById('login-view').style.display = 'flex';
+document.getElementById('app-container').style.display = 'none';
+}
 
-    setInterval(() => loadDataFromCloud(), 5000); 
-    setInterval(() => checkSchedules(), 5000); 
+setInterval(() => loadDataFromCloud(), 5000);
+setInterval(() => checkSchedules(), 5000);
 
-    loadFaceModels();
+loadFaceModels();
 }
 initializeApp();
 </script>
-
 </body>
 </html>
