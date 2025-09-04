@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Check-in App">
 <title>Check-in WebApp Mobile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="manifest" href="manifest.json">
@@ -192,7 +192,19 @@ function showModal(htmlContent, onOk, showCancelButton = false) { modalContent.i
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
 modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
 function formatSeconds(seconds) { if (seconds < 60) return `${seconds} giây`; const minutes = Math.floor(seconds / 60); const remainingSeconds = seconds % 60; return `${minutes} phút ${remainingSeconds} giây`; }
-function getWorkDayString(date) { const workDate = new Date(date); if (workDate.getHours() < 6) { workDate.setDate(workDate.getDate() - 1); } return workDate.toISOString().slice(0, 10); }
+
+// ===== START: CHỈNH SỬA LOGIC NGÀY LÀM VIỆC =====
+function getWorkDayString(date) {
+    const workDate = new Date(date);
+    // Một ngày làm việc bắt đầu từ 13:00 (1 PM) hôm nay đến 6:00 (6 AM) sáng hôm sau.
+    // Do đó, nếu giờ hiện tại nhỏ hơn 13 (tức là từ 00:00 đến 12:59),
+    // nó vẫn được tính là ngày làm việc của ngày hôm TRƯỚC.
+    if (workDate.getHours() < 13) {
+        workDate.setDate(workDate.getDate() - 1);
+    }
+    return workDate.toISOString().slice(0, 10);
+}
+// ===== END: CHỈNH SỬA LOGIC NGÀY LÀM VIỆC =====
 
 // Face API
 async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = 'Đang tải model...'; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; console.log("Face models loaded."); }
@@ -249,6 +261,10 @@ async function initializeApp() {
         document.getElementById('login-view').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
         updateUIVisibility();
+        // ===== START: FIX LỖI MÀN HÌNH TRẮNG =====
+        // Thêm dòng này để đảm bảo giao diện được vẽ lại sau khi tải lại trang
+        renderAll(); 
+        // ===== END: FIX LỖI MÀN HÌNH TRẮNG =====
     } else {
         document.getElementById('login-view').style.display = 'flex';
         document.getElementById('app-container').style.display = 'none';
