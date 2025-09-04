@@ -1,15 +1,23 @@
 {
-  "name": "WebApp Check-in",
+  "name": "Check-in App",
   "short_name": "Check-in",
-  "start_url": ".",
+  "description": "Ứng dụng chấm công và quản lý nhân viên",
+  "start_url": "/index (1).html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#f6f7fb",
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "https://www.gstatic.com/android/keyboard/emojikit/20181005/u1f44b/u1f44b_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://www.gstatic.com/android/keyboard/emojikit/20181005/u1f44b/u1f44b_192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
