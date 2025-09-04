@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Check-in App">
 <title>Check-in WebApp Mobile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,11 +91,15 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .status-item.clickable:hover { background-color: #e5e7eb; }
 .status-item .label { font-weight: 500; color: var(--gray-500); font-size: 10px; }
 .status-item .value { font-weight: 600; color: var(--text-dark); font-size: 12px; }
-.action-buttons { display: flex; gap: 6px; flex-shrink: 0; min-width: 60px; }
+.action-buttons { 
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0; min-width: 80px;
+}
 .btn {
-    padding: 6px 10px; border:none; border-radius:6px; 
+    padding: 6px 12px; border:none; border-radius:6px; 
     font-size:12px; font-weight:600; cursor:pointer;
-    color: var(--text-light);
+    color: var(--text-light); width: 100%;
     transition: background-color 0.2s ease-in-out;
 }
 .btn-start-break { background: var(--warn); }
@@ -108,13 +115,15 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .timer-text { font-size:12px; color:var(--gray-700); font-weight:500; flex-shrink: 0;}
 .progress-container { flex-grow: 1; height:6px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
 .progress-bar { height:100%; width:0%; background:var(--warn); transition:width 0.5s linear; }
-
 .history-bars-container {
     display: flex; width: 100%; height: 8px;
     background-color: var(--gray-100); border-radius: 4px; overflow: hidden;
 }
-.history-bar-item { height: 100%; background-color: var(--primary); opacity: 0.7; }
-.history-bar-item:nth-child(even) { background-color: #60a5fa; }
+.history-bar-item { 
+    height: 100%; 
+    opacity: 0.8;
+    cursor: pointer;
+}
 
 /* Admin UI & Modal */
 .admin-section { padding: 12px; margin-bottom: 12px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
@@ -187,7 +196,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 // ===== Data, State & Auth =====
 const BREAKS = [10,40,10,10];
 const timers = {};
-let AppState = { employees: [], times: {}, loggedInUserId: null };
+let AppState = { employees: [], times: {}, loggedInUserId: null, isAdmin: false };
 
 function generateInitialEmployees() {
     const names = ["An", "Bình", "Cúc", "Dũng", "Giang", "Hương", "Khanh", "Lan", "Minh", "Nam", "Oanh", "Phúc", "Quân", "Sơn", "Thảo", "Uyên", "Vân", "Xuân", "Yến", "Ánh"];
@@ -199,21 +208,17 @@ function generateInitialEmployees() {
 function login() {
     const code = document.getElementById('login-code-input').value;
     const errorEl = document.getElementById('login-error');
-    if (!code) {
-        errorEl.textContent = 'Vui lòng nhập mã số.';
-        return;
-    }
-
+    if (!code) { errorEl.textContent = 'Vui lòng nhập mã số.'; return; }
+    
     let userToLogin = null;
-    let is_admin = false;
+    AppState.isAdmin = false;
 
-    // NEW: Check for Admin login
     if (code === 'Admin') {
         userToLogin = 'ADMIN';
-        is_admin = true;
+        AppState.isAdmin = true;
     } else {
         const employee = AppState.employees.find(e => e.code == code);
-        if (employee) {
+        if (employee) { 
             userToLogin = employee.id;
         }
     }
@@ -223,34 +228,50 @@ function login() {
         sessionStorage.setItem('loggedInUserId', userToLogin);
         document.getElementById('login-view').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
+        updateUIVisibility();
+        checkSchedules(true);
         renderEmployees();
-    } else {
-        errorEl.textContent = 'Mã số không hợp lệ.';
+    } else { 
+        errorEl.textContent = 'Mã số không hợp lệ.'; 
     }
 }
 
 function logout() {
     AppState.loggedInUserId = null;
+    AppState.isAdmin = false;
     sessionStorage.removeItem('loggedInUserId');
     document.getElementById('app-container').style.display = 'none';
     document.getElementById('login-view').style.display = 'flex';
     document.getElementById('login-code-input').value = '';
     document.getElementById('login-error').textContent = '';
+    updateUIVisibility();
+}
+
+function updateUIVisibility() {
+    const adminTab = document.getElementById('tab-admin');
+    const empTab = document.getElementById('tab-emp');
+    const viewEmp = document.getElementById('view-emp');
+    const viewAdmin = document.getElementById('view-admin');
+
+    if (AppState.isAdmin) {
+        adminTab.style.display = 'block';
+    } else {
+        adminTab.style.display = 'none';
+        viewEmp.style.display = 'block';
+        viewAdmin.style.display = 'none';
+        empTab.classList.add('active');
+        adminTab.classList.remove('active');
+    }
 }
 
 // ===== Utility Functions =====
 function loadData() {
     let employees = JSON.parse(localStorage.getItem('employees'));
-    if (!employees || employees.length === 0) {
-        employees = generateInitialEmployees();
-    }
+    if (!employees || employees.length === 0) employees = generateInitialEmployees();
     AppState.employees = employees;
     AppState.times = JSON.parse(localStorage.getItem('times') || '{}');
 }
-function saveEmployees(employees) {
-    localStorage.setItem('employees', JSON.stringify(employees));
-    AppState.employees = employees;
-}
+function saveEmployees(employees) { localStorage.setItem('employees', JSON.stringify(employees)); AppState.employees = employees; }
 function saveTimes() { localStorage.setItem('times', JSON.stringify(AppState.times)); }
 function getTimes(empId) {
     return AppState.times[empId] || { 
@@ -269,9 +290,7 @@ function showModal(htmlContent, onOk) {
 }
 modalOk.onclick = () => {
     modalBackdrop.style.display = 'none';
-    if (typeof onModalOkCallback === 'function') {
-        onModalOkCallback();
-    }
+    if (typeof onModalOkCallback === 'function') onModalOkCallback();
 };
 function formatSeconds(seconds) {
     if (seconds < 60) return `${seconds} giây`;
@@ -280,35 +299,37 @@ function formatSeconds(seconds) {
     return `${minutes} phút ${remainingSeconds} giây`;
 }
 
-// ===== Notifications =====
-async function requestNotificationPermission() {
-    if (!('Notification' in window)) { return false; }
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
-}
-function showBrowserNotification(title, body) {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(title, { body: body });
+// FIX: New function to define the "Work Day" based on 6 AM reset time
+function getWorkDayString(date) {
+    const workDate = new Date(date);
+    // If the time is before 6 AM, it belongs to the previous work day.
+    if (workDate.getHours() < 6) {
+        workDate.setDate(workDate.getDate() - 1);
     }
+    return workDate.toISOString().slice(0, 10);
 }
 
-// ===== Employee Functions =====
+
+// ===== Notifications =====
+async function requestNotificationPermission() {
+    if ('Notification' in window) await Notification.requestPermission();
+}
+function showBrowserNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body: body });
+}
+
+// ===== Employee & Admin Actions =====
 function startBreak(empId){
   const times = getTimes(empId);
   const idx = times.breakIndex || 0;
-  if(idx >= BREAKS.length){ showModal('<h3>Thông báo</h3><p>Bạn đã hết số lần nghỉ giải lao trong ngày.</p>'); return; }
-  
+  if(idx >= BREAKS.length){ showModal('<h3>Thông báo</h3><p>Đã hết số lần nghỉ giải lao trong ngày.</p>'); return; }
   showModal(`<h3>Xác nhận</h3><p>Bắt đầu nghỉ lần ${idx+1}: ${BREAKS[idx]} phút?</p>`, () => {
-      times.onBreak = true; 
-      times.breakStartTime = new Date().toISOString();
-      times.breakIndex = idx + 1;
-      AppState.times[empId] = times; 
+      times.onBreak = true; times.breakStartTime = new Date().toISOString();
+      times.breakIndex = idx + 1; AppState.times[empId] = times; 
       saveTimes();
-      startBreakCountdown(empId);
       renderEmployees();
   });
 }
-
 function recordBreak(empId) {
     const times = getTimes(empId);
     if (!times.onBreak || !times.breakStartTime) return;
@@ -316,25 +337,17 @@ function recordBreak(empId) {
     times.breakHistory = times.breakHistory || [];
     times.breakHistory.push({ index: times.breakIndex, duration: duration });
 }
-
 function stopBreak(empId) {
-    if (timers[empId]) {
-        clearInterval(timers[empId]);
-        delete timers[empId];
-    }
+    if (timers[empId]) { clearInterval(timers[empId]); delete timers[empId]; }
     const times = getTimes(empId);
     if (!times.onBreak) return;
     recordBreak(empId);
-    times.onBreak = false;
-    AppState.times[empId] = times;
-    saveTimes();
-    renderEmployees();
+    times.onBreak = false; AppState.times[empId] = times;
+    saveTimes(); renderEmployees();
 }
-
 function startBreakCountdown(empId){
   if (timers[empId]) clearInterval(timers[empId]);
   const sound = document.getElementById('notif-sound');
-  
   const tick = () => {
     const times = getTimes(empId);
     if (!times.onBreak) { clearInterval(timers[empId]); return; }
@@ -345,36 +358,29 @@ function startBreakCountdown(empId){
     const breakDurationSeconds = BREAKS[times.breakIndex - 1] * 60;
     const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000;
     const remaining = breakDurationSeconds - elapsed;
-    
     if (remaining <= 0) {
-        clearInterval(timers[empId]);
-        delete timers[empId];
+        clearInterval(timers[empId]); delete timers[empId];
         sound.play().catch(e => console.error("Sound play failed", e));
         const emp = AppState.employees.find(e => e.id === empId);
         showBrowserNotification(`${emp.name}, hết giờ nghỉ!`, 'Đã hết giờ giải lao.');
         recordBreak(empId);
-        times.onBreak = false;
-        AppState.times[empId] = times;
-        saveTimes();
-        renderEmployees();
-        return;
+        times.onBreak = false; AppState.times[empId] = times;
+        saveTimes(); renderEmployees(); return;
     }
-    
     const m = String(Math.floor(remaining/60)).padStart(2,'0');
     const s = String(Math.round(remaining%60)).padStart(2,'0');
     if (timerEl) timerEl.textContent = `Còn lại: ${m}:${s}`;
     if (progressEl) progressEl.style.width = (elapsed / breakDurationSeconds) * 100 + '%';
   };
-  
-  timers[empId] = setInterval(tick, 1000);
-  tick();
+  timers[empId] = setInterval(tick, 1000); tick();
 }
 
-function showBreakStats(empId) {
-    if (AppState.loggedInUserId !== empId && AppState.loggedInUserId !== 'ADMIN') return;
-    viewBreakStatsAdmin(empId); // Reuse the admin stats viewer
+function showBreakDetailModal(index, duration) {
+    const contentHtml = `<h3>Chi tiết Lần nghỉ ${index}</h3><p><strong>Thời gian đã nghỉ:</strong> ${formatSeconds(duration)}</p>`;
+    showModal(contentHtml);
 }
 
+// ===== Rendering =====
 function renderEmployees(){
   const empListEl = document.getElementById('emp-list');
   empListEl.innerHTML = '';
@@ -393,13 +399,12 @@ function renderEmployees(){
     else if (times.scheduledTime) statusHtml = `<div class="status-badge status-scheduled">Đã lên lịch</div>`;
     else statusHtml = `<div class="status-badge status-pending">Chưa có lịch</div>`;
 
-    let buttonsHtml = '';
-    // MODIFIED: Show buttons if logged in as this user OR if logged in as Admin
-    if (emp.id === AppState.loggedInUserId || AppState.loggedInUserId === 'ADMIN') {
-        const startBreakDisabled = !isCheckedIn || isOnBreak ? 'disabled' : '';
-        buttonsHtml = isOnBreak
+    let actionButtonsHtml = '';
+    if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) {
+        const breakDisabled = !isCheckedIn || isOnBreak ? 'disabled' : '';
+        actionButtonsHtml = isOnBreak
             ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>`
-            : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${startBreakDisabled}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
+            : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${breakDisabled}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
     }
 
     let breakVisualizerHtml = '';
@@ -407,15 +412,17 @@ function renderEmployees(){
         breakVisualizerHtml = `<div class="timer-container" id="timer-container-${emp.id}"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>`;
     } else if (times.breakHistory && times.breakHistory.length > 0) {
         let historyBars = '';
+        const breakColors = { 1: '#3b82f6', 2: '#22c55e', 3: '#f59e0b', 4: '#ef4444' };
         times.breakHistory.forEach(item => {
             const widthPercent = (item.duration / totalAllowedBreakTimeInSeconds) * 100;
-            historyBars += `<div class="history-bar-item" style="width: ${widthPercent}%" title="Lần ${item.index}: ${formatSeconds(item.duration)}"></div>`;
+            const barColor = breakColors[item.index] || 'var(--gray-500)';
+            historyBars += `<div class="history-bar-item" style="width: ${widthPercent}%; background-color: ${barColor};" onclick="showBreakDetailModal(${item.index}, ${item.duration})"></div>`;
         });
         breakVisualizerHtml = `<div class="history-bars-container">${historyBars}</div>`;
     }
     
-    const breakCountClickable = (emp.id === AppState.loggedInUserId || AppState.loggedInUserId === 'ADMIN') ? 'clickable' : '';
-    const breakCountOnClick = (emp.id === AppState.loggedInUserId || AppState.loggedInUserId === 'ADMIN') ? `onclick="showBreakStats('${emp.id}')"` : '';
+    const breakCountClickable = (emp.id === AppState.loggedInUserId || AppState.isAdmin) ? 'clickable' : '';
+    const breakCountOnClick = (emp.id === AppState.loggedInUserId || AppState.isAdmin) ? `onclick="viewBreakStatsAdmin('${emp.id}')"` : '';
 
     card.innerHTML= `
       <div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div>
@@ -424,7 +431,7 @@ function renderEmployees(){
           <div class="status-item"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div>
           <div class="status-item ${breakCountClickable}" ${breakCountOnClick}><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${BREAKS.length}</div></div>
         </div>
-        <div class="action-buttons">${buttonsHtml}</div>
+        <div class="action-buttons">${actionButtonsHtml}</div>
       </div>
       <div class="break-visualizer">${breakVisualizerHtml}</div>`;
       
@@ -438,14 +445,13 @@ function renderEmployees(){
   });
 }
 
-// ===== Admin Functions =====
 function viewBreakStatsAdmin(empId) {
     const emp = AppState.employees.find(e => e.id === empId);
     const times = getTimes(empId);
     const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0);
     let contentHtml = `<h3>Thống kê nghỉ - ${emp.name}</h3><p><strong>Tổng thời gian đã nghỉ:</strong> ${formatSeconds(totalBreakSeconds)}</p>`;
     if (!times.breakHistory || times.breakHistory.length === 0) {
-        contentHtml += "<p>Nhân viên này chưa nghỉ lần nào trong ngày.</p>";
+        contentHtml += "<p>Chưa có dữ liệu nghỉ trong ngày.</p>";
     } else {
         contentHtml += "<ul>";
         times.breakHistory.forEach(item => {
@@ -455,20 +461,16 @@ function viewBreakStatsAdmin(empId) {
     }
     showModal(contentHtml);
 }
-
 function resetBreaks(empId) {
     const emp = AppState.employees.find(e => e.id === empId);
     showModal(`<h3>Xác nhận</h3><p>Reset số lần nghỉ của <strong>${emp.name}</strong>?</p>`, () => {
         const times = getTimes(empId);
-        times.breakIndex = 0;
-        times.breakHistory = [];
-        AppState.times[empId] = times;
-        saveTimes();
+        times.breakIndex = 0; times.breakHistory = [];
+        AppState.times[empId] = times; saveTimes();
         showModal(`<h3>Thành công</h3><p>Đã reset số lần nghỉ cho ${emp.name}.</p>`);
         renderEmployees();
     });
 }
-
 function addEmployee() {
     const name = document.getElementById('new-emp-name').value;
     const id = document.getElementById('new-emp-id').value.toUpperCase();
@@ -478,15 +480,13 @@ function addEmployee() {
     if (AppState.employees.some(e => e.code == code)) { showModal("<h3>Lỗi</h3><p>Mã số đăng nhập đã tồn tại.</p>"); return; }
     saveEmployees([...AppState.employees, { id, name, code }]);
     showModal("<h3>Thành công</h3><p>Thêm nhân viên thành công!</p>");
-    renderAdminPanel();
-    renderEmployees();
+    renderAdminPanel(); renderEmployees();
 }
 function saveSchedule(empId) {
     const input = document.getElementById(`schedule-${empId}`);
     if (!input.value) { showModal("<h3>Lỗi</h3><p>Vui lòng chọn giờ hợp lệ.</p>"); return; }
     const times = getTimes(empId);
-    times.scheduledTime = input.value;
-    AppState.times[empId] = times;
+    times.scheduledTime = input.value; AppState.times[empId] = times;
     saveTimes();
     showModal(`<h3>Thành công</h3><p>Đã cập nhật lịch làm việc cho ${empId}.</p>`);
     renderEmployees(); 
@@ -494,13 +494,11 @@ function saveSchedule(empId) {
 
 function renderAdminPanel(){
   const adminContentEl = document.getElementById('admin-content');
-  
   let addEmployeeHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-plus"></i> Thêm nhân viên mới</h3>
-    <div class="form-group"><label for="new-emp-name">Tên nhân viên</label><input type="text" id="new-emp-name"></div>
-    <div class="form-group"><label for="new-emp-id">ID nhân viên</label><input type="text" id="new-emp-id"></div>
-    <div class="form-group"><label for="new-emp-code">Mã số đăng nhập</label><input type="text" inputmode="numeric" id="new-emp-code"></div>
+    <div class="form-group"><label>Tên nhân viên</label><input type="text" id="new-emp-name"></div>
+    <div class="form-group"><label>ID nhân viên</label><input type="text" id="new-emp-id"></div>
+    <div class="form-group"><label>Mã số đăng nhập</label><input type="text" inputmode="numeric" id="new-emp-code"></div>
     <button class="admin-btn" onclick="addEmployee()">Thêm nhân viên</button></div>`;
-
   let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> Quản lý Nhân viên</h3>`;
   if (AppState.employees.length > 0) {
     [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => {
@@ -514,7 +512,6 @@ function renderAdminPanel(){
     });
   } else { scheduleHtml += '<p>Chưa có nhân viên nào.</p>'; }
   scheduleHtml += `</div>`;
-
   let codesHtml = `<div class="admin-section"><h3><i class="fa-solid fa-key"></i> Mã số Đăng nhập</h3>`;
   if (AppState.employees.length > 0) {
     [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => {
@@ -522,37 +519,39 @@ function renderAdminPanel(){
     });
   } else { codesHtml += '<p>Chưa có nhân viên nào.</p>'; }
   codesHtml += `</div>`;
-
   adminContentEl.innerHTML = addEmployeeHtml + scheduleHtml + codesHtml;
 }
 
 // ===== App Initialization & Core Logic =====
-function checkSchedules() {
+function checkSchedules(isLogin = false) {
     const now = new Date();
-    const todayString = now.toISOString().slice(0, 10);
+    // FIX: Use the new getWorkDayString function to determine the current work day.
+    const currentWorkDayString = getWorkDayString(now);
     let needsRender = false;
+
     AppState.employees.forEach(emp => {
         const times = getTimes(emp.id);
-        if (times.lastCheckInDay && times.lastCheckInDay !== todayString) {
+        // FIX: Compare against the new work day definition.
+        if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) {
             Object.assign(times, { checkInTime: null, onBreak: false, breakIndex: 0, breakStartTime: null, lastCheckInDay: null, breakHistory: [] });
-            AppState.times[emp.id] = times; 
-            needsRender = true;
+            AppState.times[emp.id] = times; needsRender = true;
         }
+
         if (!times.checkInTime && times.scheduledTime) {
-            const scheduledTimeToday = new Date(`${todayString}T${times.scheduledTime}`);
-            if (now >= scheduledTimeToday && (now - scheduledTimeToday) < 60000) {
+            // FIX: The scheduled time is always associated with the current work day.
+            const scheduledTimeToday = new Date(`${currentWorkDayString}T${times.scheduledTime}`);
+            if (now >= scheduledTimeToday) {
                 times.checkInTime = new Date().toISOString();
-                times.lastCheckInDay = todayString;
+                times.lastCheckInDay = currentWorkDayString; 
                 AppState.times[emp.id] = times; 
                 needsRender = true;
-                showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`);
+                if(!isLogin) {
+                    showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`);
+                }
             }
         }
     });
-    if (needsRender) {
-        saveTimes();
-        renderEmployees();
-    }
+    if (needsRender) { saveTimes(); renderEmployees(); }
 }
 
 document.getElementById('tab-emp').onclick = ()=>{
@@ -572,26 +571,26 @@ document.getElementById('tab-admin').onclick = ()=>{
 document.getElementById('login-btn').onclick = login;
 document.getElementById('logout-btn').onclick = logout;
 document.getElementById('login-code-input').addEventListener('keyup', (event) => {
-    if (event.key === 'Enter') {
-        login();
-    }
+    if (event.key === 'Enter') login();
 });
 
 async function initializeApp() {
     await requestNotificationPermission();
     loadData();
     const loggedInId = sessionStorage.getItem('loggedInUserId');
-    // MODIFIED: Also check for 'ADMIN' user ID
-    if (loggedInId && (loggedInId === 'ADMIN' || AppState.employees.some(e => e.id === loggedInId))) {
+    if (loggedInId) {
         AppState.loggedInUserId = loggedInId;
+        AppState.isAdmin = (loggedInId === 'ADMIN');
         document.getElementById('login-view').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
+        updateUIVisibility();
+        checkSchedules(true);
         renderEmployees();
     } else {
         document.getElementById('login-view').style.display = 'flex';
         document.getElementById('app-container').style.display = 'none';
     }
-    setInterval(checkSchedules, 5000);
+    setInterval(() => checkSchedules(false), 5000);
 }
 initializeApp();
 
