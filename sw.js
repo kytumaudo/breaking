@@ -1,10 +1,11 @@
 // Tên của bộ nhớ cache
-const CACHE_NAME = 'checkin-app-cache-v1';
+const CACHE_NAME = 'checkin-app-cache-v2'; // Đổi tên cache để buộc cập nhật
 
 // Danh sách các file cần được cache lại để ứng dụng hoạt động offline
+// Sử dụng đường dẫn tương đối (./) để đảm bảo chính xác trên GitHub Pages
 const urlsToCache = [
-  '/',
-  '/index (1).html',
+  './', // Quan trọng: cache thư mục gốc của project
+  './index.html', // Cache file HTML chính (giả sử bạn đã đổi tên)
   'https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js'
@@ -32,7 +33,22 @@ self.addEventListener('fetch', event => {
         }
         // Nếu không, thực hiện yêu cầu mạng
         return fetch(event.request);
-      }
-    )
+      })
+  );
+});
+
+// Sự kiện 'activate': dọn dẹp cache cũ
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
