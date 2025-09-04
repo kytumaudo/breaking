@@ -56,7 +56,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .admin-section h3 { font-size: 16px; margin-bottom: 12px; border-bottom: 1px solid var(--gray-100); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .form-group { margin-bottom: 10px; } .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 14px; } .form-group input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
 .admin-btn { width: 100%; padding: 10px; font-size: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
-.schedule-management-item, .emp-code-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-radius: 8px; background-color: var(--gray-100); margin-bottom: 8px; }
+.schedule-management-item, .emp-code-item { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 8px; border-radius: 8px; background-color: var(--gray-100); margin-bottom: 8px; gap: 8px; }
 .schedule-management-item .name, .emp-code-item .name { font-weight: 600; }
 .emp-code-item .code { font-family: monospace; font-size: 16px; background: #e0e7ff; padding: 2px 6px; border-radius: 4px; }
 .schedule-group { display: flex; gap: 6px; align-items: center; } .schedule-group input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; width: 90px; }
@@ -70,6 +70,12 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 #modal-buttons button { flex: 1; padding: 8px 16px; border-radius: 8px; border: none; font-size: 15px; cursor: pointer; font-weight: 600; }
 #modal-ok { background: var(--primary); color: white; }
 #modal-cancel { background: var(--gray-100); color: var(--text-dark); border: 1px solid #d1d5db; }
+.emp-editable-info { flex-grow: 1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 180px;}
+.admin-emp-name-input, .admin-emp-code-input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
+.admin-emp-name-input { font-weight: 600; flex: 2 1 100px; }
+.admin-emp-code-input { flex: 1 1 60px; }
+.schedule-management-item .schedule-group { flex-shrink: 0; }
+.schedule-management-item .schedule-group input[type="time"] { width: 80px; }
 </style>
 </head>
 <body>
@@ -79,6 +85,19 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
+
+<!-- ===== START: THÊM CÁC THẺ ÂM THANH ===== -->
+<div id="audio-container" style="display: none;">
+    <audio id="audio-generic" src="https://actions.google.com/sounds/v1/ui/button_press.ogg" preload="auto"></audio>
+    <audio id="audio-tab" src="https://actions.google.com/sounds/v1/ui/page_turn.ogg" preload="auto"></audio>
+    <audio id="audio-confirm" src="https://actions.google.com/sounds/v1/responses/confirmation_simple.ogg" preload="auto"></audio>
+    <audio id="audio-delete" src="https://actions.google.com/sounds/v1/ui/object_delete.ogg" preload="auto"></audio>
+    <audio id="audio-action" src="https://actions.google.com/sounds/v1/ui/switch_on.ogg" preload="auto"></audio>
+    <audio id="audio-logout" src="https://actions.google.com/sounds/v1/ui/navigation_backward-selection.ogg" preload="auto"></audio>
+    <audio id="audio-warn" src="https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg" preload="auto"></audio>
+</div>
+<!-- ===== END: THÊM CÁC THẺ ÂM THANH ===== -->
+
 <script>
 // ===== JSONBin Config & App State =====
 // THÔNG TIN ĐÃ ĐƯỢỢC CẬP NHẬT
@@ -159,17 +178,13 @@ renderAll();
 }
 }
 
-// ===== START: FIXED CODE =====
-// Chuyển hàm thành async để có thể sử dụng await
 async function saveFullState() {
-// Đợi (await) cho đến khi hàm saveDataToCloud thực thi xong
 await saveDataToCloud({
 employees: AppState.employees,
 times: AppState.times,
 locationSettings: AppState.locationSettings
 });
 }
-// ===== END: FIXED CODE =====
 
 function renderAll() {
 if (AppState.loggedInUserId) {
@@ -197,9 +212,6 @@ function formatSeconds(seconds) { if (seconds < 60) return `${seconds} giây`; c
 
 function getWorkDayString(date) {
 const workDate = new Date(date);
-// Một ngày làm việc bắt đầu từ 13:00 (1 PM) hôm nay đến 6:00 (6 AM) sáng hôm sau.
-// Do đó, nếu giờ hiện tại nhỏ hơn 13 (tức là từ 00:00 đến 12:59),
-// nó vẫn được tính là ngày làm việc của ngày hôm TRƯỚC.
 if (workDate.getHours() < 13) {
 workDate.setDate(workDate.getDate() - 1);
 }
@@ -235,106 +247,83 @@ function renderEmployees(){ const empListEl = document.getElementById('emp-list'
 function viewBreakStatsAdmin(empId) { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0); let contentHtml = `<h3>Thống kê nghỉ - ${emp.name}</h3><p><strong>Tổng thời gian đã nghỉ:</strong> ${formatSeconds(totalBreakSeconds)}</p>`; if (!times.breakHistory || times.breakHistory.length === 0) { contentHtml += "<p>Chưa có dữ liệu nghỉ trong ngày.</p>"; } else { contentHtml += "<ul>"; times.breakHistory.forEach(item => { contentHtml += `<li>Lần ${item.index}: <strong>${formatSeconds(item.duration)}</strong></li>`; }); contentHtml += "</ul>"; } showModal(contentHtml); }
 function resetBreaks(empId) { const emp = AppState.employees.find(e => e.id === empId); showModal(`<h3>Xác nhận</h3><p>Reset số lần nghỉ của <strong>${emp.name}</strong>?</p>`, () => { AppState.times[empId] = getTimes(empId); AppState.times[empId].breakIndex = 0; AppState.times[empId].breakHistory = []; saveFullState(); showModal(`<h3>Thành công</h3><p>Đã reset số lần nghỉ cho ${emp.name}.</p>`); }, true); }
 
-// ===== START: FIXED CODE =====
-// Chuyển hàm thành async và sửa lại logic để tránh race condition
 async function addEmployee() {
-const name = document.getElementById('new-emp-name').value;
-const id = document.getElementById('new-emp-id').value.toUpperCase();
-const code = document.getElementById('new-emp-code').value;
-
-// Giữ nguyên các bước kiểm tra dữ liệu đầu vào
-if (!name || !id || !code) {
-showModal("<h3>Lỗi</h3><p>Vui lòng nhập đủ Tên, ID và Mã số.</p>");
-return;
+    const name = document.getElementById('new-emp-name').value;
+    const code = document.getElementById('new-emp-code').value;
+    const id = 'E' + Date.now();
+    if (!name || !code) { showModal("<h3>Lỗi</h3><p>Vui lòng nhập đủ Tên và Mã số.</p>"); return; }
+    if (AppState.employees.some(e => e.code == code)) { showModal("<h3>Lỗi</h3><p>Mã số đăng nhập đã tồn tại.</p>"); return; }
+    AppState.employees.push({ id, name, code });
+    renderAdminPanel();
+    try { await saveFullState(); showModal("<h3>Thành công</h3><p>Thêm nhân viên thành công!</p>"); } catch (error) { console.error("Lỗi khi lưu nhân viên mới:", error); showModal("<h3>Lỗi</h3><p>Không thể lưu nhân viên mới. Dữ liệu sẽ sớm được đồng bộ lại.</p>"); }
 }
-if (AppState.employees.some(e => e.id === id)) {
-showModal("<h3>Lỗi</h3><p>ID nhân viên đã tồn tại.</p>");
-return;
+async function updateEmployeeInfo(empId, field, value) {
+    const empIndex = AppState.employees.findIndex(e => e.id === empId);
+    if (empIndex === -1) return;
+    if (field === 'code') { if (!value.trim()) { showModal("<h3>Lỗi</h3><p>Mã số không được để trống.</p>"); renderAdminPanel(); return; } if (AppState.employees.some(e => e.code === value && e.id !== empId)) { showModal("<h3>Lỗi</h3><p>Mã số này đã được người khác sử dụng. Thay đổi không được lưu.</p>"); renderAdminPanel(); return; } }
+    if (field === 'name' && !value.trim()) { showModal("<h3>Lỗi</h3><p>Tên nhân viên không được để trống.</p>"); renderAdminPanel(); return; }
+    AppState.employees[empIndex][field] = value.trim();
+    try { await saveFullState(); console.log(`Updated ${field} for ${empId} to "${value}"`); if (field === 'code') renderAdminPanel(); } catch (error) { console.error(`Lỗi khi cập nhật nhân viên ${empId}:`, error); showModal("<h3>Lỗi</h3><p>Không thể lưu thay đổi. Vui lòng kiểm tra kết nối mạng.</p>"); }
 }
-if (AppState.employees.some(e => e.code == code)) {
-showModal("<h3>Lỗi</h3><p>Mã số đăng nhập đã tồn tại.</p>");
-return;
+function saveSchedule(empId) { 
+    const input = document.getElementById(`schedule-${empId}`);
+    if (!input) return;
+    AppState.times[empId] = getTimes(empId);
+    AppState.times[empId].scheduledTime = input.value;
+    saveFullState();
+    console.log(`Đã cập nhật lịch làm việc cho ${empId}.`);
 }
-
-// Cập nhật trạng thái ở trình duyệt trước để giao diện phản hồi ngay lập tức
-AppState.employees.push({ id, name, code });
-// Vẽ lại giao diện admin để hiển thị nhân viên mới ngay
-renderAdminPanel();
-
-try {
-// Đợi (await) cho đến khi dữ liệu được lưu thành công lên cloud
-await saveFullState();
-// Chỉ hiển thị thông báo thành công SAU KHI đã lưu xong
-showModal("<h3>Thành công</h3><p>Thêm nhân viên thành công!</p>");
-} catch (error) {
-console.error("Lỗi khi lưu nhân viên mới:", error);
-showModal("<h3>Lỗi</h3><p>Không thể lưu nhân viên mới. Dữ liệu sẽ sớm được đồng bộ lại.</p>");
-// Giao diện sẽ tự động được sửa lại đúng với dữ liệu trên server ở lần đồng bộ tiếp theo
-}
-}
-// ===== END: FIXED CODE =====
-
-function saveSchedule(empId) { const input = document.getElementById(`schedule-${empId}`); if (!input.value) { showModal("<h3>Lỗi</h3><p>Vui lòng chọn giờ hợp lệ.</p>"); return; } AppState.times[empId] = getTimes(empId); AppState.times[empId].scheduledTime = input.value; saveFullState(); showModal(`<h3>Thành công</h3><p>Đã cập nhật lịch làm việc cho ${empId}.</p>`); }
 function deleteEmployee(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; showModal(`<h3>Xác nhận Xóa</h3><p>Bạn có chắc muốn xóa nhân viên <strong>${emp.name}</strong>?</p>`, () => { AppState.employees = AppState.employees.filter(e => e.id !== empId); delete AppState.times[empId]; saveFullState(); showModal(`<h3>Thành công</h3><p>Đã xóa nhân viên ${emp.name}.</p>`); }, true); }
 async function openFaceModalForRegistration(empId) { currentFaceAction = { actionType: 'register', empId }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); faceModalMessage.textContent = 'Đang khởi tạo camera...'; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); showModal("<h3>Lỗi Camera</h3><p>Không thể truy cập camera. Vui lòng cấp quyền.</p>"); return; } faceModalMessage.textContent = 'Giữ yên khuôn mặt trong khung hình...'; let registrationDescriptor = null; let stableCounter = 0; faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { if (!registrationDescriptor) { registrationDescriptor = detection.descriptor; } const distance = faceapi.euclideanDistance(detection.descriptor, registrationDescriptor); if (distance < 0.1) { stableCounter++; faceModalMessage.textContent = `Giữ yên... ${stableCounter}/5`; if (stableCounter >= 5) { stopVideoAndCloseModal(); const empIndex = AppState.employees.findIndex(e => e.id === empId); if (empIndex !== -1) { AppState.employees[empIndex].faceDescriptor = Array.from(registrationDescriptor); saveFullState(); showModal(`<h3>Thành công</h3><p>Đã đăng ký khuôn mặt cho ${AppState.employees[empIndex].name}.</p>`); } } } else { registrationDescriptor = detection.descriptor; stableCounter = 0; faceModalMessage.textContent = 'Khuôn mặt di chuyển, đang ổn định lại...'; } } }, 400); }
-function renderAdminPanel(){ const adminContentEl = document.getElementById('admin-content'); let addEmployeeHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-plus"></i> Thêm nhân viên mới</h3><div class="form-group"><label>Tên nhân viên</label><input type="text" id="new-emp-name"></div><div class="form-group"><label>ID nhân viên</label><input type="text" id="new-emp-id"></div><div class="form-group"><label>Mã số đăng nhập</label><input type="text" inputmode="numeric" id="new-emp-code"></div><button class="admin-btn" onclick="addEmployee()">Thêm nhân viên</button></div>`; let locationSettingsHtml = `<div class="admin-section"><h3><i class="fa-solid fa-map-marker-alt"></i> Cài đặt Vị trí</h3><div class="form-group"><label>Vĩ độ (Latitude)</label><input type="number" step="any" id="setting-lat"></div><div class="form-group"><label>Kinh độ (Longitude)</label><input type="number" step="any" id="setting-lon"></div><div class="form-group"><label>Bán kính cho phép (mét)</label><input type="number" id="setting-radius" value="30"></div><button class="admin-btn" onclick="saveLocationSettingsAction()">Lưu Cài đặt Vị trí</button></div>`; let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> Quản lý Nhân viên</h3>`; if (AppState.employees && AppState.employees.length > 0) { [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => { const times = getTimes(emp.id); const faceRegistered = emp.faceDescriptor && emp.faceDescriptor.length > 0; const faceBtnColor = faceRegistered ? 'var(--ok)' : 'var(--primary)'; const faceBtnIcon = faceRegistered ? 'fa-solid fa-user-check' : 'fa-solid fa-camera'; const faceBtnTitle = faceRegistered ? 'Đăng ký lại khuôn mặt' : 'Đăng ký khuôn mặt'; scheduleHtml += `<div class="schedule-management-item"><span class="name">${emp.name} (${emp.id})</span><div class="schedule-group"><input type="time" id="schedule-${emp.id}" value="${times.scheduledTime || ''}"><button class="admin-icon-btn" style="background-color: ${faceBtnColor};" onclick="openFaceModalForRegistration('${emp.id}')" title="${faceBtnTitle}"><i class="${faceBtnIcon}"></i></button><button class="admin-icon-btn btn-save-schedule" onclick="saveSchedule('${emp.id}')" title="Lưu lịch"><i class="fa-solid fa-save"></i></button><button class="admin-icon-btn btn-view-stats" onclick="viewBreakStatsAdmin('${emp.id}')" title="Xem thống kê"><i class="fa-solid fa-chart-simple"></i></button><button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="Reset nghỉ"><i class="fa-solid fa-rotate-left"></i></button><button class="admin-icon-btn btn-delete-emp" onclick="deleteEmployee('${emp.id}')" title="Xóa nhân viên"><i class="fa-solid fa-trash"></i></button></div></div>`; }); } else { scheduleHtml += '<p>Chưa có nhân viên nào.</p>'; } scheduleHtml += `</div>`; let codesHtml = `<div class="admin-section"><h3><i class="fa-solid fa-key"></i> Mã số Đăng nhập</h3>`; if (AppState.employees && AppState.employees.length > 0) { [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => { codesHtml += `<div class="emp-code-item"><span class="name">${emp.name}</span><span class="code">${emp.code}</span></div>`; }); } else { codesHtml += '<p>Chưa có nhân viên nào.</p>'; } codesHtml += `</div>`; adminContentEl.innerHTML = addEmployeeHtml + locationSettingsHtml + scheduleHtml + codesHtml; const settings = loadLocationSettings(); if (settings) { document.getElementById('setting-lat').value = settings.lat || ''; document.getElementById('setting-lon').value = settings.lon || ''; document.getElementById('setting-radius').value = settings.radius || 30; } }
+function renderAdminPanel(){
+    const adminContentEl = document.getElementById('admin-content');
+    let addEmployeeHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-plus"></i> Thêm nhân viên mới</h3><div class="form-group"><label>Tên nhân viên</label><input type="text" id="new-emp-name"></div><div class="form-group"><label>Mã số đăng nhập</label><input type="text" inputmode="numeric" id="new-emp-code"></div><button class="admin-btn" onclick="addEmployee()">Thêm nhân viên</button></div>`;
+    let locationSettingsHtml = `<div class="admin-section"><h3><i class="fa-solid fa-map-marker-alt"></i> Cài đặt Vị trí</h3><div class="form-group"><label>Vĩ độ (Latitude)</label><input type="number" step="any" id="setting-lat"></div><div class="form-group"><label>Kinh độ (Longitude)</label><input type="number" step="any" id="setting-lon"></div><div class="form-group"><label>Bán kính cho phép (mét)</label><input type="number" id="setting-radius" value="30"></div><button class="admin-btn" onclick="saveLocationSettingsAction()">Lưu Cài đặt Vị trí</button></div>`;
+    let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> Quản lý Nhân viên</h3>`;
+    if (AppState.employees && AppState.employees.length > 0) {
+        [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => {
+            const times = getTimes(emp.id);
+            const faceRegistered = emp.faceDescriptor && emp.faceDescriptor.length > 0;
+            const faceBtnColor = faceRegistered ? 'var(--ok)' : 'var(--primary)';
+            const faceBtnIcon = faceRegistered ? 'fa-solid fa-user-check' : 'fa-solid fa-camera';
+            const faceBtnTitle = faceRegistered ? 'Đăng ký lại khuôn mặt' : 'Đăng ký khuôn mặt';
+            scheduleHtml += `<div class="schedule-management-item"><div class="emp-editable-info"><input type="text" class="admin-emp-name-input" value="${emp.name}" onblur="updateEmployeeInfo('${emp.id}', 'name', this.value)" title="Sửa tên nhân viên"><input type="text" class="admin-emp-code-input" value="${emp.code}" onblur="updateEmployeeInfo('${emp.id}', 'code', this.value)" title="Sửa mã số đăng nhập"></div><div class="schedule-group"><input type="time" id="schedule-${emp.id}" value="${times.scheduledTime || ''}" onchange="saveSchedule('${emp.id}')" title="Đặt lịch làm việc"><button class="admin-icon-btn" style="background-color: ${faceBtnColor};" onclick="openFaceModalForRegistration('${emp.id}')" title="${faceBtnTitle}"><i class="${faceBtnIcon}"></i></button><button class="admin-icon-btn btn-view-stats" onclick="viewBreakStatsAdmin('${emp.id}')" title="Xem thống kê"><i class="fa-solid fa-chart-simple"></i></button><button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="Reset nghỉ"><i class="fa-solid fa-rotate-left"></i></button><button class="admin-icon-btn btn-delete-emp" onclick="deleteEmployee('${emp.id}')" title="Xóa nhân viên"><i class="fa-solid fa-trash"></i></button></div></div>`;
+        });
+    } else { scheduleHtml += '<p>Chưa có nhân viên nào.</p>'; }
+    scheduleHtml += `</div>`;
+    let codesHtml = `<div class="admin-section"><h3><i class="fa-solid fa-key"></i> Mã số Đăng nhập</h3>`;
+    if (AppState.employees && AppState.employees.length > 0) {
+        [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => { codesHtml += `<div class="emp-code-item"><span class="name">${emp.name}</span><span class="code">${emp.code}</span></div>`; });
+    } else { codesHtml += '<p>Chưa có nhân viên nào.</p>'; }
+    codesHtml += `</div>`;
+    adminContentEl.innerHTML = addEmployeeHtml + locationSettingsHtml + scheduleHtml + codesHtml;
+    const settings = loadLocationSettings();
+    if (settings) { document.getElementById('setting-lat').value = settings.lat || ''; document.getElementById('setting-lon').value = settings.lon || ''; document.getElementById('setting-radius').value = settings.radius || 30; }
+}
 
-// ===== START: UPDATED AND FIXED checkSchedules FUNCTION =====
 function checkSchedules() {
 if (!AppState.employees || AppState.employees.length === 0) return;
-
 const now = new Date();
 const currentWorkDayString = getWorkDayString(now);
 let needsSave = false;
-
 AppState.employees.forEach(emp => {
 let times = getTimes(emp.id);
-
-// 1. Logic reset trạng thái khi bắt đầu ngày làm việc mới
-// Nếu đã có check-in từ ngày trước và ngày đó khác ngày làm việc hiện tại
 if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) {
-// TẠO MỘT TRẠNG THÁI MỚI: CHỈ reset các trạng thái trong ngày, GIỮ LẠI scheduledTime
-AppState.times[emp.id] = {
-scheduledTime: times.scheduledTime, // Giữ lại lịch đã đặt
-lastCheckInDay: null,
-checkInTime: null,
-onBreak: false,
-breakStartTime: null,
-breakIndex: 0,
-breakHistory: []
-};
-// Lấy lại trạng thái mới nhất sau khi reset
+AppState.times[emp.id] = { scheduledTime: times.scheduledTime, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] };
 times = AppState.times[emp.id];
 needsSave = true;
 }
-
-// 2. Logic tự động check-in nếu đã đến giờ
-// Kiểm tra xem nhân viên có lịch và chưa check-in trong ngày hôm nay không
 if (times.scheduledTime && !times.checkInTime) {
-// Tạo đối tượng Date cho thời gian đã lên lịch của ngày làm việc hiện tại
 const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`);
-
-// Nếu giờ hiện tại đã qua hoặc bằng giờ lên lịch
 if (now >= scheduledDateTime) {
-// Thực hiện check-in
 times.checkInTime = new Date().toISOString();
 times.lastCheckInDay = currentWorkDayString;
 needsSave = true;
-
-// Gửi thông báo cho người dùng nếu đó là họ
 if (AppState.loggedInUserId === emp.id) {
 showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`);
+} } } });
+if (needsSave) { saveFullState(); }
 }
-}
-}
-});
-
-// Chỉ lưu vào cloud nếu có bất kỳ thay đổi nào
-if (needsSave) {
-saveFullState();
-}
-}
-// ===== END: UPDATED AND FIXED checkSchedules FUNCTION =====
 
 // ===== App Initialization & Event Listeners =====
 document.getElementById('tab-emp').onclick = ()=>{ document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; document.getElementById('tab-emp').classList.add('active'); document.getElementById('tab-admin').classList.remove('active'); };
@@ -348,7 +337,6 @@ document.getElementById('login-code-input').addEventListener('keyup', (event) =>
 async function initializeApp() {
 await requestNotificationPermission();
 await loadDataFromCloud();
-
 const loggedInId = sessionStorage.getItem('loggedInUserId');
 if (loggedInId) {
 AppState.loggedInUserId = loggedInId;
@@ -356,19 +344,76 @@ AppState.isAdmin = (loggedInId === 'ADMIN');
 document.getElementById('login-view').style.display = 'none';
 document.getElementById('app-container').style.display = 'block';
 updateUIVisibility();
-// Thêm dòng này để đảm bảo giao diện được vẽ lại sau khi tải lại trang
 renderAll();
 } else {
 document.getElementById('login-view').style.display = 'flex';
 document.getElementById('app-container').style.display = 'none';
 }
-
 setInterval(() => loadDataFromCloud(), 5000);
 setInterval(() => checkSchedules(), 5000);
-
 loadFaceModels();
 }
 initializeApp();
+
+// ===== START: LOGIC PHÁT ÂM THANH CHO CÁC NÚT =====
+function playSound(soundId) {
+    try {
+        const audio = document.getElementById(soundId);
+        if (audio) {
+            audio.currentTime = 0; // Quay về đầu để có thể bấm liên tục
+            audio.play().catch(e => { /* Bỏ qua lỗi khi người dùng bấm quá nhanh */ });
+        }
+    } catch (error) {
+        console.error("Lỗi khi phát âm thanh:", error);
+    }
+}
+
+// Bản đồ ánh xạ từ selector của nút đến ID của âm thanh
+const soundMap = {
+    // Hành động nguy hiểm / tiêu cực
+    '.btn-delete-emp': 'audio-delete',
+    '#logout-btn': 'audio-logout',
+    '.btn-stop-break': 'audio-delete',
+    '#modal-cancel': 'audio-logout',
+
+    // Hành động cảnh báo / bắt đầu
+    '.btn-start-break': 'audio-warn',
+    '.btn-reset-breaks': 'audio-warn',
+
+    // Hành động xác nhận / tích cực
+    '#modal-ok': 'audio-confirm',
+    '.admin-btn': 'audio-confirm',
+    '#login-by-code-btn': 'audio-confirm',
+    '#start-face-login-btn': 'audio-confirm',
+
+    // Hành động điều hướng / chuyển đổi
+    '.tab': 'audio-tab',
+    
+    // Các hành động khác
+    '#change-password-btn': 'audio-action',
+    '.admin-icon-btn': 'audio-action', // Nút icon admin chung
+};
+
+document.body.addEventListener('click', (event) => {
+    // Tìm phần tử có thể click gần nhất (bao gồm cả icon bên trong button)
+    const target = event.target.closest('button, .tab');
+    if (!target) return; // Nếu không click vào nút thì thôi
+
+    // Duyệt qua bản đồ âm thanh để tìm âm thanh phù hợp
+    for (const selector in soundMap) {
+        if (target.matches(selector)) {
+            playSound(soundMap[selector]);
+            return; // Tìm thấy và phát xong thì dừng
+        }
+    }
+    
+    // Nếu không có âm thanh nào được chỉ định riêng, phát âm thanh mặc định
+    if(target.tagName === 'BUTTON' || target.classList.contains('btn')){
+       playSound('audio-generic');
+    }
+});
+// ===== END: LOGIC PHÁT ÂM THANH =====
+
 </script>
 </body>
 </html>
