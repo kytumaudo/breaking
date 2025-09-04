@@ -12,6 +12,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="manifest" href="manifest.json">
+<!-- MỚI: Thêm thư viện face-api.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <style>
 :root { 
@@ -201,11 +203,142 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 </div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 
+<!-- MỚI: Modal cho Camera Nhận diện Khuôn mặt -->
+<div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;">
+    <div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;">
+        <video id="video" width="300" height="225" autoplay muted playsinline></video>
+        <canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas>
+        <p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p>
+        <button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+    </div>
+</div>
+
 <script>
 // ===== Data, State & Auth =====
 const BREAKS = [10,40,10,10];
 const timers = {};
 let AppState = { employees: [], times: {}, loggedInUserId: null, isAdmin: false };
+
+// ----- START: ALL NEW FACE RECOGNITION CODE -----
+const faceModalBackdrop = document.getElementById('face-modal-backdrop');
+const faceModalMessage = document.getElementById('face-modal-message');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+let modelsLoaded = false;
+let currentFaceAction = {
+    empId: null,
+    actionType: null, // 'register' or 'verify'
+    callback: null
+};
+
+async function loadFaceModels() {
+    if (modelsLoaded) return;
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+    await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+    ]);
+    modelsLoaded = true;
+    console.log("Face models loaded.");
+}
+
+async function startVideo() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        video.srcObject = stream;
+        return new Promise(resolve => {
+            video.onloadedmetadata = () => resolve(video);
+        });
+    } catch (err) {
+        console.error("Camera Error:", err);
+        showModal("<h3>Lỗi Camera</h3><p>Không thể truy cập camera. Vui lòng cấp quyền và thử lại.</p>");
+        return null;
+    }
+}
+
+function stopVideoAndCloseModal() {
+    const stream = video.srcObject;
+    if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        video.srcObject = null;
+    }
+    faceModalBackdrop.style.display = 'none';
+    if (window.faceDetectionInterval) {
+        clearInterval(window.faceDetectionInterval);
+    }
+}
+document.getElementById('face-modal-close').onclick = stopVideoAndCloseModal;
+
+async function handleFaceDetection() {
+    const displaySize = { width: video.width, height: video.height };
+    faceapi.matchDimensions(canvas, displaySize);
+
+    window.faceDetectionInterval = setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        // faceapi.draw.drawDetections(canvas, resizedDetections); // Bỏ vẽ box để gọn gàng hơn
+        
+        if (detections.length === 1) { // Chỉ xử lý khi có đúng 1 khuôn mặt
+            const descriptor = detections[0].descriptor;
+            if (currentFaceAction.actionType === 'register') {
+                faceModalMessage.textContent = 'Đã nhận diện! Đang lưu...';
+                const empIndex = AppState.employees.findIndex(e => e.id === currentFaceAction.empId);
+                if (empIndex !== -1) {
+                    AppState.employees[empIndex].faceDescriptor = Array.from(descriptor); // Lưu dưới dạng array
+                    saveEmployees(AppState.employees);
+                    stopVideoAndCloseModal();
+                    showModal(`<h3>Thành công</h3><p>Đã đăng ký khuôn mặt cho nhân viên ${AppState.employees[empIndex].name}.</p>`);
+                    renderAdminPanel(); // Cập nhật lại giao diện admin
+                }
+                clearInterval(window.faceDetectionInterval);
+            } else if (currentFaceAction.actionType === 'verify') {
+                const emp = AppState.employees.find(e => e.id === currentFaceAction.empId);
+                if (emp && emp.faceDescriptor) {
+                    const storedDescriptor = new Float32Array(emp.faceDescriptor);
+                    const distance = faceapi.euclideanDistance(descriptor, storedDescriptor);
+                    
+                    if (distance < 0.5) { // Ngưỡng chấp nhận, có thể điều chỉnh
+                        faceModalMessage.textContent = 'Xác thực thành công!';
+                        clearInterval(window.faceDetectionInterval);
+                        stopVideoAndCloseModal();
+                        if (typeof currentFaceAction.callback === 'function') {
+                            currentFaceAction.callback();
+                        }
+                    } else {
+                        faceModalMessage.textContent = 'Không khớp. Thử lại!';
+                    }
+                } else {
+                    faceModalMessage.textContent = 'Chưa đăng ký khuôn mặt!';
+                }
+            }
+        } else if (detections.length > 1) {
+            faceModalMessage.textContent = 'Vui lòng chỉ để 1 người trong khung hình.';
+        } else {
+            faceModalMessage.textContent = 'Đưa khuôn mặt vào khung hình...';
+        }
+    }, 300);
+}
+
+async function openFaceModal(empId, actionType, callback = null) {
+    currentFaceAction = { empId, actionType, callback };
+    faceModalBackdrop.style.display = 'flex';
+    
+    if (!modelsLoaded) {
+        faceModalMessage.textContent = 'Đang tải model...';
+        await loadFaceModels();
+    }
+
+    const videoEl = await startVideo();
+    if (videoEl) {
+        faceModalMessage.textContent = 'Đưa khuôn mặt vào khung hình...';
+        handleFaceDetection();
+    }
+}
+// ----- END: ALL NEW FACE RECOGNITION CODE -----
+
 
 function generateInitialEmployees() {
     const names = ["An", "Bình", "Cúc", "Dũng", "Giang", "Hương", "Khanh", "Lan", "Minh", "Nam", "Oanh", "Phúc", "Quân", "Sơn", "Thảo", "Uyên", "Vân", "Xuân", "Yến", "Ánh"];
@@ -428,8 +561,16 @@ function showChangePasswordModal() {
     });
 }
 
+// MỚI: Cập nhật hàm startBreak để dùng nhận diện khuôn mặt
 function startBreak(empId){
-    performActionWithLocationCheck(() => {
+    const emp = AppState.employees.find(e => e.id === empId);
+    if (!emp || !emp.faceDescriptor) {
+        showModal("<h3>Yêu cầu</h3><p>Bạn cần đăng ký khuôn mặt trước khi sử dụng tính năng này. Vui lòng liên hệ quản trị viên.</p>");
+        return;
+    }
+    
+    // Hàm callback sẽ được gọi nếu xác thực thành công
+    const actionCallback = () => {
         const times = getTimes(empId);
         const idx = times.breakIndex || 0;
         if(idx >= BREAKS.length){ showModal('<h3>Thông báo</h3><p>Đã hết số lần nghỉ giải lao trong ngày.</p>'); return; }
@@ -439,8 +580,14 @@ function startBreak(empId){
             saveTimes();
             renderEmployees();
         });
+    };
+
+    // Gọi xác thực khuôn mặt trước, sau đó mới kiểm tra vị trí và thực hiện hành động
+    openFaceModal(empId, 'verify', () => {
+        performActionWithLocationCheck(actionCallback);
     });
 }
+
 function recordBreak(empId) {
     const times = getTimes(empId);
     if (!times.onBreak || !times.breakStartTime) return;
@@ -448,16 +595,30 @@ function recordBreak(empId) {
     times.breakHistory = times.breakHistory || [];
     times.breakHistory.push({ index: times.breakIndex, duration: duration });
 }
+
+// MỚI: Cập nhật hàm stopBreak để dùng nhận diện khuôn mặt
 function stopBreak(empId) {
-    performActionWithLocationCheck(() => {
+    const emp = AppState.employees.find(e => e.id === empId);
+    if (!emp || !emp.faceDescriptor) {
+        showModal("<h3>Lỗi</h3><p>Không tìm thấy dữ liệu khuôn mặt. Vui lòng liên hệ quản trị viên.</p>");
+        return;
+    }
+
+    // Hàm callback sẽ được gọi nếu xác thực thành công
+    const actionCallback = () => {
         if (timers[empId]) { clearInterval(timers[empId]); delete timers[empId]; }
         const times = getTimes(empId);
         if (!times.onBreak) return;
         recordBreak(empId);
         times.onBreak = false; AppState.times[empId] = times;
         saveTimes(); renderEmployees();
+    };
+
+    openFaceModal(empId, 'verify', () => {
+        performActionWithLocationCheck(actionCallback);
     });
 }
+
 function startBreakCountdown(empId){
   if (timers[empId]) clearInterval(timers[empId]);
   const sound = document.getElementById('notif-sound');
@@ -634,10 +795,17 @@ function renderAdminPanel(){
     
   let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> Quản lý Nhân viên</h3>`;
   if (AppState.employees.length > 0) {
+    // MỚI: Cập nhật vòng lặp để thêm nút đăng ký khuôn mặt
     [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => {
         const times = getTimes(emp.id);
+        const faceRegistered = emp.faceDescriptor && emp.faceDescriptor.length > 0;
+        const faceBtnColor = faceRegistered ? 'var(--ok)' : 'var(--primary)';
+        const faceBtnIcon = faceRegistered ? 'fa-solid fa-user-check' : 'fa-solid fa-camera';
+        const faceBtnTitle = faceRegistered ? 'Đăng ký lại khuôn mặt' : 'Đăng ký khuôn mặt';
+
         scheduleHtml += `<div class="schedule-management-item"><span class="name">${emp.name} (${emp.id})</span><div class="schedule-group">
             <input type="time" id="schedule-${emp.id}" value="${times.scheduledTime || ''}">
+            <button class="admin-icon-btn" style="background-color: ${faceBtnColor};" onclick="openFaceModal('${emp.id}', 'register')" title="${faceBtnTitle}"><i class="${faceBtnIcon}"></i></button>
             <button class="admin-icon-btn btn-save-schedule" onclick="saveSchedule('${emp.id}')" title="Lưu lịch"><i class="fa-solid fa-save"></i></button>
             <button class="admin-icon-btn btn-view-stats" onclick="viewBreakStatsAdmin('${emp.id}')" title="Xem thống kê"><i class="fa-solid fa-chart-simple"></i></button>
             <button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="Reset nghỉ"><i class="fa-solid fa-rotate-left"></i></button>
@@ -731,6 +899,7 @@ async function initializeApp() {
         document.getElementById('app-container').style.display = 'none';
     }
     setInterval(() => checkSchedules(false), 5000);
+    loadFaceModels(); // MỚI: Tải trước các model nhận diện
 }
 initializeApp();
 
