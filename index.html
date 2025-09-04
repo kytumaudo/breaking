@@ -1,5 +1,3 @@
---- START OF FILE ai_studio_code (13).html ---
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -60,7 +58,7 @@ header {
   background:var(--gray-100); font-weight:600; cursor:pointer;
   transition: all 0.2s ease-in-out; font-size: 14px;
 }
-#logout-btn {
+#logout-btn, #change-password-btn {
     background: none; border: none; font-size: 18px; color: var(--gray-500);
     cursor: pointer; padding: 8px;
 }
@@ -68,13 +66,18 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .card {
   background:var(--text-light); border-radius:8px; margin-bottom:6px; 
   box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden;
+  border: 1px solid #e5e7eb;
 }
 .card-header {
   display:flex; justify-content: space-between; align-items: center; gap:8px;
   padding: 6px 8px; border-bottom:1px solid var(--gray-100);
 }
 .emp-info { display: flex; align-items: center; gap: 8px; flex-grow: 1; overflow: hidden; }
-.emp-name { font-weight:600; font-size:14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.emp-name { 
+    font-weight:600; font-size:14px; white-space: nowrap; overflow: hidden; 
+    text-overflow: ellipsis; background-color: var(--gray-100);
+    padding: 2px 8px; border-radius: 6px; color: var(--gray-700);
+}
 .status-badge { padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: 600; color: white; flex-shrink: 0; }
 .status-working { background-color: var(--ok); }
 .status-on-break { background-color: var(--warn); }
@@ -89,6 +92,8 @@ main { padding:8px; max-width:480px; margin:0 auto; }
     background-color: var(--gray-100); padding: 4px 6px;
     border-radius: 4px; text-align: center; flex: 1;
 }
+.status-item-start { background-color: #e0e7ff; }
+.status-item-break { background-color: #f0fdf4; }
 .status-item.clickable { cursor: pointer; transition: background-color 0.2s; }
 .status-item.clickable:hover { background-color: #e5e7eb; }
 .status-item .label { font-weight: 500; color: var(--gray-500); font-size: 10px; }
@@ -141,8 +146,9 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .schedule-group input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; width: 90px; }
 .admin-icon-btn { padding: 8px; border: none; border-radius: 6px; cursor: pointer; color: white; width: 32px; height: 32px; text-align: center; line-height: 1; font-size: 14px;}
 .btn-save-schedule { background: var(--ok); }
-.btn-reset-breaks { background: var(--danger); }
+.btn-reset-breaks { background: var(--warn); }
 .btn-view-stats { background: var(--primary); }
+.btn-delete-emp { background: var(--danger); }
 
 #modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
 #modal { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
@@ -171,6 +177,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
         <div id="tab-emp" class="tab active">Nhân viên</div>
         <div id="tab-admin" class="tab">Quản trị</div>
       </div>
+      <button id="change-password-btn" title="Đổi mã đăng nhập"><i class="fa-solid fa-key"></i></button>
       <button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
     </header>
 
@@ -254,11 +261,14 @@ function updateUIVisibility() {
     const empTab = document.getElementById('tab-emp');
     const viewEmp = document.getElementById('view-emp');
     const viewAdmin = document.getElementById('view-admin');
+    const changePassBtn = document.getElementById('change-password-btn');
 
     if (AppState.isAdmin) {
         adminTab.style.display = 'block';
+        changePassBtn.style.display = 'none';
     } else {
         adminTab.style.display = 'none';
+        changePassBtn.style.display = 'block';
         viewEmp.style.display = 'block';
         viewAdmin.style.display = 'none';
         empTab.classList.add('active');
@@ -300,15 +310,82 @@ function formatSeconds(seconds) {
     const remainingSeconds = seconds % 60;
     return `${minutes} phút ${remainingSeconds} giây`;
 }
-
-// FIX: New function to define the "Work Day" based on 6 AM reset time
 function getWorkDayString(date) {
     const workDate = new Date(date);
-    // If the time is before 6 AM, it belongs to the previous work day.
     if (workDate.getHours() < 6) {
         workDate.setDate(workDate.getDate() - 1);
     }
     return workDate.toISOString().slice(0, 10);
+}
+
+// ===== Geolocation Functions =====
+function loadLocationSettings() {
+    return JSON.parse(localStorage.getItem('locationSettings') || 'null');
+}
+function saveLocationSettings() {
+    const lat = parseFloat(document.getElementById('setting-lat').value);
+    const lon = parseFloat(document.getElementById('setting-lon').value);
+    const radius = parseFloat(document.getElementById('setting-radius').value);
+
+    if (isNaN(lat) || isNaN(lon) || isNaN(radius)) {
+        showModal("<h3>Lỗi</h3><p>Vui lòng nhập đầy đủ và chính xác thông tin vị trí.</p>");
+        return;
+    }
+    const settings = { lat, lon, radius };
+    localStorage.setItem('locationSettings', JSON.stringify(settings));
+    showModal("<h3>Thành công</h3><p>Đã lưu cài đặt vị trí.</p>");
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c * 1000; // Distance in meters
+}
+
+function performActionWithLocationCheck(actionCallback) {
+    const settings = loadLocationSettings();
+    if (!settings || !settings.lat || !settings.lon || !settings.radius) {
+        actionCallback(); // If no settings, proceed without check
+        return;
+    }
+
+    if (!navigator.geolocation) {
+        showModal("<h3>Lỗi</h3><p>Trình duyệt của bạn không hỗ trợ định vị.</p>");
+        return;
+    }
+
+    showModal("<h3>Đang lấy vị trí...</h3><p>Vui lòng chờ trong giây lát.</p>");
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            const distance = calculateDistance(settings.lat, settings.lon, userLat, userLon);
+
+            if (distance <= settings.radius) {
+                modalBackdrop.style.display = 'none'; // Hide the "getting location" modal
+                actionCallback();
+            } else {
+                showModal(`<h3>Lỗi</h3><p>Bạn đang ở ngoài khu vực cho phép. Khoảng cách của bạn là ${Math.round(distance)} mét.</p>`);
+            }
+        },
+        (error) => {
+            let message = "Không thể lấy được vị trí của bạn. ";
+            switch (error.code) {
+                case error.PERMISSION_DENIED: message += "Vui lòng cấp quyền truy cập vị trí."; break;
+                case error.POSITION_UNAVAILABLE: message += "Thông tin vị trí không khả dụng."; break;
+                case error.TIMEOUT: message += "Yêu cầu lấy vị trí đã hết hạn."; break;
+                default: message += "Đã xảy ra lỗi không xác định."; break;
+            }
+            showModal(`<h3>Lỗi</h3><p>${message}</p>`);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
 }
 
 
@@ -321,16 +398,48 @@ function showBrowserNotification(title, body) {
 }
 
 // ===== Employee & Admin Actions =====
+function showChangePasswordModal() {
+    const content = `
+        <h3>Đổi mã đăng nhập</h3>
+        <div class="form-group">
+            <label for="new-code">Mã số mới</label>
+            <input type="text" id="new-code" inputmode="numeric">
+        </div>
+        <div class="form-group">
+            <label for="confirm-code">Xác nhận mã số mới</label>
+            <input type="text" id="confirm-code" inputmode="numeric">
+        </div>
+    `;
+    showModal(content, () => {
+        const newCode = document.getElementById('new-code').value;
+        const confirmCode = document.getElementById('confirm-code').value;
+
+        if (!newCode || !confirmCode) { showModal("<h3>Lỗi</h3><p>Vui lòng nhập đầy đủ thông tin.</p>"); return; }
+        if (newCode !== confirmCode) { showModal("<h3>Lỗi</h3><p>Mã số xác nhận không khớp.</p>"); return; }
+        if (isNaN(newCode)) { showModal("<h3>Lỗi</h3><p>Mã số phải là dạng số.</p>"); return; }
+        if (AppState.employees.some(e => e.code == newCode)) { showModal("<h3>Lỗi</h3><p>Mã số này đã được người khác sử dụng.</p>"); return; }
+
+        const currentEmp = AppState.employees.find(e => e.id === AppState.loggedInUserId);
+        if (currentEmp) {
+            currentEmp.code = newCode;
+            saveEmployees(AppState.employees);
+            showModal("<h3>Thành công</h3><p>Đã đổi mã đăng nhập thành công!</p>");
+        }
+    });
+}
+
 function startBreak(empId){
-  const times = getTimes(empId);
-  const idx = times.breakIndex || 0;
-  if(idx >= BREAKS.length){ showModal('<h3>Thông báo</h3><p>Đã hết số lần nghỉ giải lao trong ngày.</p>'); return; }
-  showModal(`<h3>Xác nhận</h3><p>Bắt đầu nghỉ lần ${idx+1}: ${BREAKS[idx]} phút?</p>`, () => {
-      times.onBreak = true; times.breakStartTime = new Date().toISOString();
-      times.breakIndex = idx + 1; AppState.times[empId] = times; 
-      saveTimes();
-      renderEmployees();
-  });
+    performActionWithLocationCheck(() => {
+        const times = getTimes(empId);
+        const idx = times.breakIndex || 0;
+        if(idx >= BREAKS.length){ showModal('<h3>Thông báo</h3><p>Đã hết số lần nghỉ giải lao trong ngày.</p>'); return; }
+        showModal(`<h3>Xác nhận</h3><p>Bắt đầu nghỉ lần ${idx+1}: ${BREAKS[idx]} phút?</p>`, () => {
+            times.onBreak = true; times.breakStartTime = new Date().toISOString();
+            times.breakIndex = idx + 1; AppState.times[empId] = times; 
+            saveTimes();
+            renderEmployees();
+        });
+    });
 }
 function recordBreak(empId) {
     const times = getTimes(empId);
@@ -340,12 +449,14 @@ function recordBreak(empId) {
     times.breakHistory.push({ index: times.breakIndex, duration: duration });
 }
 function stopBreak(empId) {
-    if (timers[empId]) { clearInterval(timers[empId]); delete timers[empId]; }
-    const times = getTimes(empId);
-    if (!times.onBreak) return;
-    recordBreak(empId);
-    times.onBreak = false; AppState.times[empId] = times;
-    saveTimes(); renderEmployees();
+    performActionWithLocationCheck(() => {
+        if (timers[empId]) { clearInterval(timers[empId]); delete timers[empId]; }
+        const times = getTimes(empId);
+        if (!times.onBreak) return;
+        recordBreak(empId);
+        times.onBreak = false; AppState.times[empId] = times;
+        saveTimes(); renderEmployees();
+    });
 }
 function startBreakCountdown(empId){
   if (timers[empId]) clearInterval(timers[empId]);
@@ -430,8 +541,8 @@ function renderEmployees(){
       <div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div>
       <div class="card-body">
         <div class="status-section">
-          <div class="status-item"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div>
-          <div class="status-item ${breakCountClickable}" ${breakCountOnClick}><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${BREAKS.length}</div></div>
+          <div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div>
+          <div class="status-item status-item-break ${breakCountClickable}" ${breakCountOnClick}><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${BREAKS.length}</div></div>
         </div>
         <div class="action-buttons">${actionButtonsHtml}</div>
       </div>
@@ -469,7 +580,7 @@ function resetBreaks(empId) {
         const times = getTimes(empId);
         times.breakIndex = 0; times.breakHistory = [];
         AppState.times[empId] = times; saveTimes();
-        showModal(`<h3>Thành công</h3><p>Đã reset số lần nghỉ cho ${emp.name}.</p>`);
+        showModal(`<h3>Thành công</h3><p>Đã reset số lần nghỉ cho ${emp.name}.p</p>`);
         renderEmployees();
     });
 }
@@ -493,6 +604,19 @@ function saveSchedule(empId) {
     showModal(`<h3>Thành công</h3><p>Đã cập nhật lịch làm việc cho ${empId}.</p>`);
     renderEmployees(); 
 }
+function deleteEmployee(empId) {
+    const emp = AppState.employees.find(e => e.id === empId);
+    if (!emp) return;
+    showModal(`<h3>Xác nhận Xóa</h3><p>Bạn có chắc muốn xóa nhân viên <strong>${emp.name}</strong>? Hành động này không thể hoàn tác.</p>`, () => {
+        AppState.employees = AppState.employees.filter(e => e.id !== empId);
+        delete AppState.times[empId];
+        saveEmployees(AppState.employees);
+        saveTimes();
+        showModal(`<h3>Thành công</h3><p>Đã xóa nhân viên ${emp.name}.</p>`);
+        renderAdminPanel();
+        renderEmployees();
+    });
+}
 
 function renderAdminPanel(){
   const adminContentEl = document.getElementById('admin-content');
@@ -501,6 +625,13 @@ function renderAdminPanel(){
     <div class="form-group"><label>ID nhân viên</label><input type="text" id="new-emp-id"></div>
     <div class="form-group"><label>Mã số đăng nhập</label><input type="text" inputmode="numeric" id="new-emp-code"></div>
     <button class="admin-btn" onclick="addEmployee()">Thêm nhân viên</button></div>`;
+    
+  let locationSettingsHtml = `<div class="admin-section"><h3><i class="fa-solid fa-map-marker-alt"></i> Cài đặt Vị trí</h3>
+    <div class="form-group"><label>Vĩ độ (Latitude)</label><input type="number" step="any" id="setting-lat"></div>
+    <div class="form-group"><label>Kinh độ (Longitude)</label><input type="number" step="any" id="setting-lon"></div>
+    <div class="form-group"><label>Bán kính cho phép (mét)</label><input type="number" id="setting-radius" value="30"></div>
+    <button class="admin-btn" onclick="saveLocationSettings()">Lưu Cài đặt Vị trí</button></div>`;
+    
   let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> Quản lý Nhân viên</h3>`;
   if (AppState.employees.length > 0) {
     [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).forEach(emp => {
@@ -510,6 +641,7 @@ function renderAdminPanel(){
             <button class="admin-icon-btn btn-save-schedule" onclick="saveSchedule('${emp.id}')" title="Lưu lịch"><i class="fa-solid fa-save"></i></button>
             <button class="admin-icon-btn btn-view-stats" onclick="viewBreakStatsAdmin('${emp.id}')" title="Xem thống kê"><i class="fa-solid fa-chart-simple"></i></button>
             <button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="Reset nghỉ"><i class="fa-solid fa-rotate-left"></i></button>
+            <button class="admin-icon-btn btn-delete-emp" onclick="deleteEmployee('${emp.id}')" title="Xóa nhân viên"><i class="fa-solid fa-trash"></i></button>
         </div></div>`;
     });
   } else { scheduleHtml += '<p>Chưa có nhân viên nào.</p>'; }
@@ -521,26 +653,31 @@ function renderAdminPanel(){
     });
   } else { codesHtml += '<p>Chưa có nhân viên nào.</p>'; }
   codesHtml += `</div>`;
-  adminContentEl.innerHTML = addEmployeeHtml + scheduleHtml + codesHtml;
+  adminContentEl.innerHTML = addEmployeeHtml + locationSettingsHtml + scheduleHtml + codesHtml;
+
+  // Populate location settings fields
+  const settings = loadLocationSettings();
+  if (settings) {
+    document.getElementById('setting-lat').value = settings.lat;
+    document.getElementById('setting-lon').value = settings.lon;
+    document.getElementById('setting-radius').value = settings.radius;
+  }
 }
 
 // ===== App Initialization & Core Logic =====
 function checkSchedules(isLogin = false) {
     const now = new Date();
-    // FIX: Use the new getWorkDayString function to determine the current work day.
     const currentWorkDayString = getWorkDayString(now);
     let needsRender = false;
 
     AppState.employees.forEach(emp => {
         const times = getTimes(emp.id);
-        // FIX: Compare against the new work day definition.
         if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) {
             Object.assign(times, { checkInTime: null, onBreak: false, breakIndex: 0, breakStartTime: null, lastCheckInDay: null, breakHistory: [] });
             AppState.times[emp.id] = times; needsRender = true;
         }
 
         if (!times.checkInTime && times.scheduledTime) {
-            // FIX: The scheduled time is always associated with the current work day.
             const scheduledTimeToday = new Date(`${currentWorkDayString}T${times.scheduledTime}`);
             if (now >= scheduledTimeToday) {
                 times.checkInTime = new Date().toISOString();
@@ -572,6 +709,7 @@ document.getElementById('tab-admin').onclick = ()=>{
 };
 document.getElementById('login-btn').onclick = login;
 document.getElementById('logout-btn').onclick = logout;
+document.getElementById('change-password-btn').onclick = showChangePasswordModal;
 document.getElementById('login-code-input').addEventListener('keyup', (event) => {
     if (event.key === 'Enter') login();
 });
