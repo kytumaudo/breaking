@@ -271,7 +271,14 @@ document.getElementById('logout-btn').onclick = logout;
 document.getElementById('change-password-btn').onclick = () => { /* Logic đổi mật khẩu */ };
 document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
 function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
-document.body.addEventListener('click', (event) => { if (event.target.closest('button, .btn, .clickable, .tab')) playSound('audio-click'); });
+document.body.addEventListener('click', (event) => {
+    const target = event.target.closest('button, .btn, .clickable, .tab');
+    if (!target) return;
+    if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) {
+        return; 
+    }
+    playSound('audio-click');
+});
 
 async function loadInitialData() {
     try {
