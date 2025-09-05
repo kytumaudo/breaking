@@ -1,3 +1,11 @@
+
+---
+
+### **File Hoàn Chỉnh (Phiên Bản Tối Ưu Nhất)**
+
+Để chắc chắn, tôi sẽ cung cấp lại toàn bộ tệp `index.html` đã được cập nhật với giải pháp tối ưu này. Bạn có thể sao chép và thay thế hoàn toàn.
+
+```html
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -120,9 +128,44 @@ let faceDetectionInterval = null;
 // ===== CÁC HÀM LÕI VỚI FIRESTORE =====
 function setupRealtimeListeners() {
     if (!db) return;
+
     db.collection("employees").orderBy("name").onSnapshot((snapshot) => {
-        AppState.employees = snapshot.docs.map(doc => doc.data());
-        renderAll();
+        const isInitialLoad = AppState.employees.length === 0;
+
+        snapshot.docChanges().forEach((change) => {
+            const docData = change.doc.data();
+            const existingEmpIndex = AppState.employees.findIndex(e => e.id === docData.id);
+
+            if (change.type === "added") {
+                if (existingEmpIndex === -1) {
+                    AppState.employees.push(docData);
+                }
+            }
+            if (change.type === "modified") {
+                if (existingEmpIndex > -1) {
+                    AppState.employees[existingEmpIndex] = docData;
+                    if (AppState.loggedInUserId) renderSingleEmployee(docData.id);
+                }
+            }
+            if (change.type === "removed") {
+                if (existingEmpIndex > -1) {
+                    AppState.employees.splice(existingEmpIndex, 1);
+                    const empCard = document.querySelector(`.card[data-emp-id="${docData.id}"]`);
+                    if (empCard) empCard.remove();
+                }
+            }
+        });
+        
+        AppState.employees.sort((a, b) => a.name.localeCompare(b.name));
+
+        if (isInitialLoad && AppState.loggedInUserId) {
+            renderEmployees();
+        }
+
+        if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') {
+            renderAdminPanel();
+        }
+
     }, (error) => console.error("Lỗi khi lắng nghe `employees`: ", error));
 
     db.collection("app_state").doc("settings").onSnapshot((doc) => {
@@ -215,23 +258,49 @@ function updateBreakTimes(empId) {
 }
 
 function checkSchedules() {
-    if (!AppState.employees) return;
+    if (!AppState.employees || AppState.employees.length === 0) return;
     const now = new Date();
     const currentWorkDayString = getWorkDayString(now);
+    const batch = db.batch();
+    let batchHasWrites = false;
+
     AppState.employees.forEach(emp => {
         let times = getTimes(emp.id);
         if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) {
-            const newTimes = { ...getTimes(null), scheduledTime: times.scheduledTime };
-            db.collection("employees").doc(emp.id).update({ times: newTimes }); 
+            const newTimes = {
+                scheduledTime: times.scheduledTime,
+                lastCheckInDay: null,
+                checkInTime: null,
+                onBreak: false,
+                breakStartTime: null,
+                breakIndex: 0,
+                breakHistory: []
+            };
+            batch.update(db.collection("employees").doc(emp.id), { times: newTimes });
+            batchHasWrites = true;
         } else if (times.scheduledTime && !times.checkInTime) {
             const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`);
             if (now >= scheduledDateTime) {
-                db.collection("employees").doc(emp.id).update({ 'times.checkInTime': new Date().toISOString(), 'times.lastCheckInDay': currentWorkDayString });
-                if (AppState.loggedInUserId === emp.id) showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`);
+                const checkInData = {
+                    'times.checkInTime': new Date().toISOString(),
+                    'times.lastCheckInDay': currentWorkDayString
+                };
+                batch.update(db.collection("employees").doc(emp.id), checkInData);
+                batchHasWrites = true;
+                if (AppState.loggedInUserId === emp.id) {
+                    showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`);
+                }
             }
         }
     });
+
+    if (batchHasWrites) {
+        batch.commit().catch(error => {
+            console.error("Lỗi khi thực hiện batch update trong checkSchedules: ", error);
+        });
+    }
 }
+
 function createCalendarEvents(empId) {
     const emp = AppState.employees.find(e => e.id === empId);
     if (!emp || !emp.breakTimes || emp.breakTimes.every(t => !t)) {
@@ -262,38 +331,59 @@ function createCalendarEvents(empId) {
 
 
 // ===== RENDER FUNCTIONS =====
+function generateEmployeeCardHTML(emp) {
+    const times = getTimes(emp.id);
+    const isCheckedIn = !!times.checkInTime;
+    const isOnBreak = times.onBreak;
+    let statusHtml = isOnBreak ? `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>` : isCheckedIn ? `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>` : times.scheduledTime ? `<div class="status-badge status-scheduled">Đã lên lịch</div>` : `<div class="status-badge status-pending">Chưa có lịch</div>`;
+    let actionButtonsHtml = '';
+    if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) {
+        const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t);
+        const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : '';
+        const mainBtn = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${!isCheckedIn || isOnBreak ? 'disabled' : ''}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
+        actionButtonsHtml = alarmBtn + mainBtn;
+    }
+    let breakVisualizerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : '';
+
+    if (isOnBreak && !timers[emp.id]) {
+        startBreakCountdown(emp.id);
+    } else if (!isOnBreak && timers[emp.id]) {
+        clearInterval(timers[emp.id]);
+        delete timers[emp.id];
+    }
+
+    return `<div class="card" data-emp-id="${emp.id}">
+        <div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div>
+        <div class="card-body">
+            <div class="status-section">
+                <div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div>
+                <div class="status-item status-item-break clickable" onclick="viewBreakStatsAdmin('${emp.id}')"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${AppState.breakDurations.length}</div></div>
+            </div>
+            <div class="action-buttons">${actionButtonsHtml}</div>
+        </div>
+        <div class="break-visualizer">${breakVisualizerHtml}</div>
+    </div>`;
+}
+
+function renderSingleEmployee(empId) {
+    const emp = AppState.employees.find(e => e.id === empId);
+    if (!emp) return;
+
+    const empCard = document.querySelector(`.card[data-emp-id="${empId}"]`);
+    if (empCard) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = generateEmployeeCardHTML(emp);
+        const newCard = tempDiv.firstChild;
+        empCard.parentNode.replaceChild(newCard, empCard);
+    }
+}
+
 function renderEmployees() {
     const empListEl = document.getElementById('emp-list');
     if (!empListEl || !AppState.employees) return;
-    empListEl.innerHTML = AppState.employees.map(emp => {
-        const times = getTimes(emp.id);
-        const isCheckedIn = !!times.checkInTime;
-        const isOnBreak = times.onBreak;
-        let statusHtml = isOnBreak ? `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>` : isCheckedIn ? `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>` : times.scheduledTime ? `<div class="status-badge status-scheduled">Đã lên lịch</div>` : `<div class="status-badge status-pending">Chưa có lịch</div>`;
-        let actionButtonsHtml = '';
-        if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) {
-            const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t);
-            const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : '';
-            const mainBtn = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${!isCheckedIn || isOnBreak ? 'disabled' : ''}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
-            actionButtonsHtml = alarmBtn + mainBtn;
-        }
-        let breakVisualizerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : '';
-        if (isOnBreak && !timers[emp.id]) { startBreakCountdown(emp.id); } 
-        else if (!isOnBreak && timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; }
-
-        return `<div class="card" data-emp-id="${emp.id}">
-            <div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div>
-            <div class="card-body">
-                <div class="status-section">
-                    <div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div>
-                    <div class="status-item status-item-break clickable" onclick="viewBreakStatsAdmin('${emp.id}')"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${AppState.breakDurations.length}</div></div>
-                </div>
-                <div class="action-buttons">${actionButtonsHtml}</div>
-            </div>
-            <div class="break-visualizer">${breakVisualizerHtml}</div>
-        </div>`;
-    }).join('');
+    empListEl.innerHTML = AppState.employees.map(emp => generateEmployeeCardHTML(emp)).join('');
 }
+
 function renderAdminPanel(){
     const adminContentEl = document.getElementById('admin-content');
     if (!adminContentEl) return;
@@ -333,7 +423,7 @@ function viewBreakStatsAdmin(empId) { const emp = AppState.employees.find(e => e
 // ===== CÁC HÀM TIỆN ÍCH & KHỞI TẠO =====
 function loginWithId(userId) { AppState.isAdmin = (userId === 'ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); renderAll(); }
 function loginWithCode() { const code = document.getElementById('login-code-input').value; const errorEl = document.getElementById('login-error'); if (!code) { errorEl.textContent = 'Vui lòng nhập mã số.'; return; } if (code === 'Admin') { loginWithId('ADMIN'); } else { const employee = AppState.employees.find(e => e.code == code); if (employee) { loginWithId(employee.id); } else { errorEl.textContent = 'Mã số không hợp lệ.'; } } }
-function logout() { AppState.loggedInUserId = null; AppState.isAdmin = false; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; updateUIVisibility(); }
+function logout() { AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); }
 function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); const changePassBtn = document.getElementById('change-password-btn'); if (AppState.isAdmin) { adminTab.style.display = 'block'; changePassBtn.style.display = 'none'; } else { adminTab.style.display = 'none'; changePassBtn.style.display = 'block'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
 const modalBackdrop = document.getElementById('modal-backdrop'); const modalContent = document.getElementById('modal-content'); const modalOk = document.getElementById('modal-ok'); const modalCancel = document.getElementById('modal-cancel'); let onModalOkCallback = null;
 function showModal(htmlContent, onOk, showCancelButton = false) { modalContent.innerHTML = htmlContent; onModalOkCallback = onOk; if (showCancelButton) { modalCancel.style.display = 'inline-block'; modalOk.textContent = 'OK'; } else { modalCancel.style.display = 'none'; modalOk.textContent = 'Đóng'; } modalBackdrop.style.display = 'flex'; }
