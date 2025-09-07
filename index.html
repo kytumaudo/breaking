@@ -193,7 +193,39 @@ function createCalendarEvents(empId) { const emp = AppState.employees.find(e => 
 
 // ===== RENDER FUNCTIONS =====
 function activateTimers() { if (!AppState.employees) return; AppState.employees.forEach(emp => { const times = getTimes(emp.id); if (times.onBreak && !timers[emp.id]) { startBreakCountdown(emp.id); } else if (!times.onBreak && timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; } }); }
-function generateEmployeeCardHTML(emp) { const times = getTimes(emp.id); const isCheckedIn = !!times.checkInTime; const isOnBreak = times.onBreak; let statusHtml = isOnBreak ? `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>` : isCheckedIn ? `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>` : times.scheduledTime ? `<div class="status-badge status-scheduled">Đã lên lịch</div>` : `<div class="status-badge status-pending">Chưa có lịch</div>`; let actionButtonsHtml = ''; if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) { const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t); const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : ''; const mainBtn = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${!isCheckedIn || isOnBreak ? 'disabled' : ''}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`; actionButtonsHtml = alarmBtn + mainBtn; } let breakTimerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : ''; let historyBarHtml = ''; if (!isOnBreak && times.breakHistory && times.breakHistory.length > 0) { const totalMinutes = getBreakDurations().reduce((a, b) => a + b, 0); const barSegments = times.breakHistory.map(item => { const allowedDuration = getBreakDurations()[item.index - 1] || 10; const width = (allowedDuration / totalMinutes) * 100; return `<div class="history-bar-item bar-color-${item.index}" style="width: ${width}%;" title="Lần ${item.index}: ${formatSeconds(item.duration)}"></div>`; }).join(''); historyBarHtml = `<div class="history-bars-container">${barSegments}</div>`; } return `<div class="card" data-emp-id="${emp.id}"><div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div><div class="card-body"><div class="status-section"><div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div><div class="status-item status-item-break clickable" onclick="viewBreakStatsAdmin('${emp.id}')"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${getBreakDurations().length}</div></div></div><div class="action-buttons">${actionButtonsHtml}</div></div><div class="break-visualizer">${breakTimerHtml}${historyBarHtml}</div></div>`; }
+function generateEmployeeCardHTML(emp) {
+    const times = getTimes(emp.id);
+    const isCheckedIn = !!times.checkInTime;
+    const isOnBreak = times.onBreak;
+    let statusHtml = isOnBreak ? `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>` : isCheckedIn ? `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>` : times.scheduledTime ? `<div class="status-badge status-scheduled">Đã lên lịch</div>` : `<div class="status-badge status-pending">Chưa có lịch</div>`;
+    let actionButtonsHtml = '';
+    if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) {
+        const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t);
+        const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : '';
+        const mainBtn = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${!isCheckedIn || isOnBreak ? 'disabled' : ''}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
+        actionButtonsHtml = alarmBtn + mainBtn;
+    }
+    let breakTimerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : '';
+    let historyBarHtml = '';
+    if (!isOnBreak) {
+        const breakDurations = getBreakDurations();
+        const totalMinutes = breakDurations.reduce((a, b) => a + b, 0);
+        if (totalMinutes > 0) {
+            const barSegments = breakDurations.map((duration, index) => {
+                const breakIndex = index + 1;
+                const completedBreak = (times.breakHistory || []).find(h => h.index === breakIndex);
+                const width = (duration / totalMinutes) * 100;
+                if (completedBreak) {
+                    return `<div class="history-bar-item bar-color-${breakIndex}" style="width: ${width}%;" title="Lần ${breakIndex}: ${formatSeconds(completedBreak.duration)}"></div>`;
+                } else {
+                    return `<div class="history-bar-item" style="width: ${width}%;" title="Lần nghỉ ${breakIndex} (Chưa nghỉ)"></div>`;
+                }
+            }).join('');
+            historyBarHtml = `<div class="history-bars-container">${barSegments}</div>`;
+        }
+    }
+    return `<div class="card" data-emp-id="${emp.id}"><div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div><div class="card-body"><div class="status-section"><div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div><div class="status-item status-item-break clickable" onclick="viewBreakStatsAdmin('${emp.id}')"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${getBreakDurations().length}</div></div></div><div class="action-buttons">${actionButtonsHtml}</div></div><div class="break-visualizer">${breakTimerHtml}${historyBarHtml}</div></div>`;
+}
 function renderSingleEmployee(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; const empCard = document.querySelector(`.card[data-emp-id="${empId}"]`); if (empCard) { const tempDiv = document.createElement('div'); tempDiv.innerHTML = generateEmployeeCardHTML(emp); const newCard = tempDiv.firstChild; empCard.parentNode.replaceChild(newCard, empCard); } activateTimers(); }
 function renderEmployees() { const empListEl = document.getElementById('emp-list'); if (!empListEl || !AppState.employees) return; empListEl.innerHTML = AppState.employees.map(emp => generateEmployeeCardHTML(emp)).join(''); activateTimers(); }
 
