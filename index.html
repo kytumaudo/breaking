@@ -36,7 +36,7 @@ header { position:sticky; top:0; background:var(--text-light); border-bottom:1px
 #tab-emp { background-color: var(--primary); }
 #tab-admin { background-color: var(--danger); }
 .tab.active { opacity: 1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
-#logout-btn, #change-password-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
+#logout-btn, #change-password-btn, #history-log-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
 main { padding:8px; max-width:480px; margin:0 auto; }
 .card { background:var(--text-light); border-radius:8px; margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden; border: 1px solid var(--gray-200); transition: opacity 0.3s ease-in-out; }
 .card-header { display:flex; justify-content: space-between; align-items: center; gap:8px; padding: 6px 8px; border-bottom:1px solid var(--gray-100); }
@@ -58,6 +58,9 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .timer-display { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .timer-text { font-size:12px; color:var(--danger); font-weight:500; flex-shrink: 0; font-variant-numeric: tabular-nums; min-width: 70px; }
 .progress-container { flex-grow: 1; height:6px; background:#e0e0e0; border-radius:5px; overflow:hidden; } .progress-bar { height:100%; width:0%; background:var(--danger); transition:width 0.5s linear; }
+.history-bars-container { display: flex; width: 100%; height: 8px; background-color: var(--gray-200); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+.history-bar-item { height: 100%; }
+.bar-color-1 { background-color: var(--primary); } .bar-color-2 { background-color: var(--ok); } .bar-color-3 { background-color: var(--warn); } .bar-color-4 { background-color: var(--danger); }
 .admin-section { padding: 12px; margin-bottom: 12px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
 .admin-section h3 { font-size: 16px; margin-bottom: 12px; border-bottom: 1px solid var(--gray-200); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .form-group { margin-bottom: 10px; } .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 14px; } .form-group input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
@@ -85,7 +88,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="change-password-btn" title="Đổi mã đăng nhập"><i class="fa-solid fa-key"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="history-log-btn" title="Lịch sử nghỉ"><i class="fa-solid fa-clock-rotate-left"></i></button><button id="change-password-btn" title="Đổi mã đăng nhập"><i class="fa-solid fa-key"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -110,9 +113,10 @@ let db;
 let employeeListenerUnsubscribe = null;
 let settingsListenerUnsubscribe = null;
 let adminListenerUnsubscribe = null;
+let breakLogListenerUnsubscribe = null;
 
 const timers = {};
-let AppState = { employees: [], admins: [], settings: null, loggedInUserId: null, isAdmin: false };
+let AppState = { employees: [], admins: [], settings: null, breakLog: [], loggedInUserId: null, isAdmin: false };
 const faceModalBackdrop = document.getElementById('face-modal-backdrop');
 const faceModalMessage = document.getElementById('face-modal-message');
 const video = document.getElementById('video');
@@ -128,6 +132,7 @@ function setupRealtimeListeners() {
     if (employeeListenerUnsubscribe) employeeListenerUnsubscribe();
     if (settingsListenerUnsubscribe) settingsListenerUnsubscribe();
     if (adminListenerUnsubscribe) adminListenerUnsubscribe();
+    if (breakLogListenerUnsubscribe) breakLogListenerUnsubscribe();
 
     employeeListenerUnsubscribe = db.collection("employees").orderBy("name").onSnapshot((snapshot) => {
         let needsFullRender = false;
@@ -153,6 +158,11 @@ function setupRealtimeListeners() {
         AppState.admins = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') renderAdminPanel();
     });
+
+    const today = getWorkDayString(new Date());
+    breakLogListenerUnsubscribe = db.collection("break_log").where("logDate", "==", today).orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+        AppState.breakLog = snapshot.docs.map(doc => doc.data());
+    });
 }
 
 
@@ -162,6 +172,7 @@ async function createEmployee(empData) { try { await db.collection("employees").
 async function removeEmployee(empId) { try { await db.collection("employees").doc(empId).delete(); return true; } catch (error) { console.error("Lỗi xóa nhân viên:", error); return false; } }
 async function updateSettings(settingsData) { try { await db.collection("app_state").doc("settings").set(settingsData, { merge: true }); return true; } catch (error) { console.error("Lỗi cập nhật cài đặt:", error); return false; } }
 async function updateAdmin(adminId, adminData) { try { await db.collection("admins").doc(adminId).set(adminData, { merge: true }); return true; } catch (error) { console.error("Lỗi cập nhật admin:", error); return false; } }
+async function addBreakLog(logEntry) { try { await db.collection("break_log").add(logEntry); } catch (error) { console.error("Lỗi ghi log nghỉ:", error); } }
 function getTimes(empId) { const emp = AppState.employees.find(e => e.id === empId); return emp?.times || { scheduledTime: null, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] }; }
 function getBreakDurations() { return AppState.settings?.breakDurations || [10, 40, 10, 10]; }
 
@@ -172,8 +183,8 @@ function saveSchedule(empId) { const input = document.getElementById(`schedule-$
 function resetBreaks(empId) { showModal(`<h3>Xác nhận</h3><p>Reset số lần nghỉ của nhân viên này?</p>`, () => { updateEmployee(empId, { 'times.breakIndex': 0, 'times.breakHistory': [], 'times.onBreak': false, 'times.breakStartTime': null }); }, true); }
 
 function startBreak(empId) { playSound('audio-break-toggle'); const coreAction = () => { const times = getTimes(empId); const idx = times.breakIndex || 0; const breakDurations = getBreakDurations(); if (idx >= breakDurations.length) { showModal('<h3>Thông báo</h3><p>Đã hết số lần nghỉ giải lao trong ngày.</p>'); return; } showModal(`<h3>Xác nhận</h3><p>Bắt đầu nghỉ lần ${idx + 1}: ${breakDurations[idx]} phút?</p>`, () => { updateEmployee(empId, { 'times.onBreak': true, 'times.breakStartTime': new Date().toISOString(), 'times.breakIndex': idx + 1 }); }, true); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
-function stopBreak(empId) { playSound('audio-break-toggle'); const coreAction = () => { const times = getTimes(empId); if (!times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
-async function autoStopBreak(empId) { const times = getTimes(empId); if (!times || !times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); }
+function stopBreak(empId) { playSound('audio-break-toggle'); const coreAction = async () => { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
+async function autoStopBreak(empId) { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!emp || !times || !times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }
 async function updateEmployeeInfo(empId, field, value) { const trimmedValue = value.trim(); if (!trimmedValue) { showModal("<h3>Lỗi</h3><p>Tên và Mã số không được để trống.</p>"); renderAdminPanel(); return; } if (field === 'code' && AppState.employees.some(e => e.code === trimmedValue && e.id !== empId)) { showModal("<h3>Lỗi</h3><p>Mã số này đã được sử dụng.</p>"); renderAdminPanel(); return; } await updateEmployee(empId, { [field]: trimmedValue }); }
 function updateBreakTimes(empId) { const breakTimes = Array.from({ length: 4 }, (_, i) => document.getElementById(`break${i + 1}-${empId}`).value || ''); updateEmployee(empId, { breakTimes }); }
 
@@ -182,7 +193,7 @@ function createCalendarEvents(empId) { const emp = AppState.employees.find(e => 
 
 // ===== RENDER FUNCTIONS =====
 function activateTimers() { if (!AppState.employees) return; AppState.employees.forEach(emp => { const times = getTimes(emp.id); if (times.onBreak && !timers[emp.id]) { startBreakCountdown(emp.id); } else if (!times.onBreak && timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; } }); }
-function generateEmployeeCardHTML(emp) { const times = getTimes(emp.id); const isCheckedIn = !!times.checkInTime; const isOnBreak = times.onBreak; let statusHtml = isOnBreak ? `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>` : isCheckedIn ? `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>` : times.scheduledTime ? `<div class="status-badge status-scheduled">Đã lên lịch</div>` : `<div class="status-badge status-pending">Chưa có lịch</div>`; let actionButtonsHtml = ''; if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) { const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t); const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : ''; const mainBtn = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${!isCheckedIn || isOnBreak ? 'disabled' : ''}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`; actionButtonsHtml = alarmBtn + mainBtn; } let breakVisualizerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : ''; return `<div class="card" data-emp-id="${emp.id}"><div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div><div class="card-body"><div class="status-section"><div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div><div class="status-item status-item-break clickable" onclick="viewBreakStatsAdmin('${emp.id}')"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${getBreakDurations().length}</div></div></div><div class="action-buttons">${actionButtonsHtml}</div></div><div class="break-visualizer">${breakVisualizerHtml}</div></div>`; }
+function generateEmployeeCardHTML(emp) { const times = getTimes(emp.id); const isCheckedIn = !!times.checkInTime; const isOnBreak = times.onBreak; let statusHtml = isOnBreak ? `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>` : isCheckedIn ? `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>` : times.scheduledTime ? `<div class="status-badge status-scheduled">Đã lên lịch</div>` : `<div class="status-badge status-pending">Chưa có lịch</div>`; let actionButtonsHtml = ''; if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) { const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t); const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : ''; const mainBtn = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${!isCheckedIn || isOnBreak ? 'disabled' : ''}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`; actionButtonsHtml = alarmBtn + mainBtn; } let breakTimerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : ''; let historyBarHtml = ''; if (!isOnBreak && times.breakHistory && times.breakHistory.length > 0) { const totalMinutes = getBreakDurations().reduce((a, b) => a + b, 0); const barSegments = times.breakHistory.map(item => { const allowedDuration = getBreakDurations()[item.index - 1] || 10; const width = (allowedDuration / totalMinutes) * 100; return `<div class="history-bar-item bar-color-${item.index}" style="width: ${width}%;" title="Lần ${item.index}: ${formatSeconds(item.duration)}"></div>`; }).join(''); historyBarHtml = `<div class="history-bars-container">${barSegments}</div>`; } return `<div class="card" data-emp-id="${emp.id}"><div class="card-header"><div class="emp-info"><div class="emp-name">${emp.name}</div></div>${statusHtml}</div><div class="card-body"><div class="status-section"><div class="status-item status-item-start"><div class="label">Bắt đầu</div><div class="value">${times.scheduledTime || 'N/A'}</div></div><div class="status-item status-item-break clickable" onclick="viewBreakStatsAdmin('${emp.id}')"><div class="label">Lần nghỉ</div><div class="value">${times.breakIndex || 0}/${getBreakDurations().length}</div></div></div><div class="action-buttons">${actionButtonsHtml}</div></div><div class="break-visualizer">${breakTimerHtml}${historyBarHtml}</div></div>`; }
 function renderSingleEmployee(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; const empCard = document.querySelector(`.card[data-emp-id="${empId}"]`); if (empCard) { const tempDiv = document.createElement('div'); tempDiv.innerHTML = generateEmployeeCardHTML(emp); const newCard = tempDiv.firstChild; empCard.parentNode.replaceChild(newCard, empCard); } activateTimers(); }
 function renderEmployees() { const empListEl = document.getElementById('emp-list'); if (!empListEl || !AppState.employees) return; empListEl.innerHTML = AppState.employees.map(emp => generateEmployeeCardHTML(emp)).join(''); activateTimers(); }
 
@@ -220,19 +231,33 @@ function renderAdminPanel() {
 }
 function startBreakCountdown(empId){ if (timers[empId]) clearInterval(timers[empId]); const tick = () => { const times = getTimes(empId); if (!times.onBreak) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerContainerEl = document.getElementById(`timer-container-${empId}`); if (!timerContainerEl) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerEl = timerContainerEl.querySelector('.timer-text'); const progressEl = timerContainerEl.querySelector('.progress-bar'); const breakDurationSeconds = (getBreakDurations()[times.breakIndex - 1] || 10) * 60; const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000; const remaining = breakDurationSeconds - elapsed; if (remaining <= 0) { clearInterval(timers[empId]); delete timers[empId]; const emp = AppState.employees.find(e => e.id === empId); if(emp) { showBrowserNotification(`${emp.name}, hết giờ nghỉ!`, 'Đã hết giờ giải lao.'); if (AppState.loggedInUserId === emp.id || AppState.isAdmin) { playSound('notif-sound'); } } autoStopBreak(empId); return; } const m = String(Math.floor(remaining/60)).padStart(2,'0'); const s = String(Math.round(remaining%60)).padStart(2,'0'); if (timerEl) timerEl.textContent = `Còn lại: ${m}:${s}`; if (progressEl) progressEl.style.width = (elapsed / breakDurationSeconds) * 100 + '%'; }; timers[empId] = setInterval(tick, 1000); tick(); }
 function viewBreakStatsAdmin(empId) { const emp = AppState.employees.find(e => e.id === empId); if(!emp) return; const times = getTimes(empId); const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0); let contentHtml = `<h3>Thống kê nghỉ - ${emp.name}</h3><p><strong>Tổng thời gian đã nghỉ:</strong> ${formatSeconds(totalBreakSeconds)}</p>`; if (!times.breakHistory || times.breakHistory.length === 0) { contentHtml += `<p>Chưa có dữ liệu nghỉ trong ngày.</p>`; } else { contentHtml += "<ul>"; times.breakHistory.forEach(item => { contentHtml += `<li>Lần ${item.index}: <strong>${formatSeconds(item.duration)}</strong></li>`; }); contentHtml += "</ul>"; } showModal(contentHtml); }
+function showHistoryLogModal() {
+    let contentHtml = `<h3>Lịch sử nghỉ trong ngày</h3>`;
+    if (!AppState.breakLog || AppState.breakLog.length === 0) {
+        contentHtml += `<p>Chưa có dữ liệu nghỉ trong ngày.</p>`;
+    } else {
+        contentHtml += "<ul>";
+        AppState.breakLog.forEach(log => {
+            const time = new Date(log.timestamp).toLocaleTimeString('vi-VN');
+            contentHtml += `<li><strong>${log.empName}</strong> - Lần ${log.breakIndex} (${formatSeconds(log.duration)}) lúc ${time}</li>`;
+        });
+        contentHtml += "</ul>";
+    }
+    showModal(contentHtml);
+}
 
 
 // ===== CÁC HÀM TIỆN ÍCH & KHỞI TẠO =====
 function unlockAudioContext() { const sound = document.getElementById('notif-sound'); if (sound && sound.paused) { sound.play().catch(()=>{}); sound.pause(); sound.currentTime = 0; } }
 function loginWithId(userId) { unlockAudioContext(); AppState.isAdmin = userId.startsWith('ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); setupRealtimeListeners(); renderEmployees(); }
 function loginWithCode() { const code = document.getElementById('login-code-input').value; const errorEl = document.getElementById('login-error'); if (!code) { errorEl.textContent = 'Vui lòng nhập mã số.'; return; } if (code.toUpperCase() === 'ADMIN') { loginWithId('ADMIN1'); } else { const employee = AppState.employees.find(e => e.code == code); if (employee) { loginWithId(employee.id); } else { errorEl.textContent = 'Mã số không hợp lệ.'; } } }
-async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
+async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); if(breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; AppState.breakLog = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
 function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); const changePassBtn = document.getElementById('change-password-btn'); if (AppState.isAdmin) { adminTab.style.display = 'block'; changePassBtn.style.display = 'none'; } else { adminTab.style.display = 'none'; changePassBtn.style.display = 'block'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
 const modalBackdrop = document.getElementById('modal-backdrop'); const modalContent = document.getElementById('modal-content'); const modalOk = document.getElementById('modal-ok'); const modalCancel = document.getElementById('modal-cancel'); let onModalOkCallback = null;
 function showModal(htmlContent, onOk, showCancelButton = false) { modalContent.innerHTML = htmlContent; onModalOkCallback = onOk; if (showCancelButton) { modalCancel.style.display = 'inline-block'; modalOk.textContent = 'OK'; } else { modalCancel.style.display = 'none'; modalOk.textContent = 'Đóng'; } modalBackdrop.style.display = 'flex'; }
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
 modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
-function formatSeconds(seconds) { if (seconds < 60) return `${seconds} giây`; const minutes = Math.floor(seconds / 60); return `${minutes} phút ${seconds % 60} giây`; }
+function formatSeconds(seconds) { if (seconds < 60) return `${Math.round(seconds)} giây`; const minutes = Math.floor(seconds / 60); return `${minutes} phút ${Math.round(seconds % 60)} giây`; }
 function getWorkDayString(date) { const workDate = new Date(date); if (workDate.getHours() < 4) { workDate.setDate(workDate.getDate() - 1); } return workDate.toISOString().slice(0, 10); }
 async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = 'Đang tải model...'; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; }
 async function startVideo() { try { const stream = await navigator.mediaDevices.getUserMedia({ video: {} }); video.srcObject = stream; return new Promise(resolve => { video.onloadedmetadata = () => resolve(video); }); } catch (err) { console.error("Camera Error:", err); return null; } }
@@ -255,6 +280,7 @@ document.getElementById('start-face-login-btn').onclick = loginWithFace;
 document.getElementById('login-by-code-btn').onclick = loginWithCode;
 document.getElementById('logout-btn').onclick = logout;
 document.getElementById('change-password-btn').onclick = () => { /* Logic đổi mật khẩu */ };
+document.getElementById('history-log-btn').onclick = showHistoryLogModal;
 document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
 function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
 document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
@@ -274,7 +300,6 @@ async function loadInitialData() {
         alert("Không thể tải dữ liệu từ máy chủ. Vui lòng kiểm tra kết nối mạng.");
     }
 }
-
 function checkExpiredBreaks() {
     if (!AppState.employees || !AppState.loggedInUserId) return;
     AppState.employees.forEach(emp => {
@@ -283,15 +308,9 @@ function checkExpiredBreaks() {
             const breakDurationSeconds = (getBreakDurations()[times.breakIndex - 1] || 10) * 60;
             const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000;
             if (breakDurationSeconds - elapsed <= 0) {
-                console.log(`Phát hiện giờ nghỉ quá hạn của ${emp.name} khi ứng dụng được mở lại.`);
-                if (timers[emp.id]) {
-                    clearInterval(timers[emp.id]);
-                    delete timers[emp.id];
-                }
+                if (timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; }
                 showBrowserNotification(`${emp.name}, hết giờ nghỉ!`, 'Đã hết giờ giải lao.');
-                if (AppState.loggedInUserId === emp.id || AppState.isAdmin) {
-                    playSound('notif-sound');
-                }
+                if (AppState.loggedInUserId === emp.id || AppState.isAdmin) { playSound('notif-sound'); }
                 autoStopBreak(emp.id);
             }
         }
