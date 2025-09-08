@@ -114,18 +114,18 @@ body.font-size-large .admin-controls-row input, body.font-size-large .admin-icon
 body.font-size-very-large .admin-controls-row input, body.font-size-very-large .admin-icon-btn { font-size: 15px; }
 
 /* Tetris Game Styles */
-#tetris-modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); z-index: 400; display: none; align-items: center; justify-content: center; flex-direction: column; color: white; }
-#tetris-container { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+#tetris-modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); z-index: 400; display: none; align-items: center; justify-content: center; flex-direction: column; color: white; width: 100vw; height: 100vh; user-select: none; }
+#tetris-container { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 16px; padding: 16px; }
 .tetris-game-area { display: flex; align-items: flex-start; gap: 16px; }
 #tetris-canvas { border: 2px solid #fff; background-color: #000; }
 .tetris-info { font-size: 20px; font-weight: 600; text-align: left; }
 .tetris-info div { margin-bottom: 12px; }
 .tetris-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 240px; margin-top: 16px; }
-.tetris-btn { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fff; background-color: rgba(255,255,255,0.2); color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; user-select: none; }
+.tetris-btn { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fff; background-color: rgba(255,255,255,0.2); color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; touch-action: manipulation; user-select: none; }
 #tetris-rotate { grid-column: 2; }
 #tetris-left { grid-column: 1; }
 #tetris-right { grid-column: 3; }
-#tetris-down { grid-column: 2; }
+#tetris-down { grid-column: 1 / 4; }
 #tetris-close-btn { position: absolute; top: 15px; right: 15px; font-size: 32px; color: white; background: none; border: none; cursor: pointer; }
 </style>
 </head>
@@ -155,7 +155,7 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
             <button class="tetris-btn" id="tetris-left"><i class="fa-solid fa-arrow-left"></i></button>
             <button class="tetris-btn" id="tetris-rotate"><i class="fa-solid fa-rotate-right"></i></button>
             <button class="tetris-btn" id="tetris-right"><i class="fa-solid fa-arrow-right"></i></button>
-            <button class="tetris-btn" id="tetris-down" style="grid-column: 1 / 4;"><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="tetris-btn" id="tetris-down"><i class="fa-solid fa-arrow-down"></i></button>
         </div>
     </div>
 </div>
@@ -314,11 +314,11 @@ function generateEmployeeCardHTML(emp) {
                             <span class="value">${formatTo12Hour(times.scheduledTime)}</span>
                         </div>
                         <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')">
-                             <span class="label">Lần nghỉ:</span>
+                             <span class="label">Lần:</span>
                              <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span>
                         </div>
                         <div class="status-item status-item-total-break">
-                             <span class="label">Tổng TG:</span>
+                             <span class="label">Tổng:</span>
                              <span class="value">${formatSeconds(totalBreakSeconds).replace(' giây', 's').replace(' phút', 'm')}</span>
                         </div>
                         <div class="status-item status-item-break-type">
@@ -476,6 +476,19 @@ document.getElementById('font-size-btn').onclick = () => {
     playSound('audio-click');
 };
 document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
+document.getElementById('game-btn').onclick = () => {
+    tetrisModal.style.display = 'flex';
+    startGame();
+};
+document.getElementById('tetris-close-btn').onclick = () => {
+    tetrisModal.style.display = 'none';
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+};
+document.getElementById('tetris-left').onclick = () => playerMove(-1);
+document.getElementById('tetris-right').onclick = () => playerMove(1);
+document.getElementById('tetris-down').onclick = () => playerDrop();
+document.getElementById('tetris-rotate').onclick = () => playerRotate(1);
+
 function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
 document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
 
@@ -543,7 +556,7 @@ function arenaSweep() {
         player.score += rowCount * 10;
         player.rows++;
         rowCount *= 2;
-        if (player.rows % 10 === 0) {
+        if (player.rows > 0 && player.rows % 10 === 0) {
             player.level++;
             dropInterval *= 0.9;
             tetrisLevelEl.innerText = player.level;
