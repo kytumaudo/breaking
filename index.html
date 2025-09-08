@@ -36,7 +36,7 @@ header { position:sticky; top:0; background:var(--text-light); border-bottom:1px
 #tab-emp { background-color: var(--primary); }
 #tab-admin { background-color: var(--danger); }
 .tab.active { opacity: 1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
-#logout-btn, #change-password-btn, #history-log-btn, #font-size-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
+#logout-btn, #game-btn, #font-size-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
 main { padding:8px; max-width:480px; margin:0 auto; }
 .card { background:var(--text-light); border-radius:8px; margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden; border: 1px solid var(--gray-200); transition: opacity 0.3s ease-in-out; }
 .card-header { display:flex; justify-content: space-between; align-items: center; gap:8px; padding: 6px 8px; border-bottom:1px solid var(--gray-100); }
@@ -100,28 +100,38 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 body.font-size-small { font-size: 12px; }
 body.font-size-large { font-size: 16px; }
 body.font-size-very-large { font-size: 18px; }
-
 body.font-size-small .emp-name { font-size: 13px; }
 body.font-size-large .emp-name { font-size: 15px; }
 body.font-size-very-large .emp-name { font-size: 16px; }
-
 body.font-size-small .status-item .label { font-size: 9px; }
 body.font-size-large .status-item .label { font-size: 11px; }
 body.font-size-very-large .status-item .label { font-size: 12px; }
-
 body.font-size-small .status-item .value { font-size: 10px; }
 body.font-size-large .status-item .value { font-size: 13px; }
 body.font-size-very-large .status-item .value { font-size: 14px; }
-
 body.font-size-small .admin-controls-row input, body.font-size-small .admin-icon-btn { font-size: 12px; }
 body.font-size-large .admin-controls-row input, body.font-size-large .admin-icon-btn { font-size: 14px; }
 body.font-size-very-large .admin-controls-row input, body.font-size-very-large .admin-icon-btn { font-size: 15px; }
 
+/* Tetris Game Styles */
+#tetris-modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); z-index: 400; display: none; align-items: center; justify-content: center; flex-direction: column; color: white; }
+#tetris-container { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.tetris-game-area { display: flex; align-items: flex-start; gap: 16px; }
+#tetris-canvas { border: 2px solid #fff; background-color: #000; }
+.tetris-info { font-size: 20px; font-weight: 600; text-align: left; }
+.tetris-info div { margin-bottom: 12px; }
+.tetris-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 240px; margin-top: 16px; }
+.tetris-btn { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fff; background-color: rgba(255,255,255,0.2); color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; user-select: none; }
+#tetris-rotate { grid-column: 2; }
+#tetris-left { grid-column: 1; }
+#tetris-right { grid-column: 3; }
+#tetris-down { grid-column: 2; }
+#tetris-close-btn { position: absolute; top: 15px; right: 15px; font-size: 32px; color: white; background: none; border: none; cursor: pointer; }
 </style>
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -129,6 +139,27 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
     <audio id="audio-click" src="https://actions.google.com/sounds/v1/ui/button_press.ogg" preload="auto"></audio>
     <audio id="audio-break-toggle" src="https://actions.google.com/sounds/v1/switches/switch_on.ogg" preload="auto"></audio>
 </div>
+
+<!-- Tetris Game Modal -->
+<div id="tetris-modal-backdrop">
+    <button id="tetris-close-btn">&times;</button>
+    <div id="tetris-container">
+        <div class="tetris-game-area">
+            <canvas id="tetris-canvas" width="240" height="400"></canvas>
+            <div class="tetris-info">
+                <div>Score: <span id="tetris-score">0</span></div>
+                <div>Level: <span id="tetris-level">0</span></div>
+            </div>
+        </div>
+        <div class="tetris-controls">
+            <button class="tetris-btn" id="tetris-left"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="tetris-btn" id="tetris-rotate"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="tetris-btn" id="tetris-right"><i class="fa-solid fa-arrow-right"></i></button>
+            <button class="tetris-btn" id="tetris-down" style="grid-column: 1 / 4;"><i class="fa-solid fa-arrow-down"></i></button>
+        </div>
+    </div>
+</div>
+
 
 <script>
 // ===== Firebase Config & App State =====
@@ -480,6 +511,194 @@ function checkExpiredBreaks() {
     });
 }
 
+// ===== TETRIS GAME LOGIC =====
+const tetrisCanvas = document.getElementById('tetris-canvas');
+const tetrisCtx = tetrisCanvas.getContext('2d');
+const tetrisScoreEl = document.getElementById('tetris-score');
+const tetrisLevelEl = document.getElementById('tetris-level');
+const tetrisModal = document.getElementById('tetris-modal-backdrop');
+
+tetrisCtx.scale(20, 20);
+
+let dropCounter = 0;
+let dropInterval = 1000;
+let lastTime = 0;
+let animationFrameId;
+
+const arena = createMatrix(12, 20);
+const player = { pos: { x: 0, y: 0 }, matrix: null, score: 0, level: 0, rows: 0 };
+const colors = [ null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF' ];
+
+function arenaSweep() {
+    let rowCount = 1;
+    outer: for (let y = arena.length - 1; y > 0; --y) {
+        for (let x = 0; x < arena[y].length; ++x) {
+            if (arena[y][x] === 0) {
+                continue outer;
+            }
+        }
+        const row = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(row);
+        ++y;
+        player.score += rowCount * 10;
+        player.rows++;
+        rowCount *= 2;
+        if (player.rows % 10 === 0) {
+            player.level++;
+            dropInterval *= 0.9;
+            tetrisLevelEl.innerText = player.level;
+        }
+    }
+}
+
+function collide(arena, player) {
+    const [m, o] = [player.matrix, player.pos];
+    for (let y = 0; y < m.length; ++y) {
+        for (let x = 0; x < m[y].length; ++x) {
+            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function createMatrix(w, h) {
+    const matrix = [];
+    while (h--) {
+        matrix.push(new Array(w).fill(0));
+    }
+    return matrix;
+}
+
+function createPiece(type) {
+    if (type === 'T') { return [[0, 0, 0], [1, 1, 1], [0, 1, 0]]; }
+    else if (type === 'O') { return [[2, 2], [2, 2]]; }
+    else if (type === 'L') { return [[0, 3, 0], [0, 3, 0], [0, 3, 3]]; }
+    else if (type === 'J') { return [[0, 4, 0], [0, 4, 0], [4, 4, 0]]; }
+    else if (type === 'I') { return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]]; }
+    else if (type === 'S') { return [[0, 6, 6], [6, 6, 0], [0, 0, 0]]; }
+    else if (type === 'Z') { return [[7, 7, 0], [0, 7, 7], [0, 0, 0]]; }
+}
+
+function drawMatrix(matrix, offset) {
+    matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                tetrisCtx.fillStyle = colors[value];
+                tetrisCtx.fillRect(x + offset.x, y + offset.y, 1, 1);
+            }
+        });
+    });
+}
+
+function draw() {
+    tetrisCtx.fillStyle = '#000';
+    tetrisCtx.fillRect(0, 0, tetrisCanvas.width, tetrisCanvas.height);
+    drawMatrix(arena, { x: 0, y: 0 });
+    drawMatrix(player.matrix, player.pos);
+}
+
+function merge(arena, player) {
+    player.matrix.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value !== 0) {
+                arena[y + player.pos.y][x + player.pos.x] = value;
+            }
+        });
+    });
+}
+
+function rotate(matrix, dir) {
+    for (let y = 0; y < matrix.length; ++y) {
+        for (let x = 0; x < y; ++x) {
+            [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+        }
+    }
+    if (dir > 0) { matrix.forEach(row => row.reverse()); }
+    else { matrix.reverse(); }
+}
+
+function playerDrop() {
+    player.pos.y++;
+    if (collide(arena, player)) {
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
+    }
+    dropCounter = 0;
+}
+
+function playerMove(offset) {
+    player.pos.x += offset;
+    if (collide(arena, player)) {
+        player.pos.x -= offset;
+    }
+}
+
+function playerReset() {
+    const pieces = 'ILJOTSZ';
+    player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
+    player.pos.y = 0;
+    player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+    if (collide(arena, player)) {
+        arena.forEach(row => row.fill(0));
+        player.score = 0;
+        player.level = 0;
+        player.rows = 0;
+        dropInterval = 1000;
+        updateScore();
+    }
+}
+
+function playerRotate(dir) {
+    const pos = player.pos.x;
+    let offset = 1;
+    rotate(player.matrix, dir);
+    while (collide(arena, player)) {
+        player.pos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        if (offset > player.matrix[0].length) {
+            rotate(player.matrix, -dir);
+            player.pos.x = pos;
+            return;
+        }
+    }
+}
+
+function update(time = 0) {
+    const deltaTime = time - lastTime;
+    lastTime = time;
+    dropCounter += deltaTime;
+    if (dropCounter > dropInterval) {
+        playerDrop();
+    }
+    draw();
+    animationFrameId = requestAnimationFrame(update);
+}
+
+function updateScore() {
+    tetrisScoreEl.innerText = player.score;
+    tetrisLevelEl.innerText = player.level;
+}
+
+function startGame() {
+    playerReset();
+    updateScore();
+    if(animationFrameId) cancelAnimationFrame(animationFrameId);
+    update();
+}
+
+document.addEventListener('keydown', event => {
+    if (tetrisModal.style.display !== 'flex') return;
+    if (event.key === 'ArrowLeft') playerMove(-1);
+    else if (event.key === 'ArrowRight') playerMove(1);
+    else if (event.key === 'ArrowDown') playerDrop();
+    else if (event.key === 'ArrowUp') playerRotate(1);
+});
+
 async function initializeApp() {
     try {
         firebase.initializeApp(firebaseConfig);
@@ -509,6 +728,43 @@ async function initializeApp() {
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed: ', err)); }); }
 function waitForFirebase(callback) { const interval = setInterval(() => { if (typeof firebase !== 'undefined' && firebase.firestore) { clearInterval(interval); callback(); } }, 100); }
 waitForFirebase(initializeApp);
+
+// Event Listeners
+document.getElementById('tab-emp').onclick = ()=>{ document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; document.getElementById('tab-emp').classList.add('active'); document.getElementById('tab-admin').classList.remove('active'); };
+document.getElementById('tab-admin').onclick = ()=>{ document.getElementById('view-emp').style.display='none'; document.getElementById('view-admin').style.display='block'; document.getElementById('tab-admin').classList.add('active'); document.getElementById('tab-emp').classList.remove('active'); renderAdminPanel(); };
+document.getElementById('start-face-login-btn').onclick = loginWithFace;
+document.getElementById('login-by-code-btn').onclick = loginWithCode;
+document.getElementById('logout-btn').onclick = logout;
+document.getElementById('font-size-btn').onclick = () => {
+    const currentSize = fontSizes.find(size => document.body.classList.contains(size)) || fontSizes[0];
+    const currentIndex = fontSizes.indexOf(currentSize);
+    const nextIndex = (currentIndex + 1) % fontSizes.length;
+    const newSize = fontSizes[nextIndex];
+    
+    fontSizes.forEach(size => document.body.classList.remove(size));
+    if (newSize !== 'font-size-normal') {
+       document.body.classList.add(newSize);
+    }
+    localStorage.setItem('appFontSize', newSize);
+    playSound('audio-click');
+};
+document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
+document.getElementById('game-btn').onclick = () => {
+    tetrisModal.style.display = 'flex';
+    startGame();
+};
+document.getElementById('tetris-close-btn').onclick = () => {
+    tetrisModal.style.display = 'none';
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+};
+document.getElementById('tetris-left').onclick = () => playerMove(-1);
+document.getElementById('tetris-right').onclick = () => playerMove(1);
+document.getElementById('tetris-down').onclick = () => playerDrop();
+document.getElementById('tetris-rotate').onclick = () => playerRotate(1);
+
+function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
+document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
+
 </script>
 </body>
 </html>
