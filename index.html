@@ -36,7 +36,7 @@ header { position:sticky; top:0; background:var(--text-light); border-bottom:1px
 #tab-emp { background-color: var(--primary); }
 #tab-admin { background-color: var(--danger); }
 .tab.active { opacity: 1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
-#logout-btn, #game-btn, #font-size-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
+#logout-btn, #game-btn, #font-size-btn, #notification-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
 main { padding:8px; max-width:480px; margin:0 auto; }
 .card { background:var(--text-light); border-radius:8px; margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden; border: 1px solid var(--gray-200); transition: opacity 0.3s ease-in-out; }
 .card-header { display:flex; justify-content: space-between; align-items: center; gap:8px; padding: 6px 8px; border-bottom:1px solid var(--gray-100); }
@@ -127,17 +127,55 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
 #tetris-right { grid-column: 3; }
 #tetris-down { grid-column: 1 / 4; }
 #tetris-close-btn { position: absolute; top: 15px; right: 15px; font-size: 32px; color: white; background: none; border: none; cursor: pointer; }
+
+/* Notification Modal Styles */
+#notification-modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); z-index: 350; display: none; align-items: center; justify-content: center; }
+.notification-modal-box { background: white; width: 95%; max-width: 400px; max-height: 80vh; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
+.notification-header { padding: 12px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+.notification-header h3 { font-size: 16px; margin: 0; }
+#notification-close-btn { background: none; border: none; font-size: 24px; color: var(--gray-500); cursor: pointer; }
+.notification-body { padding: 12px; overflow-y: auto; flex-grow: 1; }
+#announcement-content { min-height: 60px; background: var(--gray-100); border-radius: 8px; padding: 10px; white-space: pre-wrap; word-break: break-word; }
+.announcement-meta { font-size: 11px; color: var(--gray-500); text-align: right; margin-top: 4px; }
+#announcement-textarea { width: 100%; min-height: 80px; padding: 8px; border-radius: 8px; border: 1px solid var(--gray-200); font-size: 14px; margin-bottom: 8px; }
+.admin-announcement-actions { display: flex; gap: 8px; }
+.admin-announcement-actions button { flex: 1; }
+#new-announcement-btn { background-color: var(--warn); }
+.comment-section { margin-top: 16px; }
+.comment-section h4 { font-size: 14px; margin-bottom: 8px; border-top: 1px solid var(--gray-200); padding-top: 12px; }
+#comment-list { list-style-type: none; padding: 0; margin: 0; }
+.comment-item { background: var(--bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; }
+.comment-header { display: flex; justify-content: space-between; align-items: baseline; }
+.comment-author { font-weight: 600; font-size: 13px; }
+.comment-time { font-size: 10px; color: var(--gray-500); }
+.comment-text { font-size: 14px; color: var(--text-dark); margin-top: 4px; word-break: break-word; }
+.comment-input-area { display: flex; gap: 8px; margin-top: 12px; }
+#comment-input { flex-grow: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+#send-comment-btn { padding: 8px 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
 </style>
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
 <div id="audio-container" style="display: none;">
     <audio id="audio-click" src="https://actions.google.com/sounds/v1/ui/button_press.ogg" preload="auto"></audio>
     <audio id="audio-break-toggle" src="https://actions.google.com/sounds/v1/switches/switch_on.ogg" preload="auto"></audio>
+</div>
+
+<!-- Notification Modal -->
+<div id="notification-modal-backdrop">
+    <div class="notification-modal-box">
+        <div class="notification-header">
+            <h3><i class="fa-solid fa-bullhorn"></i> Thông Báo Chung</h3>
+            <button id="notification-close-btn">&times;</button>
+        </div>
+        <div id="notification-content" class="notification-body">
+            <!-- Content will be rendered by JavaScript -->
+        </div>
+    </div>
 </div>
 
 <!-- Tetris Game Modal -->
@@ -178,9 +216,11 @@ let employeeListenerUnsubscribe = null;
 let settingsListenerUnsubscribe = null;
 let adminListenerUnsubscribe = null;
 let breakLogListenerUnsubscribe = null;
+let announcementListenerUnsubscribe = null;
+let commentsListenerUnsubscribe = null;
 
 const timers = {};
-let AppState = { employees: [], admins: [], settings: null, breakLog: [], loggedInUserId: null, isAdmin: false };
+let AppState = { employees: [], admins: [], settings: null, breakLog: [], loggedInUserId: null, isAdmin: false, announcement: null, comments: [] };
 const faceModalBackdrop = document.getElementById('face-modal-backdrop');
 const faceModalMessage = document.getElementById('face-modal-message');
 const video = document.getElementById('video');
@@ -197,6 +237,8 @@ function setupRealtimeListeners() {
     if (settingsListenerUnsubscribe) settingsListenerUnsubscribe();
     if (adminListenerUnsubscribe) adminListenerUnsubscribe();
     if (breakLogListenerUnsubscribe) breakLogListenerUnsubscribe();
+    if (announcementListenerUnsubscribe) announcementListenerUnsubscribe();
+    if (commentsListenerUnsubscribe) commentsListenerUnsubscribe();
 
     employeeListenerUnsubscribe = db.collection("employees").orderBy("name").onSnapshot((snapshot) => {
         let needsFullRender = false;
@@ -226,6 +268,20 @@ function setupRealtimeListeners() {
     const today = getWorkDayString(new Date());
     breakLogListenerUnsubscribe = db.collection("break_log").where("logDate", "==", today).orderBy("timestamp", "desc").onSnapshot((snapshot) => {
         AppState.breakLog = snapshot.docs.map(doc => doc.data());
+    });
+    
+    announcementListenerUnsubscribe = db.collection("app_state").doc("announcement").onSnapshot((doc) => {
+        AppState.announcement = doc.exists ? doc.data() : { content: "Chưa có thông báo nào.", postedBy: "Hệ thống" };
+        if (document.getElementById('notification-modal-backdrop').style.display === 'flex') {
+            renderNotificationModal();
+        }
+    });
+
+    commentsListenerUnsubscribe = db.collection("app_state").doc("announcement").collection("comments").orderBy("timestamp", "asc").onSnapshot((snapshot) => {
+        AppState.comments = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        if (document.getElementById('notification-modal-backdrop').style.display === 'flex') {
+            renderNotificationModal();
+        }
     });
 }
 
@@ -286,7 +342,7 @@ function generateEmployeeCardHTML(emp) {
         let mainBtn = '';
         if (isOnBreak) {
             mainBtn = `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>`;
-        } else if (isCheckedIn) { // Only show break button if checked in
+        } else if (isCheckedIn && !isOutsideWorkingHours) { 
             mainBtn = `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
         }
         
@@ -435,20 +491,20 @@ function formatTo12Hour(timeString) {
 function unlockAudioContext() { const sound = document.getElementById('notif-sound'); if (sound && sound.paused) { sound.play().catch(()=>{}); sound.pause(); sound.currentTime = 0; } }
 function loginWithId(userId) { unlockAudioContext(); AppState.isAdmin = userId.startsWith('ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); setupRealtimeListeners(); renderEmployees(); }
 function loginWithCode() { const code = document.getElementById('login-code-input').value; const errorEl = document.getElementById('login-error'); if (!code) { errorEl.textContent = 'Vui lòng nhập mã số.'; return; } if (code.toUpperCase() === 'ADMIN') { loginWithId('ADMIN1'); } else { const employee = AppState.employees.find(e => e.code == code); if (employee) { loginWithId(employee.id); } else { errorEl.textContent = 'Mã số không hợp lệ.'; } } }
-async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); if(breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; AppState.breakLog = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
+async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); if(breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); if (announcementListenerUnsubscribe) announcementListenerUnsubscribe(); if (commentsListenerUnsubscribe) commentsListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; AppState.breakLog = []; AppState.announcement = null; AppState.comments = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
 function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); if (AppState.isAdmin) { adminTab.style.display = 'block'; } else { adminTab.style.display = 'none'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
 const modalBackdrop = document.getElementById('modal-backdrop'); const modalContent = document.getElementById('modal-content'); const modalOk = document.getElementById('modal-ok'); const modalCancel = document.getElementById('modal-cancel'); let onModalOkCallback = null;
 function showModal(htmlContent, onOk, showCancelButton = false) { modalContent.innerHTML = htmlContent; onModalOkCallback = onOk; if (showCancelButton) { modalCancel.style.display = 'inline-block'; modalOk.textContent = 'OK'; } else { modalCancel.style.display = 'none'; modalOk.textContent = 'Đóng'; } modalBackdrop.style.display = 'flex'; }
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
 modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
 function formatSeconds(seconds, showFull = false) { 
-    if (seconds < 60) return `${Math.round(seconds)}s`;
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.round(seconds % 60);
-    if(showFull){
-      return `${minutes} phút ${remainingSeconds} giây`;
+    if (showFull) {
+        const remainingSeconds = Math.round(seconds % 60);
+        return `${minutes} phút ${remainingSeconds} giây`;
     }
-    return `${minutes}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${Math.round(seconds)}s`;
 }
 function getWorkDayString(date) { const workDate = new Date(date); if (workDate.getHours() < 6) { workDate.setDate(workDate.getDate() - 1); } return workDate.toISOString().slice(0, 10); }
 async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = 'Đang tải model...'; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; }
@@ -719,6 +775,134 @@ document.addEventListener('keydown', event => {
     else if (event.key === 'ArrowDown') playerDrop();
     else if (event.key === 'ArrowUp') playerRotate(1);
 });
+
+// ===== NOTIFICATION LOGIC =====
+const notificationModal = document.getElementById('notification-modal-backdrop');
+const notificationContentEl = document.getElementById('notification-content');
+
+function formatTimestamp(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate();
+    return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function getRandomColorForId(id) {
+    let hash = 0;
+    if (!id || id.length === 0) return '#000000';
+    for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+    return "#" + "00000".substring(0, 6 - c.length) + c;
+}
+
+async function postAnnouncement() {
+    const textarea = document.getElementById('announcement-textarea');
+    const content = textarea.value.trim();
+    if (!content) return;
+    const adminName = AppState.isAdmin ? "Admin" : "Unknown";
+    const announcementData = {
+        content,
+        postedBy: adminName,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection("app_state").doc("announcement").set(announcementData, { merge: true });
+    renderNotificationModal();
+}
+
+async function createNewAnnouncement() {
+    showModal("<h3>Xác nhận</h3><p>Bạn có chắc muốn xóa thông báo và tất cả bình luận hiện tại để tạo thông báo mới?</p>", async () => {
+        const batch = db.batch();
+        AppState.comments.forEach(comment => {
+            const commentRef = db.collection("app_state").doc("announcement").collection("comments").doc(comment.id);
+            batch.delete(commentRef);
+        });
+        await batch.commit();
+        
+        const announcementData = { content: "", postedBy: "Admin", timestamp: firebase.firestore.FieldValue.serverTimestamp() };
+        await db.collection("app_state").doc("announcement").set(announcementData);
+        
+        renderNotificationModal();
+    }, true);
+}
+
+
+async function postComment() {
+    const input = document.getElementById('comment-input');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const user = AppState.employees.find(e => e.id === AppState.loggedInUserId) || {name: "Admin"};
+
+    const commentData = {
+        text,
+        authorId: AppState.loggedInUserId,
+        authorName: user.name,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection("app_state").doc("announcement").collection("comments").add(commentData);
+    input.value = '';
+}
+
+function renderNotificationModal() {
+    let adminHtml = '';
+    if (AppState.isAdmin) {
+        adminHtml = `
+            <textarea id="announcement-textarea" placeholder="Soạn thông báo mới...">${AppState.announcement?.content || ''}</textarea>
+            <div class="admin-announcement-actions">
+                <button id="post-announcement-btn" class="admin-btn">Đăng/Cập nhật</button>
+                <button id="new-announcement-btn" class="admin-btn">Tạo Mới</button>
+            </div>
+        `;
+    }
+    const announcementTime = AppState.announcement?.timestamp ? formatTimestamp(AppState.announcement.timestamp) : '';
+
+    const commentsHtml = AppState.comments.map(comment => {
+        const authorColor = getRandomColorForId(comment.authorId || 'default');
+        return `
+        <li class="comment-item">
+            <div class="comment-header">
+                <span class="comment-author" style="color: ${authorColor};">${comment.authorName}</span>
+                <span class="comment-time">${formatTimestamp(comment.timestamp)}</span>
+            </div>
+            <div class="comment-text">${comment.text}</div>
+        </li>
+    `}).join('');
+
+    notificationContentEl.innerHTML = `
+        ${adminHtml}
+        <div id="announcement-content">${AppState.announcement?.content || 'Chưa có thông báo.'}</div>
+        <div class="announcement-meta">${announcementTime}</div>
+        <div class="comment-section">
+            <h4>Bình luận</h4>
+            <ul id="comment-list">${commentsHtml}</ul>
+            <div class="comment-input-area">
+                <input type="text" id="comment-input" placeholder="Viết bình luận...">
+                <button id="send-comment-btn">Gửi</button>
+            </div>
+        </div>
+    `;
+
+    if (AppState.isAdmin) {
+        document.getElementById('post-announcement-btn').onclick = postAnnouncement;
+        document.getElementById('new-announcement-btn').onclick = createNewAnnouncement;
+    }
+    document.getElementById('send-comment-btn').onclick = postComment;
+    document.getElementById('comment-input').addEventListener('keyup', (event) => {
+        if(event.key === 'Enter') {
+            postComment();
+        }
+    });
+}
+
+document.getElementById('notification-btn').onclick = () => {
+    renderNotificationModal();
+    notificationModal.style.display = 'flex';
+};
+document.getElementById('notification-close-btn').onclick = () => {
+    notificationModal.style.display = 'none';
+};
+
 
 async function initializeApp() {
     try {
