@@ -36,7 +36,7 @@ header { position:sticky; top:0; background:var(--text-light); border-bottom:1px
 #tab-emp { background-color: var(--primary); }
 #tab-admin { background-color: var(--danger); }
 .tab.active { opacity: 1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
-#logout-btn, #change-password-btn, #history-log-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
+#logout-btn, #change-password-btn, #history-log-btn, #font-size-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
 main { padding:8px; max-width:480px; margin:0 auto; }
 .card { background:var(--text-light); border-radius:8px; margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden; border: 1px solid var(--gray-200); transition: opacity 0.3s ease-in-out; }
 .card-header { display:flex; justify-content: space-between; align-items: center; gap:8px; padding: 6px 8px; border-bottom:1px solid var(--gray-100); }
@@ -61,6 +61,8 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .status-item.clickable { cursor: pointer; transition: background-color 0.2s; } .status-item.clickable:hover { background-color: #e5e7eb; }
 .status-item .label { font-weight: 500; color: var(--gray-500); font-size: 10px; } 
 .status-item .value { font-weight: 700; color: var(--text-dark); font-size: 11px; }
+.status-item .value.break-count-value { color: var(--danger) !important; }
+.status-item .value.break-total-value { color: var(--ok) !important; }
 .action-buttons { display: flex; justify-content: center; align-items:center; flex-shrink: 0; gap: 4px; }
 .btn { padding: 6px 10px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; color: var(--text-light); width: auto; flex-grow: 1; transition: background-color 0.2s ease-in-out; }
 .btn-alarm { background: var(--ok); padding: 6px 8px; flex-shrink: 0; width: auto; flex-grow: 0; }
@@ -93,11 +95,23 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 #modal-buttons button { flex: 1; padding: 8px 16px; border-radius: 8px; border: none; font-size: 15px; cursor: pointer; font-weight: 600; }
 #modal-ok { background: var(--primary); color: white; }
 #modal-cancel { background: var(--gray-100); color: var(--text-dark); border: 1px solid #d1d5db; }
+
+/* Font Size Adjustment Classes */
+body.font-size-small { font-size: 12px; }
+body.font-size-large { font-size: 16px; }
+body.font-size-small .emp-name { font-size: 13px; }
+body.font-size-large .emp-name { font-size: 15px; }
+body.font-size-small .status-item .label { font-size: 9px; }
+body.font-size-large .status-item .label { font-size: 11px; }
+body.font-size-small .status-item .value { font-size: 10px; }
+body.font-size-large .status-item .value { font-size: 13px; }
+body.font-size-small .admin-controls-row input, body.font-size-small .admin-icon-btn { font-size: 12px; }
+body.font-size-large .admin-controls-row input, body.font-size-large .admin-icon-btn { font-size: 14px; }
 </style>
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="history-log-btn" title="Lịch sử nghỉ"><i class="fa-solid fa-clock-rotate-left"></i></button><button id="change-password-btn" title="Đổi mã đăng nhập"><i class="fa-solid fa-key"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="history-log-btn" title="Lịch sử nghỉ"><i class="fa-solid fa-clock-rotate-left"></i></button><button id="change-password-btn" title="Đổi mã đăng nhập"><i class="fa-solid fa-key"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -133,7 +147,7 @@ const canvas = document.getElementById('canvas');
 let modelsLoaded = false;
 let currentFaceAction = { empId: null, actionType: null, callback: null };
 let faceDetectionInterval = null;
-
+const fontSizes = ['font-size-normal', 'font-size-large', 'font-size-small'];
 
 // ===== CÁC HÀM LÕI VỚI FIRESTORE =====
 function setupRealtimeListeners() {
@@ -195,7 +209,7 @@ function startBreak(empId) { playSound('audio-break-toggle'); const coreAction =
 function stopBreak(empId) { playSound('audio-break-toggle'); const coreAction = async () => { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
 async function autoStopBreak(empId) { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!emp || !times || !times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }
 async function updateEmployeeInfo(empId, field, value) { const trimmedValue = value.trim(); if (!trimmedValue) { showModal("<h3>Lỗi</h3><p>Tên và Mã số không được để trống.</p>"); renderAdminPanel(); return; } if (field === 'code' && AppState.employees.some(e => e.code === trimmedValue && e.id !== empId)) { showModal("<h3>Lỗi</h3><p>Mã số này đã được sử dụng.</p>"); renderAdminPanel(); return; } await updateEmployee(empId, { [field]: trimmedValue }); }
-function updateBreakTimes(empId) { const breakTimes = Array.from({ length: 4 }, (_, i) => document.getElementById(`break${i + 1}-${empId}`).value || ''); updateEmployee(empId, { breakTimes }); }
+function updateBreakTimes(empId) { const breakTimes = Array.from({ length: 4 }, (_, i) => document.getElementById(`break${i + 1}-${emp.id}`).value || ''); updateEmployee(empId, { breakTimes }); }
 
 function checkSchedules() { if (!AppState.employees || AppState.employees.length === 0 || !AppState.loggedInUserId) return; const now = new Date(); const currentWorkDayString = getWorkDayString(now); const batch = db.batch(); let batchHasWrites = false; AppState.employees.forEach(emp => { let times = getTimes(emp.id); if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) { const newTimes = { scheduledTime: times.scheduledTime, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] }; batch.update(db.collection("employees").doc(emp.id), { times: newTimes }); batchHasWrites = true; } else if (times.scheduledTime && !times.checkInTime) { const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`); if (now >= scheduledDateTime) { const checkInData = { 'times.checkInTime': new Date().toISOString(), 'times.lastCheckInDay': currentWorkDayString }; batch.update(db.collection("employees").doc(emp.id), checkInData); batchHasWrites = true; if (AppState.loggedInUserId === emp.id) { showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`); } } } }); if (batchHasWrites) { batch.commit().catch(error => console.error("Lỗi khi thực hiện batch update: ", error)); } }
 function createCalendarEvents(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp || !emp.breakTimes || emp.breakTimes.every(t => !t)) { showModal("<h3>Thông báo</h3><p>Chưa có lịch nghỉ cố định nào được thiết lập.</p>"); return; } showModal(`<h3>Xác nhận</h3><p>Thêm lịch nghỉ hôm nay vào Lịch của điện thoại?</p>`, () => { const today = new Date().toISOString().slice(0, 10); const formatICSDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Check-in App//EN']; emp.breakTimes.forEach((breakTime, index) => { if (!breakTime) return; const breakDuration = getBreakDurations()[index] || 10; const startDate = new Date(`${today}T${breakTime}`); const endDate = new Date(startDate.getTime() + breakDuration * 60000); icsContent.push('BEGIN:VEVENT', `UID:${emp.id}-break${index + 1}-${today}@checkin.app`, `DTSTAMP:${formatICSDate(new Date())}`, `DTSTART:${formatICSDate(startDate)}`, `DTEND:${formatICSDate(endDate)}`, `SUMMARY:Giờ nghỉ lần ${index + 1} (${emp.name})`, 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Đến giờ nghỉ giải lao!', 'TRIGGER:-PT0M', 'END:VALARM', 'END:VEVENT'); }); icsContent.push('END:VCALENDAR'); const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `LichNghi_${today}.ics`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }, true); }
@@ -227,7 +241,14 @@ function generateEmployeeCardHTML(emp) {
     if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) {
         const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t);
         const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : '';
-        const mainBtn = isOnBreak ? `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>` : `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')" ${!isCheckedIn || isOnBreak ? 'disabled' : ''}><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
+        
+        let mainBtn = '';
+        if (isOnBreak) {
+            mainBtn = `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>`;
+        } else if (isCheckedIn) {
+            mainBtn = `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
+        }
+        
         actionButtonsHtml = `<div class="action-buttons">${alarmBtn}${mainBtn}</div>`;
     }
     
@@ -249,12 +270,12 @@ function generateEmployeeCardHTML(emp) {
                 <div class="card-body">
                     <div class="status-section">
                         <div class="status-item status-item-start">
-                            <span class="label">Bắt đầu:</span>
+                            <span class="label">Start:</span>
                             <span class="value">${formatTo12Hour(times.scheduledTime)}</span>
                         </div>
                         <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')">
                              <span class="label">Lần nghỉ:</span>
-                             <span class="value">${times.breakIndex || 0}/${breakDurations.length}</span>
+                             <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span>
                         </div>
                         <div class="status-item status-item-total-break">
                              <span class="label">Tổng TG:</span>
@@ -296,7 +317,7 @@ function renderAdminPanel() {
                             </div>
                         </div>
                         <div class="admin-controls-row">
-                            <input type="time" id="schedule-${emp.id}" value="${getTimes(emp.id).scheduledTime || ''}" onchange="saveSchedule('${emp.id}')" title="Giờ bắt đầu ca">
+                            <input type="time" id="schedule-${emp.id}" value="${getTimes(emp.id).scheduledTime || ''}" onchange="saveSchedule('${emp.id}')" title="Giờ start ca">
                             ${breakInputsString}
                         </div>
                     </div>`;
@@ -417,6 +438,17 @@ document.getElementById('login-by-code-btn').onclick = loginWithCode;
 document.getElementById('logout-btn').onclick = logout;
 document.getElementById('change-password-btn').onclick = () => { /* Logic đổi mật khẩu */ };
 document.getElementById('history-log-btn').onclick = showHistoryLogModal;
+document.getElementById('font-size-btn').onclick = () => {
+    const currentSize = fontSizes.find(size => document.body.classList.contains(size)) || fontSizes[0];
+    const currentIndex = fontSizes.indexOf(currentSize);
+    const nextIndex = (currentIndex + 1) % fontSizes.length;
+    const newSize = fontSizes[nextIndex];
+    
+    fontSizes.forEach(size => document.body.classList.remove(size));
+    document.body.classList.add(newSize);
+    localStorage.setItem('appFontSize', newSize);
+    playSound('audio-click');
+};
 document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
 function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
 document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
@@ -459,6 +491,9 @@ async function initializeApp() {
         db = firebase.firestore();
     } catch (e) { alert("Lỗi khởi tạo Firebase. Vui lòng kiểm tra lại cấu hình."); return; }
     await requestNotificationPermission();
+    
+    const savedFontSize = localStorage.getItem('appFontSize') || 'font-size-normal';
+    document.body.classList.add(savedFontSize);
     
     await loadInitialData();
     const loggedInId = sessionStorage.getItem('loggedInUserId');
