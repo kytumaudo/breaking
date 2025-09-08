@@ -71,7 +71,16 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .timer-container { display: none; width: 100%; background-color: #fef2f2; padding: 4px 8px; border-radius: 4px; }
 .timer-display { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .timer-text { font-size:12px; color:var(--danger); font-weight:500; flex-shrink: 0; font-variant-numeric: tabular-nums; min-width: 70px; }
-.progress-container { flex-grow: 1; height:6px; background:#e0e0e0; border-radius:5px; overflow:hidden; } .progress-bar { height:100%; width:0%; background:var(--danger); transition:width 0.5s linear; }
+.progress-container { flex-grow: 1; height:6px; background:#e0e0e0; border-radius:5px; overflow:hidden; } 
+.progress-bar { height:100%; width:0%; background:var(--danger); }
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+.progress-bar.overtime {
+  animation: pulse 1.5s infinite;
+}
 .admin-section { padding: 12px; margin-bottom: 12px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
 .admin-section h3 { font-size: 16px; margin-bottom: 12px; border-bottom: 1px solid var(--gray-200); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .form-group { margin-bottom: 10px; } .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 14px; } .form-group input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
@@ -96,40 +105,25 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 #modal-buttons button { flex: 1; padding: 8px 16px; border-radius: 8px; border: none; font-size: 15px; cursor: pointer; font-weight: 600; }
 #modal-ok { background: var(--primary); color: white; }
 #modal-cancel { background: var(--gray-100); color: var(--text-dark); border: 1px solid #d1d5db; }
-
-/* Font Size Adjustment Classes */
-body.font-size-small { font-size: 12px; }
-body.font-size-large { font-size: 16px; }
-body.font-size-very-large { font-size: 18px; }
-body.font-size-small .emp-name { font-size: 13px; }
-body.font-size-large .emp-name { font-size: 15px; }
-body.font-size-very-large .emp-name { font-size: 16px; }
-body.font-size-small .status-item .label { font-size: 9px; }
-body.font-size-large .status-item .label { font-size: 11px; }
-body.font-size-very-large .status-item .label { font-size: 12px; }
-body.font-size-small .status-item .value { font-size: 10px; }
-body.font-size-large .status-item .value { font-size: 13px; }
-body.font-size-very-large .status-item .value { font-size: 14px; }
+.filter-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 8px; padding: 4px 8px; background-color: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); border: 1px solid var(--gray-200); }
+.filter-controls label { font-weight: 600; font-size: 13px; color: var(--gray-700); }
+.filter-controls select { padding: 6px 8px; border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; background-color: var(--gray-100); font-weight: 500; }
+body.font-size-small { font-size: 12px; } body.font-size-large { font-size: 16px; } body.font-size-very-large { font-size: 18px; }
+body.font-size-small .emp-name { font-size: 13px; } body.font-size-large .emp-name { font-size: 15px; } body.font-size-very-large .emp-name { font-size: 16px; }
+body.font-size-small .status-item .label { font-size: 9px; } body.font-size-large .status-item .label { font-size: 11px; } body.font-size-very-large .status-item .label { font-size: 12px; }
+body.font-size-small .status-item .value { font-size: 10px; } body.font-size-large .status-item .value { font-size: 13px; } body.font-size-very-large .status-item .value { font-size: 14px; }
 body.font-size-small .admin-controls-row input, body.font-size-small .admin-icon-btn, body.font-size-small .admin-controls-row select { font-size: 12px; }
 body.font-size-large .admin-controls-row input, body.font-size-large .admin-icon-btn, body.font-size-large .admin-controls-row select { font-size: 14px; }
 body.font-size-very-large .admin-controls-row input, body.font-size-very-large .admin-icon-btn, body.font-size-very-large .admin-controls-row select { font-size: 15px; }
-
-/* Tetris Game Styles */
 #tetris-modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.85); z-index: 400; display: none; align-items: center; justify-content: center; flex-direction: column; color: white; width: 100vw; height: 100vh; user-select: none; }
 #tetris-container { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 16px; padding: 16px; }
 .tetris-game-area { display: flex; align-items: flex-start; gap: 16px; }
 #tetris-canvas { border: 2px solid #fff; background-color: #000; }
-.tetris-info { font-size: 20px; font-weight: 600; text-align: left; }
-.tetris-info div { margin-bottom: 12px; }
+.tetris-info { font-size: 20px; font-weight: 600; text-align: left; } .tetris-info div { margin-bottom: 12px; }
 .tetris-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 240px; margin-top: 16px; }
 .tetris-btn { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fff; background-color: rgba(255,255,255,0.2); color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; touch-action: manipulation; user-select: none; }
-#tetris-rotate { grid-column: 2; }
-#tetris-left { grid-column: 1; }
-#tetris-right { grid-column: 3; }
-#tetris-down { grid-column: 1 / 4; }
+#tetris-rotate { grid-column: 2; } #tetris-left { grid-column: 1; } #tetris-right { grid-column: 3; } #tetris-down { grid-column: 1 / 4; }
 #tetris-close-btn { position: absolute; top: 15px; right: 15px; font-size: 32px; color: white; background: none; border: none; cursor: pointer; }
-
-/* Notification Modal Styles */
 #notification-modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); z-index: 350; display: none; align-items: center; justify-content: center; }
 .notification-modal-box { background: white; width: 95%; max-width: 400px; max-height: 80vh; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
 .notification-header { padding: 12px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
@@ -139,16 +133,12 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
 #announcement-content { min-height: 60px; background: var(--gray-100); border-radius: 8px; padding: 10px; white-space: pre-wrap; word-break: break-word; }
 .announcement-meta { font-size: 11px; color: var(--gray-500); text-align: right; margin-top: 4px; }
 #announcement-textarea { width: 100%; min-height: 80px; padding: 8px; border-radius: 8px; border: 1px solid var(--gray-200); font-size: 14px; margin-bottom: 8px; }
-.admin-announcement-actions { display: flex; gap: 8px; }
-.admin-announcement-actions button { flex: 1; }
-#new-announcement-btn { background-color: var(--warn); }
-.comment-section { margin-top: 16px; }
-.comment-section h4 { font-size: 14px; margin-bottom: 8px; border-top: 1px solid var(--gray-200); padding-top: 12px; }
+.admin-announcement-actions { display: flex; gap: 8px; } .admin-announcement-actions button { flex: 1; } #new-announcement-btn { background-color: var(--warn); }
+.comment-section { margin-top: 16px; } .comment-section h4 { font-size: 14px; margin-bottom: 8px; border-top: 1px solid var(--gray-200); padding-top: 12px; }
 #comment-list { list-style-type: none; padding: 0; margin: 0; }
 .comment-item { background: var(--bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; }
 .comment-header { display: flex; justify-content: space-between; align-items: baseline; }
-.comment-author { font-weight: 600; font-size: 13px; }
-.comment-time { font-size: 10px; color: var(--gray-500); }
+.comment-author { font-weight: 600; font-size: 13px; } .comment-time { font-size: 10px; color: var(--gray-500); }
 .comment-text { font-size: 14px; color: var(--text-dark); margin-top: 4px; word-break: break-word; }
 .comment-input-area { display: flex; gap: 8px; margin-top: 12px; }
 #comment-input { flex-grow: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
@@ -157,7 +147,7 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="language-btn" title="Đổi Ngôn ngữ"><i class="fa-solid fa-globe"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="language-btn" title="Đổi Ngôn ngữ"><i class="fa-solid fa-globe"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div class="filter-controls"><label for="sort-filter-select">Sắp xếp:</label><select id="sort-filter-select"><option value="name">Theo Tên</option><option value="onBreak">Đang Nghỉ</option><option value="totalBreak">Tổng TG Nghỉ</option></select></div><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -165,60 +155,22 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
     <audio id="audio-click" src="https://actions.google.com/sounds/v1/ui/button_press.ogg" preload="auto"></audio>
     <audio id="audio-break-toggle" src="https://actions.google.com/sounds/v1/switches/switch_on.ogg" preload="auto"></audio>
 </div>
-
-<!-- Notification Modal -->
-<div id="notification-modal-backdrop">
-    <div class="notification-modal-box">
-        <div class="notification-header">
-            <h3><i class="fa-solid fa-bullhorn"></i> Thông Báo Chung</h3>
-            <button id="notification-close-btn">&times;</button>
-        </div>
-        <div id="notification-content" class="notification-body">
-            <!-- Content will be rendered by JavaScript -->
-        </div>
-    </div>
-</div>
-
-<!-- Tetris Game Modal -->
-<div id="tetris-modal-backdrop">
-    <button id="tetris-close-btn">&times;</button>
-    <div id="tetris-container">
-        <div class="tetris-game-area">
-            <canvas id="tetris-canvas" width="240" height="400"></canvas>
-            <div class="tetris-info">
-                <div>Score: <span id="tetris-score">0</span></div>
-                <div>Level: <span id="tetris-level">0</span></div>
-            </div>
-        </div>
-        <div class="tetris-controls">
-            <button class="tetris-btn" id="tetris-left"><i class="fa-solid fa-arrow-left"></i></button>
-            <button class="tetris-btn" id="tetris-rotate"><i class="fa-solid fa-rotate-right"></i></button>
-            <button class="tetris-btn" id="tetris-right"><i class="fa-solid fa-arrow-right"></i></button>
-            <button class="tetris-btn" id="tetris-down"><i class="fa-solid fa-arrow-down"></i></button>
-        </div>
-    </div>
-</div>
-
+<div id="notification-modal-backdrop"> <div class="notification-modal-box"> <div class="notification-header"> <h3><i class="fa-solid fa-bullhorn"></i> Thông Báo Chung</h3> <button id="notification-close-btn">&times;</button> </div> <div id="notification-content" class="notification-body"> </div> </div> </div>
+<div id="tetris-modal-backdrop"> <button id="tetris-close-btn">&times;</button> <div id="tetris-container"> <div class="tetris-game-area"> <canvas id="tetris-canvas" width="240" height="400"></canvas> <div class="tetris-info"> <div>Score: <span id="tetris-score">0</span></div> <div>Level: <span id="tetris-level">0</span></div> </div> </div> <div class="tetris-controls"> <button class="tetris-btn" id="tetris-left"><i class="fa-solid fa-arrow-left"></i></button> <button class="tetris-btn" id="tetris-rotate"><i class="fa-solid fa-rotate-right"></i></button> <button class="tetris-btn" id="tetris-right"><i class="fa-solid fa-arrow-right"></i></button> <button class="tetris-btn" id="tetris-down"><i class="fa-solid fa-arrow-down"></i></button> </div> </div> </div>
 
 <script>
 // ===== Firebase Config & App State =====
 const firebaseConfig = {
-  apiKey: "AIzaSyCN3cJ12JkC49JJmPl1d_uJ-PFr_MhPuLs", // THAY BẰNG API KEY CỦA BẠN
-  authDomain: "checkin-app-cua-toi.firebaseapp.com", // THAY BẰNG AUTH DOMAIN CỦA BẠN
-  projectId: "checkin-app-cua-toi", // THAY BẰNG PROJECT ID CỦA BẠN
-  storageBucket: "checkin-app-cua-toi.appspot.com", // THAY BẰNG STORAGE BUCKET CỦA BẠN
-  messagingSenderId: "979758577166", // THAY BẰNG SENDER ID CỦA BẠN
-  appId: "1:979758577166:web:5950cf18778a4f0c0dee5f" // THAY BẰNG APP ID CỦA BẠN
+  apiKey: "AIzaSyCN3cJ12JkC49JJmPl1d_uJ-PFr_MhPuLs", authDomain: "checkin-app-cua-toi.firebaseapp.com", projectId: "checkin-app-cua-toi", storageBucket: "checkin-app-cua-toi.appspot.com", messagingSenderId: "979758577166", appId: "1:979758577166:web:5950cf18778a4f0c0dee5f"
 };
 let db;
-
-// ===== NEW: Language and Translations =====
 let currentLanguage = 'vi';
 const translations = {
     'vi': {
         'langBtnTitle': 'Đổi Ngôn ngữ', 'fontSizeBtnTitle': 'Đổi cỡ chữ', 'notificationBtnTitle': 'Thông báo', 'gameBtnTitle': 'Game', 'logoutBtnTitle': 'Đăng xuất', 'employeeTab': 'Nhân viên', 'adminTab': 'Quản trị', 'ok': 'OK', 'cancel': 'Hủy', 'close': 'Đóng', 'errorTitle': 'Lỗi', 'successTitle': 'Thành công', 'confirmTitle': 'Xác nhận', 'notificationTitle': 'Thông báo', 'loadingLocation': 'Đang lấy vị trí...',
         'loginTitle': 'Đăng nhập', 'loginFaceBtn': 'Đăng nhập bằng Khuôn mặt', 'loginCodePrompt': 'Hoặc đăng nhập bằng mã số', 'loginCodePlaceholder': 'Nhập mã số hoặc Admin', 'loginCodeBtn': 'Đăng nhập bằng mã', 'loginErrNoCode': 'Vui lòng nhập mã số.', 'loginErrInvalidCode': 'Mã số không hợp lệ.', 'loginErrFaceOnly': 'Tài khoản này chỉ được đăng nhập bằng khuôn mặt.', 'loginErrCodeOnly': 'Tài khoản này chỉ được đăng nhập bằng mã số.',
-        'statusOnBreak': 'Đang nghỉ', 'statusOffHours': 'Ngoài giờ làm', 'statusWorking': 'Đang làm', 'statusScheduled': 'Đã lên lịch', 'statusNoSchedule': 'Chưa có lịch', 'createAlarmBtnTitle': 'Tạo báo thức lịch nghỉ', 'stopBtn': 'Dừng', 'breakBtn': 'Nghỉ', 'timerRemaining': 'Còn lại', 'breakCountLabel': 'Lần', 'totalBreakLabel': 'Tổng', 'breakTypeLabel': 'Nghỉ', 'breakInstance': 'Lần',
+        'statusOnBreak': 'Đang nghỉ', 'statusOffHours': 'Ngoài giờ làm', 'statusWorking': 'Đang làm', 'statusScheduled': 'Đã lên lịch', 'statusNoSchedule': 'Chưa có lịch', 'createAlarmBtnTitle': 'Tạo báo thức lịch nghỉ', 'stopBtn': 'Dừng', 'breakBtn': 'Nghỉ', 'timerRemaining': 'Còn lại', 'timerOvertime': 'Quá giờ', 'breakCountLabel': 'Lần', 'totalBreakLabel': 'Tổng', 'breakTypeLabel': 'Nghỉ', 'breakInstance': 'Lần',
+        'sortByLabel': 'Sắp xếp:', 'sortByName': 'Theo Tên', 'sortByOnBreak': 'Đang Nghỉ', 'sortByTotalBreak': 'Tổng TG Nghỉ',
         'adminHeaderEmployees': 'Quản lý Nhân viên', 'adminHeaderAdmins': 'Quản lý Admin', 'adminHeaderAddEmployee': 'Thêm nhân viên mới', 'adminHeaderSettings': 'Cài đặt Vị trí & Thời gian nghỉ', 'adminNoEmployees': 'Chưa có nhân viên nào.', 'adminEmpNamePlaceholder': 'Tên', 'adminEmpCodePlaceholder': 'Mã số', 'adminLoginMethodTitle': 'Chọn phương thức đăng nhập', 'adminFaceRegBtnTitle': 'Đăng ký khuôn mặt qua Camera', 'adminResetBreaksBtnTitle': 'Reset nghỉ', 'adminDeleteBtnTitle': 'Xóa', 'adminStartTimeTitle': 'Giờ start ca', 'adminBreakTimeTitle': 'Giờ nghỉ lần', 'adminAccountLabel': 'Tài khoản Admin', 'adminAddEmpNameLabel': 'Tên nhân viên', 'adminAddEmpCodeLabel': 'Mã số đăng nhập', 'adminAddEmpBtn': 'Thêm nhân viên', 'adminSettingsLatLabel': 'Vĩ độ', 'adminSettingsLonLabel': 'Kinh độ', 'adminSettingsRadiusLabel': 'Bán kính (mét)', 'adminSettingsSaveBtn': 'Lưu Cài đặt',
         'modalErrFillFields': 'Vui lòng nhập đủ Tên và Mã số.', 'modalErrCodeExists': 'Mã số đăng nhập đã tồn tại.', 'modalSuccessAddEmp': 'Thêm nhân viên thành công!', 'modalErrAddEmp': 'Không thể thêm nhân viên. Vui lòng thử lại.', 'modalConfirmDelete': 'Bạn có chắc muốn xóa nhân viên', 'modalSuccessDelete': 'Đã xóa nhân viên', 'modalConfirmResetBreaks': 'Reset số lần nghỉ của nhân viên này?', 'modalErrNoFixedBreaks': 'Chưa có lịch nghỉ cố định nào được thiết lập.', 'modalConfirmCreateCalendar': 'Thêm lịch nghỉ hôm nay vào Lịch của điện thoại?', 'modalErrEmptyFields': 'Tên và Mã số không được để trống.', 'modalErrCodeInUse': 'Mã số này đã được sử dụng.', 'modalSuccessSaveSettings': 'Đã lưu cài đặt vị trí.', 'modalErrInvalidLocation': 'Vui lòng nhập thông tin vị trí hợp lệ.', 'modalErrLocationSupport': 'Trình duyệt không hỗ trợ định vị.', 'modalErrLocationOutside': 'Bạn đang ở ngoài khu vực cho phép', 'modalErrGetLocation': 'Không thể lấy được vị trí của bạn.', 'modalBreakStatsTitle': 'Thống kê nghỉ', 'modalTotalBreakTime': 'Tổng thời gian đã nghỉ:', 'modalBreakRules': 'Quy định nghỉ', 'modalBreakHistory': 'Lịch sử nghỉ trong ngày', 'modalNoBreakHistory': 'Chưa có dữ liệu nghỉ trong ngày.', 'minutes': 'phút', 'seconds': 'giây', 'modalOutOfBreaks': 'Đã hết số lần nghỉ giải lao trong ngày.', 'modalConfirmStartBreak': 'Bắt đầu nghỉ lần', 'modalVerifyWithCodeTitle': 'Xác thực bằng Mã số', 'modalVerifyWithCodePrompt': 'Nhập mã số của', 'modalVerifyWithCodeContinue': 'để tiếp tục.', 'modalVerifyCodePlaceholder': 'Nhập mã số', 'modalErrWrongCode': 'Mã số không chính xác.',
         'faceLoadingModels': 'Đang tải model...', 'faceInitCamera': 'Đang khởi tạo camera...', 'facePositionFace': 'Đưa khuôn mặt vào khung hình...', 'faceNoMatch': 'Không khớp. Thử lại!', 'faceHoldStill': 'Giữ yên...', 'faceMoved': 'Khuôn mặt di chuyển...', 'faceSuccessRegistered': 'Đã đăng ký khuôn mặt cho', 'faceErrNoFaceRegistered': 'Nhân viên này chưa đăng ký khuôn mặt.', 'faceErrNoCamera': 'Không thể truy cập camera.', 'faceErrNoOneRegistered': 'Chưa có ai đăng ký khuôn mặt.', 'faceErrTimeout': 'Không nhận diện được khuôn mặt.',
@@ -227,90 +179,42 @@ const translations = {
     'en': {
         'langBtnTitle': 'Change Language', 'fontSizeBtnTitle': 'Change Font Size', 'notificationBtnTitle': 'Notifications', 'gameBtnTitle': 'Game', 'logoutBtnTitle': 'Logout', 'employeeTab': 'Employee', 'adminTab': 'Admin', 'ok': 'OK', 'cancel': 'Cancel', 'close': 'Close', 'errorTitle': 'Error', 'successTitle': 'Success', 'confirmTitle': 'Confirm', 'notificationTitle': 'Notice', 'loadingLocation': 'Getting location...',
         'loginTitle': 'Login', 'loginFaceBtn': 'Login with Face', 'loginCodePrompt': 'Or login with code', 'loginCodePlaceholder': 'Enter code or Admin', 'loginCodeBtn': 'Login with Code', 'loginErrNoCode': 'Please enter a code.', 'loginErrInvalidCode': 'Invalid code.', 'loginErrFaceOnly': 'This account can only log in with face recognition.', 'loginErrCodeOnly': 'This account can only log in with a code.',
-        'statusOnBreak': 'On Break', 'statusOffHours': 'Off Hours', 'statusWorking': 'Working', 'statusScheduled': 'Scheduled', 'statusNoSchedule': 'No Schedule', 'createAlarmBtnTitle': 'Create break schedule alarms', 'stopBtn': 'Stop', 'breakBtn': 'Break', 'timerRemaining': 'Remaining', 'breakCountLabel': 'Count', 'totalBreakLabel': 'Total', 'breakTypeLabel': 'Break', 'breakInstance': 'Break',
+        'statusOnBreak': 'On Break', 'statusOffHours': 'Off Hours', 'statusWorking': 'Working', 'statusScheduled': 'Scheduled', 'statusNoSchedule': 'No Schedule', 'createAlarmBtnTitle': 'Create break schedule alarms', 'stopBtn': 'Stop', 'breakBtn': 'Break', 'timerRemaining': 'Remaining', 'timerOvertime': 'Overtime', 'breakCountLabel': 'Count', 'totalBreakLabel': 'Total', 'breakTypeLabel': 'Break', 'breakInstance': 'Break',
+        'sortByLabel': 'Sort by:', 'sortByName': 'By Name', 'sortByOnBreak': 'On Break', 'sortByTotalBreak': 'Total Break Time',
         'adminHeaderEmployees': 'Employee Management', 'adminHeaderAdmins': 'Admin Management', 'adminHeaderAddEmployee': 'Add New Employee', 'adminHeaderSettings': 'Location & Break Time Settings', 'adminNoEmployees': 'No employees yet.', 'adminEmpNamePlaceholder': 'Name', 'adminEmpCodePlaceholder': 'Code', 'adminLoginMethodTitle': 'Select login method', 'adminFaceRegBtnTitle': 'Register face via Camera', 'adminResetBreaksBtnTitle': 'Reset Breaks', 'adminDeleteBtnTitle': 'Delete', 'adminStartTimeTitle': 'Shift start time', 'adminBreakTimeTitle': 'Break time for break', 'adminAccountLabel': 'Admin Account', 'adminAddEmpNameLabel': 'Employee Name', 'adminAddEmpCodeLabel': 'Login Code', 'adminAddEmpBtn': 'Add Employee', 'adminSettingsLatLabel': 'Latitude', 'adminSettingsLonLabel': 'Longitude', 'adminSettingsRadiusLabel': 'Radius (meters)', 'adminSettingsSaveBtn': 'Save Settings',
         'modalErrFillFields': 'Please enter both Name and Code.', 'modalErrCodeExists': 'This login code already exists.', 'modalSuccessAddEmp': 'Employee added successfully!', 'modalErrAddEmp': 'Could not add employee. Please try again.', 'modalConfirmDelete': 'Are you sure you want to delete employee', 'modalSuccessDelete': 'Deleted employee', 'modalConfirmResetBreaks': 'Reset the break count for this employee?', 'modalErrNoFixedBreaks': 'No fixed break schedule has been set.', 'modalConfirmCreateCalendar': 'Add today\'s break schedule to your phone\'s Calendar?', 'modalErrEmptyFields': 'Name and Code cannot be empty.', 'modalErrCodeInUse': 'This code is already in use.', 'modalSuccessSaveSettings': 'Location settings saved.', 'modalErrInvalidLocation': 'Please enter valid location information.', 'modalErrLocationSupport': 'Geolocation is not supported by this browser.', 'modalErrLocationOutside': 'You are outside the allowed area', 'modalErrGetLocation': 'Unable to retrieve your location.', 'modalBreakStatsTitle': 'Break Statistics', 'modalTotalBreakTime': 'Total time on break:', 'modalBreakRules': 'Break Rules', 'modalBreakHistory': 'Break History for Today', 'modalNoBreakHistory': 'No break data for today yet.', 'minutes': 'minutes', 'seconds': 'seconds', 'modalOutOfBreaks': 'You have used all available breaks for the day.', 'modalConfirmStartBreak': 'Start break number', 'modalVerifyWithCodeTitle': 'Verify with Code', 'modalVerifyWithCodePrompt': 'Enter the code for', 'modalVerifyWithCodeContinue': 'to continue.', 'modalVerifyCodePlaceholder': 'Enter code', 'modalErrWrongCode': 'Incorrect code.',
         'faceLoadingModels': 'Loading models...', 'faceInitCamera': 'Initializing camera...', 'facePositionFace': 'Position your face in the frame...', 'faceNoMatch': 'No match. Try again!', 'faceHoldStill': 'Hold still...', 'faceMoved': 'Face moved...', 'faceSuccessRegistered': 'Successfully registered face for', 'faceErrNoFaceRegistered': 'This employee has not registered a face.', 'faceErrNoCamera': 'Cannot access camera.', 'faceErrNoOneRegistered': 'No one has registered a face yet.', 'faceErrTimeout': 'Could not recognize face.',
         'notifTitle': 'General Announcement', 'notifNoAnnouncements': 'No announcements yet.', 'notifComments': 'Comments', 'notifWriteCommentPlaceholder': 'Write a comment...', 'notifSendBtn': 'Send', 'notifNewAnnouncementPlaceholder': 'Compose new announcement...', 'notifPostBtn': 'Post/Update', 'notifCreateNewBtn': 'Create New', 'notifConfirmCreateNew': 'Are you sure you want to delete the current announcement and all its comments to create a new one?', 'notifBrowserCheckInTitle': 'it\'s time to work!', 'notifBrowserCheckInBody': 'The system has checked you in automatically.', 'notifBrowserBreakOverTitle': 'break time is over!', 'notifBrowserBreakOverBody': 'Your break time has ended.',
     }
 };
-
-// Biến để lưu trữ các hàm hủy listener
-let employeeListenerUnsubscribe = null;
-let settingsListenerUnsubscribe = null;
-let adminListenerUnsubscribe = null;
-let breakLogListenerUnsubscribe = null;
-let announcementListenerUnsubscribe = null;
-let commentsListenerUnsubscribe = null;
-
+let currentSortMethod = 'name';
+let employeeListenerUnsubscribe = null, settingsListenerUnsubscribe = null, adminListenerUnsubscribe = null, breakLogListenerUnsubscribe = null, announcementListenerUnsubscribe = null, commentsListenerUnsubscribe = null;
 const timers = {};
 let AppState = { employees: [], admins: [], settings: null, breakLog: [], loggedInUserId: null, isAdmin: false, announcement: null, comments: [] };
-const faceModalBackdrop = document.getElementById('face-modal-backdrop');
-const faceModalMessage = document.getElementById('face-modal-message');
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-let modelsLoaded = false;
-let currentFaceAction = { empId: null, actionType: null, callback: null };
-let faceDetectionInterval = null;
+const faceModalBackdrop = document.getElementById('face-modal-backdrop'), faceModalMessage = document.getElementById('face-modal-message'), video = document.getElementById('video'), canvas = document.getElementById('canvas');
+let modelsLoaded = false, currentFaceAction = { empId: null, actionType: null, callback: null }, faceDetectionInterval = null;
 const fontSizes = ['font-size-normal', 'font-size-large', 'font-size-very-large', 'font-size-small'];
 
-// ===== CÁC HÀM LÕI VỚI FIRESTORE =====
 function setupRealtimeListeners() {
     if (!db) return;
-    if (employeeListenerUnsubscribe) employeeListenerUnsubscribe();
-    if (settingsListenerUnsubscribe) settingsListenerUnsubscribe();
-    if (adminListenerUnsubscribe) adminListenerUnsubscribe();
-    if (breakLogListenerUnsubscribe) breakLogListenerUnsubscribe();
-    if (announcementListenerUnsubscribe) announcementListenerUnsubscribe();
-    if (commentsListenerUnsubscribe) commentsListenerUnsubscribe();
-
-    employeeListenerUnsubscribe = db.collection("employees").orderBy("name").onSnapshot((snapshot) => {
-        let needsFullRender = false;
+    if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if (adminListenerUnsubscribe) adminListenerUnsubscribe(); if (breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); if (announcementListenerUnsubscribe) announcementListenerUnsubscribe(); if (commentsListenerUnsubscribe) commentsListenerUnsubscribe();
+    employeeListenerUnsubscribe = db.collection("employees").onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
-            const docData = change.doc.data();
-            const existingEmpIndex = AppState.employees.findIndex(e => e.id === docData.id);
-            if (change.type === "added" || change.type === "removed") { needsFullRender = true; }
+            const docData = change.doc.data(); const existingEmpIndex = AppState.employees.findIndex(e => e.id === docData.id);
             if (change.type === "added") { if (existingEmpIndex === -1) AppState.employees.push(docData); }
-            if (change.type === "modified") { if (existingEmpIndex > -1) AppState.employees[existingEmpIndex] = docData; }
-            if (change.type === "removed") { if (existingEmpIndex > -1) AppState.employees.splice(existingEmpIndex, 1); }
+            else if (change.type === "modified") { if (existingEmpIndex > -1) AppState.employees[existingEmpIndex] = docData; }
+            else if (change.type === "removed") { if (existingEmpIndex > -1) AppState.employees.splice(existingEmpIndex, 1); }
         });
-        if (needsFullRender) { AppState.employees.sort((a, b) => a.name.localeCompare(b.name)); renderEmployees(); }
-        else { snapshot.docChanges().forEach(change => { if (change.type === "modified") renderSingleEmployee(change.doc.data().id); }); }
+        renderEmployees();
         if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') { renderAdminPanel(); }
     }, (error) => console.error("Lỗi khi lắng nghe `employees`: ", error));
-
-    settingsListenerUnsubscribe = db.collection("app_state").doc("settings").onSnapshot((doc) => {
-        if (doc.exists) AppState.settings = doc.data();
-        if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') renderAdminPanel();
-    }, (error) => console.error("Lỗi khi lắng nghe `settings`: ", error));
-
-    adminListenerUnsubscribe = db.collection("admins").onSnapshot((snapshot) => {
-        AppState.admins = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') renderAdminPanel();
-    });
-
+    settingsListenerUnsubscribe = db.collection("app_state").doc("settings").onSnapshot((doc) => { if (doc.exists) AppState.settings = doc.data(); if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') renderAdminPanel(); }, (error) => console.error("Lỗi khi lắng nghe `settings`: ", error));
+    adminListenerUnsubscribe = db.collection("admins").onSnapshot((snapshot) => { AppState.admins = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') renderAdminPanel(); });
     const today = getWorkDayString(new Date());
-    breakLogListenerUnsubscribe = db.collection("break_log").where("logDate", "==", today).orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-        AppState.breakLog = snapshot.docs.map(doc => doc.data());
-    });
-    
-    announcementListenerUnsubscribe = db.collection("app_state").doc("announcement").onSnapshot((doc) => {
-        AppState.announcement = doc.exists ? doc.data() : { content: "Chưa có thông báo nào.", postedBy: "Hệ thống" };
-        if (document.getElementById('notification-modal-backdrop').style.display === 'flex') {
-            renderNotificationModal();
-        }
-    });
-
-    commentsListenerUnsubscribe = db.collection("app_state").doc("announcement").collection("comments").orderBy("timestamp", "asc").onSnapshot((snapshot) => {
-        AppState.comments = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        if (document.getElementById('notification-modal-backdrop').style.display === 'flex') {
-            renderNotificationModal();
-        }
-    });
+    breakLogListenerUnsubscribe = db.collection("break_log").where("logDate", "==", today).orderBy("timestamp", "desc").onSnapshot((snapshot) => { AppState.breakLog = snapshot.docs.map(doc => doc.data()); });
+    announcementListenerUnsubscribe = db.collection("app_state").doc("announcement").onSnapshot((doc) => { AppState.announcement = doc.exists ? doc.data() : { content: "Chưa có thông báo nào.", postedBy: "Hệ thống" }; if (document.getElementById('notification-modal-backdrop').style.display === 'flex') { renderNotificationModal(); } });
+    commentsListenerUnsubscribe = db.collection("app_state").doc("announcement").collection("comments").orderBy("timestamp", "asc").onSnapshot((snapshot) => { AppState.comments = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()})); if (document.getElementById('notification-modal-backdrop').style.display === 'flex') { renderNotificationModal(); } });
 }
-
-
-// ===== CÁC HÀM CẬP NHẬT DỮ LIỆU =====
 async function updateEmployee(empId, dataToUpdate) { try { await db.collection("employees").doc(empId).update(dataToUpdate); } catch (error) { console.error(`Lỗi cập nhật ${empId}:`, error); alert("Có lỗi xảy ra."); } }
 async function createEmployee(empData) { try { await db.collection("employees").doc(empData.id).set(empData); return true; } catch (error) { console.error("Lỗi thêm nhân viên:", error); return false; } }
 async function removeEmployee(empId) { try { await db.collection("employees").doc(empId).delete(); return true; } catch (error) { console.error("Lỗi xóa nhân viên:", error); return false; } }
@@ -319,255 +223,115 @@ async function updateAdmin(adminId, adminData) { try { await db.collection("admi
 async function addBreakLog(logEntry) { try { await db.collection("break_log").add(logEntry); } catch (error) { console.error("Lỗi ghi log nghỉ:", error); } }
 function getTimes(empId) { const emp = AppState.employees.find(e => e.id === empId); return emp?.times || { scheduledTime: null, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] }; }
 function getBreakDurations() { return AppState.settings?.breakDurations || [10, 40, 10, 10]; }
-
-// ===== CÁC HÀM LOGIC CỦA ỨNG DỤNG =====
 async function addEmployee() { const lang = translations[currentLanguage]; const name = document.getElementById('new-emp-name').value; const code = document.getElementById('new-emp-code').value; if (!name || !code) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrFillFields}</p>`); return; } if (AppState.employees.some(e => e.code == code)) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrCodeExists}</p>`); return; } const id = "E" + Date.now(); const newEmployee = { id, name, code, faceDescriptor: null, times: getTimes(null), breakTimes: ['', '', '', ''], loginMethod: 'both' }; if (await createEmployee(newEmployee)) { showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessAddEmp}</p>`); document.getElementById('new-emp-name').value = ''; document.getElementById('new-emp-code').value = '';} else { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrAddEmp}</p>`); } }
 async function deleteEmployee(empId) { const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmDelete} <strong>${emp.name}</strong>?</p>`, async () => { if (await removeEmployee(empId)) showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessDelete} ${emp.name}.</p>`); }, true); }
 function saveSchedule(empId) { const input = document.getElementById(`schedule-${empId}`); updateEmployee(empId, { 'times.scheduledTime': input.value || null }); }
 function resetBreaks(empId) { const lang = translations[currentLanguage]; showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmResetBreaks}</p>`, () => { updateEmployee(empId, { 'times.breakIndex': 0, 'times.breakHistory': [], 'times.onBreak': false, 'times.breakStartTime': null }); }, true); }
 async function updateLoginMethod(empId, method) { await updateEmployee(empId, { loginMethod: method }); }
-
 function startBreak(empId) { const lang = translations[currentLanguage]; playSound('audio-break-toggle'); const coreAction = () => { const times = getTimes(empId); const idx = times.breakIndex || 0; const breakDurations = getBreakDurations(); if (idx >= breakDurations.length) { showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.modalOutOfBreaks}</p>`); return; } showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmStartBreak} ${idx + 1}: ${breakDurations[idx]} ${lang.minutes}?</p>`, () => { updateEmployee(empId, { 'times.onBreak': true, 'times.breakStartTime': new Date().toISOString(), 'times.breakIndex': idx + 1 }); }, true); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
 function stopBreak(empId) { playSound('audio-break-toggle'); const coreAction = async () => { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
-async function autoStopBreak(empId) { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!emp || !times || !times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }
 async function updateEmployeeInfo(empId, field, value) { const lang = translations[currentLanguage]; const trimmedValue = value.trim(); if (!trimmedValue) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrEmptyFields}</p>`); renderAdminPanel(); return; } if (field === 'code' && AppState.employees.some(e => e.code === trimmedValue && e.id !== empId)) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrCodeInUse}</p>`); renderAdminPanel(); return; } await updateEmployee(empId, { [field]: trimmedValue }); }
 function updateBreakTimes(empId) { const breakTimes = Array.from({ length: 4 }, (_, i) => document.getElementById(`break${i + 1}-${emp.id}`).value || ''); updateEmployee(empId, { breakTimes }); }
-
 function checkSchedules() { if (!AppState.employees || AppState.employees.length === 0 || !AppState.loggedInUserId) return; const lang = translations[currentLanguage]; const now = new Date(); const currentWorkDayString = getWorkDayString(now); const batch = db.batch(); let batchHasWrites = false; AppState.employees.forEach(emp => { let times = getTimes(emp.id); if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) { const newTimes = { scheduledTime: times.scheduledTime, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] }; batch.update(db.collection("employees").doc(emp.id), { times: newTimes }); batchHasWrites = true; } else if (times.scheduledTime && !times.checkInTime) { const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`); if (now >= scheduledDateTime) { const checkInData = { 'times.checkInTime': new Date().toISOString(), 'times.lastCheckInDay': currentWorkDayString }; batch.update(db.collection("employees").doc(emp.id), checkInData); batchHasWrites = true; if (AppState.loggedInUserId === emp.id) { showBrowserNotification(`${emp.name}, ${lang.notifBrowserCheckInTitle}`, lang.notifBrowserCheckInBody); } } } }); if (batchHasWrites) { batch.commit().catch(error => console.error("Lỗi khi thực hiện batch update: ", error)); } }
 function createCalendarEvents(empId) { const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if (!emp || !emp.breakTimes || emp.breakTimes.every(t => !t)) { showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.modalErrNoFixedBreaks}</p>`); return; } showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmCreateCalendar}</p>`, () => { const today = new Date().toISOString().slice(0, 10); const formatICSDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Check-in App//EN']; emp.breakTimes.forEach((breakTime, index) => { if (!breakTime) return; const breakDuration = getBreakDurations()[index] || 10; const startDate = new Date(`${today}T${breakTime}`); const endDate = new Date(startDate.getTime() + breakDuration * 60000); icsContent.push('BEGIN:VEVENT', `UID:${emp.id}-break${index + 1}-${today}@checkin.app`, `DTSTAMP:${formatICSDate(new Date())}`, `DTSTART:${formatICSDate(startDate)}`, `DTEND:${formatICSDate(endDate)}`, `SUMMARY:Giờ nghỉ lần ${index + 1} (${emp.name})`, 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Đến giờ nghỉ giải lao!', 'TRIGGER:-PT0M', 'END:VALARM', 'END:VEVENT'); }); icsContent.push('END:VCALENDAR'); const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `LichNghi_${today}.ics`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }, true); }
-
-// ===== RENDER FUNCTIONS =====
-function activateTimers() { if (!AppState.employees) return; AppState.employees.forEach(emp => { const times = getTimes(emp.id); if (times.onBreak && !timers[emp.id]) { startBreakCountdown(emp.id); } else if (!times.onBreak && timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; } }); }
+function activateTimers() { if (!AppState.employees) return; AppState.employees.forEach(emp => { const times = getTimes(emp.id); if (times.onBreak && !timers[emp.id]) { startBreakCountdown(emp.id); } else if (!times.onBreak && timers[emp.id]) { clearInterval(timers[emp.id].interval); delete timers[emp.id]; } }); }
 function generateEmployeeCardHTML(emp) {
-    const lang = translations[currentLanguage];
-    const times = getTimes(emp.id);
-    const isCheckedIn = !!times.checkInTime;
-    const isOnBreak = times.onBreak;
-    const now = new Date();
-    const currentHour = now.getHours();
-    const isOutsideWorkingHours = currentHour >= 6 && currentHour < 17;
-
+    const lang = translations[currentLanguage]; const times = getTimes(emp.id); const isCheckedIn = !!times.checkInTime; const isOnBreak = times.onBreak; const now = new Date(); const currentHour = now.getHours(); const isOutsideWorkingHours = currentHour >= 6 && currentHour < 17;
     let statusHtml = '';
-    if (isOnBreak) {
-        statusHtml = `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> ${lang.statusOnBreak}</div>`;
-    } else if (isOutsideWorkingHours) {
-        statusHtml = `<div class="status-badge status-pending">${lang.statusOffHours}</div>`;
-    } else if (isCheckedIn) {
-        statusHtml = `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> ${lang.statusWorking}</div>`;
-    } else if (times.scheduledTime) {
-        statusHtml = `<div class="status-badge status-scheduled">${lang.statusScheduled}</div>`;
-    } else {
-        statusHtml = `<div class="status-badge status-pending">${lang.statusNoSchedule}</div>`;
-    }
-
+    if (isOnBreak) { statusHtml = `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> ${lang.statusOnBreak}</div>`; } else if (isOutsideWorkingHours) { statusHtml = `<div class="status-badge status-pending">${lang.statusOffHours}</div>`; } else if (isCheckedIn) { statusHtml = `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> ${lang.statusWorking}</div>`; } else if (times.scheduledTime) { statusHtml = `<div class="status-badge status-scheduled">${lang.statusScheduled}</div>`; } else { statusHtml = `<div class="status-badge status-pending">${lang.statusNoSchedule}</div>`; }
     let actionButtonsHtml = '';
     if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) {
         const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t);
-        const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="${lang.createAlarmBtnTitle}"><i class="fa-solid fa-bell"></i></button>` : '';
-        
-        let mainBtn = '';
-        if (isOnBreak) {
-            mainBtn = `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> ${lang.stopBtn}</button>`;
-        } else if (isCheckedIn && !isOutsideWorkingHours) { 
-            mainBtn = `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> ${lang.breakBtn}</button>`;
-        }
-        
+        const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="${lang.createAlarmBtnTitle}"><i class="fa-solid fa-bell"></i></button>` : ''; let mainBtn = '';
+        if (isOnBreak) { mainBtn = `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> ${lang.stopBtn}</button>`; } else if (isCheckedIn && !isOutsideWorkingHours) { mainBtn = `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> ${lang.breakBtn}</button>`; }
         actionButtonsHtml = `<div class="action-buttons">${alarmBtn}${mainBtn}</div>`;
     }
-    
     let breakTimerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : '';
-    
-    const breakDurations = getBreakDurations();
-    const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0);
-
-    return `<div class="card" data-emp-id="${emp.id}">
-                <div class="card-header">
-                    <div class="emp-info">
-                        <div class="emp-name">${emp.name}</div>
-                    </div>
-                    <div class="header-actions">
-                        ${actionButtonsHtml}
-                        ${statusHtml}
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="status-section">
-                        <div class="status-item status-item-start">
-                            <span class="value">${formatTo12Hour(times.scheduledTime)}</span>
-                        </div>
-                        <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')">
-                             <span class="label">${lang.breakCountLabel}:</span>
-                             <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span>
-                        </div>
-                        <div class="status-item status-item-total-break">
-                             <span class="label">${lang.totalBreakLabel}:</span>
-                             <span class="value">${formatSeconds(totalBreakSeconds)}</span>
-                        </div>
-                        <div class="status-item status-item-break-type">
-                             <span class="label">${lang.breakTypeLabel}:</span>
-                             <span class="value">${isOnBreak ? `${lang.breakInstance} ${times.breakIndex}` : '--'}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="break-visualizer">
-                    ${breakTimerHtml}
-                </div>
-            </div>`;
+    const breakDurations = getBreakDurations(); const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0);
+    return `<div class="card" data-emp-id="${emp.id}"> <div class="card-header"> <div class="emp-info"> <div class="emp-name">${emp.name}</div> </div> <div class="header-actions"> ${actionButtonsHtml} ${statusHtml} </div> </div> <div class="card-body"> <div class="status-section"> <div class="status-item status-item-start"> <span class="value">${formatTo12Hour(times.scheduledTime)}</span> </div> <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')"> <span class="label">${lang.breakCountLabel}:</span> <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span> </div> <div class="status-item status-item-total-break"> <span class="label">${lang.totalBreakLabel}:</span> <span class="value">${formatSeconds(totalBreakSeconds)}</span> </div> <div class="status-item status-item-break-type"> <span class="label">${lang.breakTypeLabel}:</span> <span class="value">${isOnBreak ? `${lang.breakInstance} ${times.breakIndex}` : '--'}</span> </div> </div> </div> <div class="break-visualizer"> ${breakTimerHtml} </div> </div>`;
 }
-function renderSingleEmployee(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; const empCard = document.querySelector(`.card[data-emp-id="${empId}"]`); if (empCard) { const tempDiv = document.createElement('div'); tempDiv.innerHTML = generateEmployeeCardHTML(emp); const newCard = tempDiv.firstChild; empCard.parentNode.replaceChild(newCard, empCard); } activateTimers(); }
-function renderEmployees() { const empListEl = document.getElementById('emp-list'); if (!empListEl || !AppState.employees) return; empListEl.innerHTML = AppState.employees.map(emp => generateEmployeeCardHTML(emp)).join(''); activateTimers(); }
-
+function renderEmployees() {
+    const empListEl = document.getElementById('emp-list'); if (!empListEl || !AppState.employees) return;
+    const sortedEmployees = [...AppState.employees];
+    switch (currentSortMethod) {
+        case 'onBreak': sortedEmployees.sort((a, b) => { const aIsOnBreak = getTimes(a.id).onBreak; const bIsOnBreak = getTimes(b.id).onBreak; if (aIsOnBreak && !bIsOnBreak) return -1; if (!aIsOnBreak && bIsOnBreak) return 1; return a.name.localeCompare(b.name); }); break;
+        case 'totalBreak': sortedEmployees.sort((a, b) => { const aTotalBreak = (getTimes(a.id).breakHistory || []).reduce((sum, item) => sum + item.duration, 0); const bTotalBreak = (getTimes(b.id).breakHistory || []).reduce((sum, item) => sum + item.duration, 0); return bTotalBreak - aTotalBreak; }); break;
+        case 'name': default: sortedEmployees.sort((a, b) => a.name.localeCompare(b.name)); break;
+    }
+    empListEl.innerHTML = sortedEmployees.map(emp => generateEmployeeCardHTML(emp)).join('');
+    activateTimers();
+}
 function renderAdminPanel() {
-    const lang = translations[currentLanguage];
-    const adminContentEl = document.getElementById('admin-content'); if (!adminContentEl) return;
-    const adminIds = ['ADMIN1', 'ADMIN2', 'ADMIN3'];
-    
+    const lang = translations[currentLanguage]; const adminContentEl = document.getElementById('admin-content'); if (!adminContentEl) return; const adminIds = ['ADMIN1', 'ADMIN2', 'ADMIN3'];
     let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> ${lang.adminHeaderEmployees}</h3>`;
     if (AppState.employees && AppState.employees.length > 0) {
-        scheduleHtml += [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
-            const faceRegistered = emp.faceDescriptor && Array.isArray(emp.faceDescriptor) && emp.faceDescriptor.length > 0;
-            const breakTimes = emp.breakTimes || ['', '', '', ''];
-            const breakInputsString = Array.from({length: 4}, (_, i) => `<input type="time" id="break${i+1}-${emp.id}" value="${breakTimes[i] || ''}" onblur="updateBreakTimes('${emp.id}')" title="${lang.adminBreakTimeTitle} ${i+1}">`).join('');
-            
-            const loginMethod = emp.loginMethod || 'both';
-            const loginMethodDropdown = `
-                <select class="admin-login-method-select" onchange="updateLoginMethod('${emp.id}', this.value)" title="${lang.adminLoginMethodTitle}">
-                    <option value="both" ${loginMethod === 'both' ? 'selected' : ''}>F&C</option>
-                    <option value="face" ${loginMethod === 'face' ? 'selected' : ''}>Face</option>
-                    <option value="code" ${loginMethod === 'code' ? 'selected' : ''}>Code</option>
-                </select>
-            `;
-
-            return `<div class="schedule-management-item">
-                        <div class="admin-controls-row">
-                            <input type="text" class="admin-emp-name-input" value="${emp.name}" onblur="updateEmployeeInfo('${emp.id}', 'name', this.value)" placeholder="${lang.adminEmpNamePlaceholder}">
-                            ${loginMethodDropdown}
-                            <input type="text" class="admin-emp-code-input" value="${emp.code}" onblur="updateEmployeeInfo('${emp.id}', 'code', this.value)" placeholder="${lang.adminEmpCodePlaceholder}">
-                            <div class="admin-action-buttons">
-                                <button class="admin-icon-btn" style="background-color: ${faceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${emp.id}')" title="${lang.adminFaceRegBtnTitle}"><i class="fa-solid ${faceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button>
-                                <button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="${lang.adminResetBreaksBtnTitle}"><i class="fa-solid fa-rotate-left"></i></button>
-                                <button class="admin-icon-btn btn-delete-emp" onclick="deleteEmployee('${emp.id}')" title="${lang.adminDeleteBtnTitle}"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                        <div class="admin-controls-row">
-                            <input type="time" id="schedule-${emp.id}" value="${getTimes(emp.id).scheduledTime || ''}" onchange="saveSchedule('${emp.id}')" title="${lang.adminStartTimeTitle}">
-                            ${breakInputsString}
-                        </div>
-                    </div>`;
+        scheduleHtml += [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).map(emp => { const faceRegistered = emp.faceDescriptor && Array.isArray(emp.faceDescriptor) && emp.faceDescriptor.length > 0; const breakTimes = emp.breakTimes || ['', '', '', '']; const breakInputsString = Array.from({length: 4}, (_, i) => `<input type="time" id="break${i+1}-${emp.id}" value="${breakTimes[i] || ''}" onblur="updateBreakTimes('${emp.id}')" title="${lang.adminBreakTimeTitle} ${i+1}">`).join(''); const loginMethod = emp.loginMethod || 'both'; const loginMethodDropdown = `<select class="admin-login-method-select" onchange="updateLoginMethod('${emp.id}', this.value)" title="${lang.adminLoginMethodTitle}"> <option value="both" ${loginMethod === 'both' ? 'selected' : ''}>F&C</option> <option value="face" ${loginMethod === 'face' ? 'selected' : ''}>Face</option> <option value="code" ${loginMethod === 'code' ? 'selected' : ''}>Code</option> </select>`;
+            return `<div class="schedule-management-item"> <div class="admin-controls-row"> <input type="text" class="admin-emp-name-input" value="${emp.name}" onblur="updateEmployeeInfo('${emp.id}', 'name', this.value)" placeholder="${lang.adminEmpNamePlaceholder}"> ${loginMethodDropdown} <input type="text" class="admin-emp-code-input" value="${emp.code}" onblur="updateEmployeeInfo('${emp.id}', 'code', this.value)" placeholder="${lang.adminEmpCodePlaceholder}"> <div class="admin-action-buttons"> <button class="admin-icon-btn" style="background-color: ${faceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${emp.id}')" title="${lang.adminFaceRegBtnTitle}"><i class="fa-solid ${faceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button> <button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="${lang.adminResetBreaksBtnTitle}"><i class="fa-solid fa-rotate-left"></i></button> <button class="admin-icon-btn btn-delete-emp" onclick="deleteEmployee('${emp.id}')" title="${lang.adminDeleteBtnTitle}"><i class="fa-solid fa-trash"></i></button> </div> </div> <div class="admin-controls-row"> <input type="time" id="schedule-${emp.id}" value="${getTimes(emp.id).scheduledTime || ''}" onchange="saveSchedule('${emp.id}')" title="${lang.adminStartTimeTitle}"> ${breakInputsString} </div> </div>`;
         }).join('');
-    } else { 
-        scheduleHtml += `<p>${lang.adminNoEmployees}</p>`; 
-    }
+    } else { scheduleHtml += `<p>${lang.adminNoEmployees}</p>`; }
     scheduleHtml += `</div>`;
-    
     let adminManagementHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-shield"></i> ${lang.adminHeaderAdmins}</h3>`;
-    adminManagementHtml += adminIds.map((adminId, index) => {
-        const adminData = AppState.admins.find(a => a.id === adminId);
-        const adminFaceRegistered = adminData?.faceDescriptor && adminData.faceDescriptor.length > 0;
-        return `<div class="schedule-management-item">
-             <div class="admin-controls-row">
-                <span style="font-weight: 600; flex-grow:1;">${lang.adminAccountLabel} ${index + 1}</span>
-                <div class="admin-action-buttons">
-                    <button class="admin-icon-btn" style="background-color: ${adminFaceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${adminId}')" title="${lang.adminFaceRegBtnTitle}"><i class="fa-solid ${adminFaceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
+    adminManagementHtml += adminIds.map((adminId, index) => { const adminData = AppState.admins.find(a => a.id === adminId); const adminFaceRegistered = adminData?.faceDescriptor && adminData.faceDescriptor.length > 0; return `<div class="schedule-management-item"> <div class="admin-controls-row"> <span style="font-weight: 600; flex-grow:1;">${lang.adminAccountLabel} ${index + 1}</span> <div class="admin-action-buttons"> <button class="admin-icon-btn" style="background-color: ${adminFaceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${adminId}')" title="${lang.adminFaceRegBtnTitle}"><i class="fa-solid ${adminFaceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button> </div> </div> </div>`; }).join('');
     adminManagementHtml += `</div>`;
-    
     let addEmployeeHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-plus"></i> ${lang.adminHeaderAddEmployee}</h3><div class="form-group"><label>${lang.adminAddEmpNameLabel}</label><input type="text" id="new-emp-name"></div><div class="form-group"><label>${lang.adminAddEmpCodeLabel}</label><input type="text" inputmode="numeric" id="new-emp-code"></div><button class="admin-btn" onclick="addEmployee()">${lang.adminAddEmpBtn}</button></div>`;
-    
     let locationSettingsHtml = `<div class="admin-section"><h3><i class="fa-solid fa-map-marker-alt"></i> ${lang.adminHeaderSettings}</h3><div class="form-group"><label>${lang.adminSettingsLatLabel}</label><input type="number" step="any" id="setting-lat"></div><div class="form-group"><label>${lang.adminSettingsLonLabel}</label><input type="number" step="any" id="setting-lon"></div><div class="form-group"><label>${lang.adminSettingsRadiusLabel}</label><input type="number" id="setting-radius"></div><button class="admin-btn" onclick="saveLocationSettingsAction()">${lang.adminSettingsSaveBtn}</button></div>`;
-    
     adminContentEl.innerHTML = scheduleHtml + adminManagementHtml + addEmployeeHtml + locationSettingsHtml;
-    
     const settings = AppState.settings?.locationSettings; if (settings) { document.getElementById('setting-lat').value = settings.lat || ''; document.getElementById('setting-lon').value = settings.lon || ''; document.getElementById('setting-radius').value = settings.radius || 30; }
 }
-function startBreakCountdown(empId){ if (timers[empId]) clearInterval(timers[empId]); const lang = translations[currentLanguage]; const tick = () => { const times = getTimes(empId); if (!times.onBreak) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerContainerEl = document.getElementById(`timer-container-${empId}`); if (!timerContainerEl) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerEl = timerContainerEl.querySelector('.timer-text'); const progressEl = timerContainerEl.querySelector('.progress-bar'); const breakDurationSeconds = (getBreakDurations()[times.breakIndex - 1] || 10) * 60; const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000; const remaining = breakDurationSeconds - elapsed; if (remaining <= 0) { clearInterval(timers[empId]); delete timers[empId]; const emp = AppState.employees.find(e => e.id === empId); if(emp) { showBrowserNotification(`${emp.name}, ${lang.notifBrowserBreakOverTitle}`, lang.notifBrowserBreakOverBody); if (AppState.loggedInUserId === emp.id || AppState.isAdmin) { playSound('notif-sound'); } } autoStopBreak(empId); return; } const m = String(Math.floor(remaining/60)).padStart(2,'0'); const s = String(Math.round(remaining%60)).padStart(2,'0'); if (timerEl) timerEl.textContent = `${lang.timerRemaining}: ${m}:${s}`; if (progressEl) progressEl.style.width = (elapsed / breakDurationSeconds) * 100 + '%'; }; timers[empId] = setInterval(tick, 1000); tick(); }
+function startBreakCountdown(empId) {
+    if (timers[empId]) clearInterval(timers[empId].interval);
+    const tick = () => {
+        const lang = translations[currentLanguage]; const times = getTimes(empId);
+        if (!times.onBreak) { if (timers[empId]) clearInterval(timers[empId].interval); delete timers[empId]; return; }
+        const timerContainerEl = document.getElementById(`timer-container-${empId}`);
+        if (!timerContainerEl) { if (timers[empId]) clearInterval(timers[empId].interval); delete timers[empId]; return; }
+        const timerEl = timerContainerEl.querySelector('.timer-text'); const progressEl = timerContainerEl.querySelector('.progress-bar');
+        const breakDurationSeconds = (getBreakDurations()[times.breakIndex - 1] || 10) * 60;
+        const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000;
+        if (elapsed < breakDurationSeconds) {
+            const remaining = breakDurationSeconds - elapsed;
+            const m = String(Math.floor(remaining / 60)).padStart(2, '0'); const s = String(Math.round(remaining % 60)).padStart(2, '0');
+            if (timerEl) timerEl.textContent = `${lang.timerRemaining}: ${m}:${s}`;
+            if (progressEl) { progressEl.style.width = (elapsed / breakDurationSeconds) * 100 + '%'; progressEl.classList.remove('overtime'); }
+        } else {
+            if (!timers[empId].notified) {
+                const emp = AppState.employees.find(e => e.id === empId);
+                if (emp) { showBrowserNotification(`${emp.name}, ${lang.notifBrowserBreakOverTitle}`, lang.notifBrowserBreakOverBody); }
+                if (AppState.loggedInUserId === empId || AppState.isAdmin) { playSound('notif-sound'); }
+                timers[empId].notified = true;
+            }
+            const overtime = elapsed - breakDurationSeconds;
+            const m = String(Math.floor(overtime / 60)).padStart(2, '0'); const s = String(Math.round(overtime % 60)).padStart(2, '0');
+            if (timerEl) timerEl.textContent = `${lang.timerOvertime}: ${m}:${s}`;
+            if (progressEl) { progressEl.style.width = '100%'; progressEl.classList.add('overtime'); }
+        }
+    };
+    timers[empId] = { interval: setInterval(tick, 1000), notified: false };
+    tick();
+}
 function viewBreakStatsAdmin(empId) {
-    const lang = translations[currentLanguage];
-    const emp = AppState.employees.find(e => e.id === empId); if(!emp) return;
-    const times = getTimes(empId);
+    const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if(!emp) return; const times = getTimes(empId);
     const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0);
-    
     let rulesHtml = `<h4>${lang.modalBreakRules}</h4><ul>`;
-    getBreakDurations().forEach((duration, index) => {
-        rulesHtml += `<li>${lang.breakInstance} ${index + 1}: <strong>${duration} ${lang.minutes}</strong></li>`;
-    });
+    getBreakDurations().forEach((duration, index) => { rulesHtml += `<li>${lang.breakInstance} ${index + 1}: <strong>${duration} ${lang.minutes}</strong></li>`; });
     rulesHtml += `</ul>`;
-
     let historyHtml = `<h4>${lang.modalBreakHistory}</h4>`;
-    if (!times.breakHistory || times.breakHistory.length === 0) {
-        historyHtml += `<p>${lang.modalNoBreakHistory}</p>`;
-    } else {
-        historyHtml += "<ul>";
-        times.breakHistory.forEach(item => {
-            historyHtml += `<li>${lang.breakInstance} ${item.index}: <strong>${formatSeconds(item.duration, true)}</strong></li>`;
-        });
-        historyHtml += "</ul>";
-    }
-
-    let contentHtml = `<h3>${lang.modalBreakStatsTitle} - ${emp.name}</h3>
-                       <p><strong>${lang.modalTotalBreakTime}</strong> ${formatSeconds(totalBreakSeconds, true)}</p>
-                       ${rulesHtml}
-                       ${historyHtml}`;
-    
+    if (!times.breakHistory || times.breakHistory.length === 0) { historyHtml += `<p>${lang.modalNoBreakHistory}</p>`; } 
+    else { historyHtml += "<ul>"; times.breakHistory.forEach(item => { historyHtml += `<li>${lang.breakInstance} ${item.index}: <strong>${formatSeconds(item.duration, true)}</strong></li>`; }); historyHtml += "</ul>"; }
+    let contentHtml = `<h3>${lang.modalBreakStatsTitle} - ${emp.name}</h3> <p><strong>${lang.modalTotalBreakTime}</strong> ${formatSeconds(totalBreakSeconds, true)}</p> ${rulesHtml} ${historyHtml}`;
     showModal(contentHtml);
 }
-
-
-// ===== CÁC HÀM TIỆN ÍCH & KHỞI TẠO =====
-function formatTo12Hour(timeString) {
-    if (!timeString || !timeString.includes(':')) return '--';
-    let [hours, minutes] = timeString.split(':');
-    let h = parseInt(hours, 10);
-    const ampm = h >= 12 ? 'pm' : 'am';
-    h = h % 12;
-    h = h ? h : 12;
-    return `${String(h).padStart(2, '0')}:${minutes}${ampm}`;
-}
+function formatTo12Hour(timeString) { if (!timeString || !timeString.includes(':')) return '--'; let [hours, minutes] = timeString.split(':'); let h = parseInt(hours, 10); const ampm = h >= 12 ? 'pm' : 'am'; h = h % 12; h = h ? h : 12; return `${String(h).padStart(2, '0')}:${minutes}${ampm}`; }
 function unlockAudioContext() { const sound = document.getElementById('notif-sound'); if (sound && sound.paused) { sound.play().catch(()=>{}); sound.pause(); sound.currentTime = 0; } }
 function loginWithId(userId) { unlockAudioContext(); AppState.isAdmin = userId.startsWith('ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); setupRealtimeListeners(); renderEmployees(); }
-function loginWithCode() { 
-    const lang = translations[currentLanguage];
-    const code = document.getElementById('login-code-input').value; 
-    const errorEl = document.getElementById('login-error'); 
-    if (!code) { 
-        errorEl.textContent = lang.loginErrNoCode; 
-        return; 
-    } 
-    if (code.toUpperCase() === 'ADMIN') { 
-        loginWithId('ADMIN1'); 
-    } else { 
-        const employee = AppState.employees.find(e => e.code == code); 
-        if (employee) { 
-            const loginMethod = employee.loginMethod || 'both';
-            if (loginMethod === 'face') {
-                errorEl.textContent = lang.loginErrFaceOnly;
-                return;
-            }
-            loginWithId(employee.id); 
-        } else { 
-            errorEl.textContent = lang.loginErrInvalidCode; 
-        } 
-    } 
-}
+function loginWithCode() { const lang = translations[currentLanguage]; const code = document.getElementById('login-code-input').value; const errorEl = document.getElementById('login-error'); if (!code) { errorEl.textContent = lang.loginErrNoCode; return; } if (code.toUpperCase() === 'ADMIN') { loginWithId('ADMIN1'); } else { const employee = AppState.employees.find(e => e.code == code); if (employee) { const loginMethod = employee.loginMethod || 'both'; if (loginMethod === 'face') { errorEl.textContent = lang.loginErrFaceOnly; return; } loginWithId(employee.id); } else { errorEl.textContent = lang.loginErrInvalidCode; } } }
 async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); if(breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); if (announcementListenerUnsubscribe) announcementListenerUnsubscribe(); if (commentsListenerUnsubscribe) commentsListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; AppState.breakLog = []; AppState.announcement = null; AppState.comments = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
 function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); if (AppState.isAdmin) { adminTab.style.display = 'block'; } else { adminTab.style.display = 'none'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
 const modalBackdrop = document.getElementById('modal-backdrop'); const modalContent = document.getElementById('modal-content'); const modalOk = document.getElementById('modal-ok'); const modalCancel = document.getElementById('modal-cancel'); let onModalOkCallback = null;
 function showModal(htmlContent, onOk, showCancelButton = false) { const lang = translations[currentLanguage]; modalContent.innerHTML = htmlContent; onModalOkCallback = onOk; if (showCancelButton) { modalCancel.style.display = 'inline-block'; modalOk.textContent = lang.ok; modalCancel.textContent = lang.cancel; } else { modalCancel.style.display = 'none'; modalOk.textContent = lang.close; } modalBackdrop.style.display = 'flex'; }
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
 modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
-function formatSeconds(seconds, showFull = false) { 
-    const lang = translations[currentLanguage];
-    const minutes = Math.floor(seconds / 60);
-    if (showFull) {
-        const remainingSeconds = Math.round(seconds % 60);
-        return `${minutes} ${lang.minutes} ${remainingSeconds} ${lang.seconds}`;
-    }
-    if (minutes > 0) return `${minutes}m`;
-    return `${Math.round(seconds)}s`;
-}
+function formatSeconds(seconds, showFull = false) { const lang = translations[currentLanguage]; const minutes = Math.floor(seconds / 60); if (showFull) { const remainingSeconds = Math.round(seconds % 60); return `${minutes} ${lang.minutes} ${remainingSeconds} ${lang.seconds}`; } if (minutes > 0) return `${minutes}m`; return `${Math.round(seconds)}s`; }
 function getWorkDayString(date) { const workDate = new Date(date); if (workDate.getHours() < 6) { workDate.setDate(workDate.getDate() - 1); } return workDate.toISOString().slice(0, 10); }
 async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = translations[currentLanguage].faceLoadingModels; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; }
 async function startVideo() { try { const stream = await navigator.mediaDevices.getUserMedia({ video: {} }); video.srcObject = stream; return new Promise(resolve => { video.onloadedmetadata = () => resolve(video); }); } catch (err) { console.error("Camera Error:", err); return null; } }
@@ -580,13 +344,7 @@ async function loginWithFace() { const lang = translations[currentLanguage]; cur
     const matchedEmployee = AppState.employees.find(e => e.id === bestMatch.label);
     if (matchedEmployee) {
         const loginMethod = matchedEmployee.loginMethod || 'both';
-        if (loginMethod === 'code') {
-            clearTimeout(timeout);
-            stopVideoAndCloseModal();
-            showModal(`<h3>${lang.errorTitle}</h3><p>${lang.loginErrCodeOnly}</p>`);
-            showCodeLogin();
-            return;
-        }
+        if (loginMethod === 'code') { clearTimeout(timeout); stopVideoAndCloseModal(); showModal(`<h3>${lang.errorTitle}</h3><p>${lang.loginErrCodeOnly}</p>`); showCodeLogin(); return; }
     }
     clearTimeout(timeout); stopVideoAndCloseModal(); loginWithId(bestMatch.label); 
 } } }, 500); }
@@ -596,122 +354,40 @@ function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const φ1
 function performActionWithLocationCheck(actionCallback) { const lang = translations[currentLanguage]; const settings = AppState.settings?.locationSettings; if (!settings || !settings.lat || !settings.lon || !settings.radius) { actionCallback(); return; } if (!navigator.geolocation) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrLocationSupport}</p>`); return; } showModal(`<h3>${lang.loadingLocation}</h3>`); navigator.geolocation.getCurrentPosition( (position) => { const distance = calculateDistance(settings.lat, settings.lon, position.coords.latitude, position.coords.longitude); if (distance <= settings.radius) { modalBackdrop.style.display = 'none'; actionCallback(); } else { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrLocationOutside} (${Math.round(distance)}m).</p>`); } }, () => showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrGetLocation}</p>`), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } ); }
 async function requestNotificationPermission() { if ('Notification' in window) await Notification.requestPermission(); }
 function showBrowserNotification(title, body) { if ('Notification'in window && Notification.permission === 'granted') new Notification(title, { body: body }); }
-
-// ===== NEW: Language Functions =====
 function setLanguage(lang) {
-    currentLanguage = lang;
-    localStorage.setItem('appLanguage', lang);
-    updateUIText();
+    currentLanguage = lang; localStorage.setItem('appLanguage', lang); updateUIText();
     if (document.getElementById('app-container').style.display === 'block') {
         renderEmployees(); 
-        if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') {
-            renderAdminPanel();
-        }
-        if (document.getElementById('notification-modal-backdrop').style.display === 'flex') {
-            renderNotificationModal();
-        }
+        if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') { renderAdminPanel(); }
+        if (document.getElementById('notification-modal-backdrop').style.display === 'flex') { renderNotificationModal(); }
     }
 }
 function updateUIText() {
-    const lang = translations[currentLanguage];
-    document.documentElement.lang = currentLanguage;
-    document.querySelector('.login-box h2').textContent = lang.loginTitle;
-    document.getElementById('start-face-login-btn').innerHTML = `<i class="fa-solid fa-camera"></i>&nbsp; ${lang.loginFaceBtn}`;
-    document.querySelector('#code-login-section p').textContent = lang.loginCodePrompt;
-    document.getElementById('login-code-input').placeholder = lang.loginCodePlaceholder;
-    document.getElementById('login-by-code-btn').textContent = lang.loginCodeBtn;
-    document.getElementById('tab-emp').textContent = lang.employeeTab;
-    document.getElementById('tab-admin').textContent = lang.adminTab;
-    document.getElementById('font-size-btn').title = lang.fontSizeBtnTitle;
-    document.getElementById('notification-btn').title = lang.notificationBtnTitle;
-    document.getElementById('language-btn').title = lang.langBtnTitle;
-    document.getElementById('game-btn').title = lang.gameBtnTitle;
-    document.getElementById('logout-btn').title = lang.logoutBtnTitle;
-    document.getElementById('modal-cancel').textContent = lang.cancel;
+    const lang = translations[currentLanguage]; document.documentElement.lang = currentLanguage;
+    document.querySelector('.login-box h2').textContent = lang.loginTitle; document.getElementById('start-face-login-btn').innerHTML = `<i class="fa-solid fa-camera"></i>&nbsp; ${lang.loginFaceBtn}`; document.querySelector('#code-login-section p').textContent = lang.loginCodePrompt; document.getElementById('login-code-input').placeholder = lang.loginCodePlaceholder; document.getElementById('login-by-code-btn').textContent = lang.loginCodeBtn; document.getElementById('tab-emp').textContent = lang.employeeTab; document.getElementById('tab-admin').textContent = lang.adminTab; document.getElementById('font-size-btn').title = lang.fontSizeBtnTitle; document.getElementById('notification-btn').title = lang.notificationBtnTitle; document.getElementById('language-btn').title = lang.langBtnTitle; document.getElementById('game-btn').title = lang.gameBtnTitle; document.getElementById('logout-btn').title = lang.logoutBtnTitle; document.querySelector('.filter-controls label').textContent = lang.sortByLabel; document.querySelector('#sort-filter-select option[value="name"]').textContent = lang.sortByName; document.querySelector('#sort-filter-select option[value="onBreak"]').textContent = lang.sortByOnBreak; document.querySelector('#sort-filter-select option[value="totalBreak"]').textContent = lang.sortByTotalBreak; document.getElementById('modal-cancel').textContent = lang.cancel;
 }
-
 document.getElementById('tab-emp').onclick = ()=>{ document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; document.getElementById('tab-emp').classList.add('active'); document.getElementById('tab-admin').classList.remove('active'); };
 document.getElementById('tab-admin').onclick = ()=>{ document.getElementById('view-emp').style.display='none'; document.getElementById('view-admin').style.display='block'; document.getElementById('tab-admin').classList.add('active'); document.getElementById('tab-emp').classList.remove('active'); renderAdminPanel(); };
-document.getElementById('start-face-login-btn').onclick = loginWithFace;
-document.getElementById('login-by-code-btn').onclick = loginWithCode;
-document.getElementById('logout-btn').onclick = logout;
-document.getElementById('font-size-btn').onclick = () => {
-    const currentSize = fontSizes.find(size => document.body.classList.contains(size)) || fontSizes[0];
-    const currentIndex = fontSizes.indexOf(currentSize);
-    const nextIndex = (currentIndex + 1) % fontSizes.length;
-    const newSize = fontSizes[nextIndex];
-    fontSizes.forEach(size => document.body.classList.remove(size));
-    if (newSize !== 'font-size-normal') { document.body.classList.add(newSize); }
-    localStorage.setItem('appFontSize', newSize);
-    playSound('audio-click');
-};
-document.getElementById('language-btn').onclick = () => {
-    const newLang = currentLanguage === 'vi' ? 'en' : 'vi';
-    setLanguage(newLang);
-    playSound('audio-click');
-};
+document.getElementById('start-face-login-btn').onclick = loginWithFace; document.getElementById('login-by-code-btn').onclick = loginWithCode; document.getElementById('logout-btn').onclick = logout;
+document.getElementById('font-size-btn').onclick = () => { const currentSize = fontSizes.find(size => document.body.classList.contains(size)) || fontSizes[0]; const currentIndex = fontSizes.indexOf(currentSize); const nextIndex = (currentIndex + 1) % fontSizes.length; const newSize = fontSizes[nextIndex]; fontSizes.forEach(size => document.body.classList.remove(size)); if (newSize !== 'font-size-normal') { document.body.classList.add(newSize); } localStorage.setItem('appFontSize', newSize); playSound('audio-click'); };
+document.getElementById('language-btn').onclick = () => { const newLang = currentLanguage === 'vi' ? 'en' : 'vi'; setLanguage(newLang); playSound('audio-click'); };
 document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
 document.getElementById('game-btn').onclick = () => { tetrisModal.style.display = 'flex'; startGame(); };
 document.getElementById('tetris-close-btn').onclick = () => { tetrisModal.style.display = 'none'; if (animationFrameId) cancelAnimationFrame(animationFrameId); };
-document.getElementById('tetris-left').onclick = () => playerMove(-1);
-document.getElementById('tetris-right').onclick = () => playerMove(1);
-document.getElementById('tetris-down').onclick = () => playerDrop();
-document.getElementById('tetris-rotate').onclick = () => playerRotate(1);
-
+document.getElementById('tetris-left').onclick = () => playerMove(-1); document.getElementById('tetris-right').onclick = () => playerMove(1); document.getElementById('tetris-down').onclick = () => playerDrop(); document.getElementById('tetris-rotate').onclick = () => playerRotate(1);
+document.getElementById('sort-filter-select').addEventListener('change', (event) => { currentSortMethod = event.target.value; renderEmployees(); });
 function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
 document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
-
 async function loadInitialData() {
     try {
-        const [empSnapshot, settingsDoc, adminSnapshot] = await Promise.all([
-            db.collection('employees').get(),
-            db.collection('app_state').doc('settings').get(),
-            db.collection('admins').get()
-        ]);
+        const [empSnapshot, settingsDoc, adminSnapshot] = await Promise.all([ db.collection('employees').get(), db.collection('app_state').doc('settings').get(), db.collection('admins').get() ]);
         AppState.employees = empSnapshot.docs.map(doc => doc.data());
         if (settingsDoc.exists) AppState.settings = settingsDoc.data();
         AppState.admins = adminSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-        console.error("Lỗi khi tải dữ liệu ban đầu:", error);
-        alert("Không thể tải dữ liệu từ máy chủ. Vui lòng kiểm tra kết nối mạng.");
-    }
+    } catch (error) { console.error("Lỗi khi tải dữ liệu ban đầu:", error); alert("Không thể tải dữ liệu từ máy chủ. Vui lòng kiểm tra kết nối mạng."); }
 }
-function checkExpiredBreaks() {
-    if (!AppState.employees || !AppState.loggedInUserId) return;
-    const lang = translations[currentLanguage];
-    AppState.employees.forEach(emp => {
-        const times = getTimes(emp.id);
-        if (times.onBreak) {
-            const breakDurationSeconds = (getBreakDurations()[times.breakIndex - 1] || 10) * 60;
-            const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000;
-            if (breakDurationSeconds - elapsed <= 0) {
-                if (timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; }
-                showBrowserNotification(`${emp.name}, ${lang.notifBrowserBreakOverTitle}`, lang.notifBrowserBreakOverBody);
-                if (AppState.loggedInUserId === emp.id || AppState.isAdmin) { playSound('notif-sound'); }
-                autoStopBreak(emp.id);
-            }
-        }
-    });
-}
-
-// ===== TETRIS GAME LOGIC =====
-const tetrisCanvas = document.getElementById('tetris-canvas');
-const tetrisCtx = tetrisCanvas.getContext('2d');
-const tetrisScoreEl = document.getElementById('tetris-score');
-const tetrisLevelEl = document.getElementById('tetris-level');
-const tetrisModal = document.getElementById('tetris-modal-backdrop');
-
-tetrisCtx.scale(20, 20);
-
-let dropCounter = 0;
-let dropInterval = 1000;
-let lastTime = 0;
-let animationFrameId;
-
-const arena = createMatrix(12, 20);
-const player = { pos: { x: 0, y: 0 }, matrix: null, score: 0, level: 0, rows: 0 };
-const colors = [ null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF' ];
-
+const tetrisCanvas = document.getElementById('tetris-canvas'); const tetrisCtx = tetrisCanvas.getContext('2d'); const tetrisScoreEl = document.getElementById('tetris-score'); const tetrisLevelEl = document.getElementById('tetris-level'); const tetrisModal = document.getElementById('tetris-modal-backdrop');
+tetrisCtx.scale(20, 20); let dropCounter = 0; let dropInterval = 1000; let lastTime = 0; let animationFrameId; const arena = createMatrix(12, 20); const player = { pos: { x: 0, y: 0 }, matrix: null, score: 0, level: 0, rows: 0 }; const colors = [ null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF' ];
 function arenaSweep() { let rowCount = 1; outer: for (let y = arena.length - 1; y > 0; --y) { for (let x = 0; x < arena[y].length; ++x) { if (arena[y][x] === 0) { continue outer; } } const row = arena.splice(y, 1)[0].fill(0); arena.unshift(row); ++y; player.score += rowCount * 10; player.rows++; rowCount *= 2; if (player.rows > 0 && player.rows % 10 === 0) { player.level++; dropInterval *= 0.9; tetrisLevelEl.innerText = player.level; } } }
 function collide(arena, player) { const [m, o] = [player.matrix, player.pos]; for (let y = 0; y < m.length; ++y) { for (let x = 0; x < m[y].length; ++x) { if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) { return true; } } } return false; }
 function createMatrix(w, h) { const matrix = []; while (h--) { matrix.push(new Array(w).fill(0)); } return matrix; }
@@ -728,94 +404,32 @@ function update(time = 0) { const deltaTime = time - lastTime; lastTime = time; 
 function updateScore() { tetrisScoreEl.innerText = player.score; tetrisLevelEl.innerText = player.level; }
 function startGame() { playerReset(); updateScore(); if(animationFrameId) cancelAnimationFrame(animationFrameId); update(); }
 document.addEventListener('keydown', event => { if (tetrisModal.style.display !== 'flex') return; if (event.key === 'ArrowLeft') playerMove(-1); else if (event.key === 'ArrowRight') playerMove(1); else if (event.key === 'ArrowDown') playerDrop(); else if (event.key === 'ArrowUp') playerRotate(1); });
-
-// ===== NOTIFICATION LOGIC =====
-const notificationModal = document.getElementById('notification-modal-backdrop');
-const notificationContentEl = document.getElementById('notification-content');
-
+const notificationModal = document.getElementById('notification-modal-backdrop'); const notificationContentEl = document.getElementById('notification-content');
 function formatTimestamp(timestamp) { if (!timestamp) return ''; const date = timestamp.toDate(); return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); }
 function getRandomColorForId(id) { let hash = 0; if (!id || id.length === 0) return '#000000'; for (let i = 0; i < id.length; i++) { hash = id.charCodeAt(i) + ((hash << 5) - hash); } const c = (hash & 0x00FFFFFF).toString(16).toUpperCase(); return "#" + "00000".substring(0, 6 - c.length) + c; }
 async function postAnnouncement() { const textarea = document.getElementById('announcement-textarea'); const content = textarea.value.trim(); if (!content) return; const adminName = AppState.isAdmin ? "Admin" : "Unknown"; const announcementData = { content, postedBy: adminName, timestamp: firebase.firestore.FieldValue.serverTimestamp() }; await db.collection("app_state").doc("announcement").set(announcementData, { merge: true }); renderNotificationModal(); }
 async function createNewAnnouncement() { const lang = translations[currentLanguage]; showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.notifConfirmCreateNew}</p>`, async () => { const batch = db.batch(); AppState.comments.forEach(comment => { const commentRef = db.collection("app_state").doc("announcement").collection("comments").doc(comment.id); batch.delete(commentRef); }); await batch.commit(); const announcementData = { content: "", postedBy: "Admin", timestamp: firebase.firestore.FieldValue.serverTimestamp() }; await db.collection("app_state").doc("announcement").set(announcementData); renderNotificationModal(); }, true); }
 async function postComment() { const input = document.getElementById('comment-input'); const text = input.value.trim(); if (!text) return; const user = AppState.employees.find(e => e.id === AppState.loggedInUserId) || {name: "Admin"}; const commentData = { text, authorId: AppState.loggedInUserId, authorName: user.name, timestamp: firebase.firestore.FieldValue.serverTimestamp() }; await db.collection("app_state").doc("announcement").collection("comments").add(commentData); input.value = ''; }
-
-function renderNotificationModal() {
-    const lang = translations[currentLanguage];
-    let adminHtml = '';
-    if (AppState.isAdmin) {
-        adminHtml = `
-            <textarea id="announcement-textarea" placeholder="${lang.notifNewAnnouncementPlaceholder}">${AppState.announcement?.content || ''}</textarea>
-            <div class="admin-announcement-actions">
-                <button id="post-announcement-btn" class="admin-btn">${lang.notifPostBtn}</button>
-                <button id="new-announcement-btn" class="admin-btn">${lang.notifCreateNewBtn}</button>
-            </div>
-        `;
-    }
-    const announcementTime = AppState.announcement?.timestamp ? formatTimestamp(AppState.announcement.timestamp) : '';
-    const commentsHtml = AppState.comments.map(comment => {
-        const authorColor = getRandomColorForId(comment.authorId || 'default');
-        return `
-        <li class="comment-item">
-            <div class="comment-header">
-                <span class="comment-author" style="color: ${authorColor};">${comment.authorName}</span>
-                <span class="comment-time">${formatTimestamp(comment.timestamp)}</span>
-            </div>
-            <div class="comment-text">${comment.text}</div>
-        </li>
-    `}).join('');
-
-    document.querySelector('.notification-header h3').innerHTML = `<i class="fa-solid fa-bullhorn"></i> ${lang.notifTitle}`;
-    notificationContentEl.innerHTML = `
-        ${adminHtml}
-        <div id="announcement-content">${AppState.announcement?.content || lang.notifNoAnnouncements}</div>
-        <div class="announcement-meta">${announcementTime}</div>
-        <div class="comment-section">
-            <h4>${lang.notifComments}</h4>
-            <ul id="comment-list">${commentsHtml}</ul>
-            <div class="comment-input-area">
-                <input type="text" id="comment-input" placeholder="${lang.notifWriteCommentPlaceholder}">
-                <button id="send-comment-btn">${lang.notifSendBtn}</button>
-            </div>
-        </div>
-    `;
-
-    if (AppState.isAdmin) {
-        document.getElementById('post-announcement-btn').onclick = postAnnouncement;
-        document.getElementById('new-announcement-btn').onclick = createNewAnnouncement;
-    }
-    document.getElementById('send-comment-btn').onclick = postComment;
-    document.getElementById('comment-input').addEventListener('keyup', (event) => { if(event.key === 'Enter') { postComment(); } });
-}
-
+function renderNotificationModal() { const lang = translations[currentLanguage]; let adminHtml = ''; if (AppState.isAdmin) { adminHtml = ` <textarea id="announcement-textarea" placeholder="${lang.notifNewAnnouncementPlaceholder}">${AppState.announcement?.content || ''}</textarea> <div class="admin-announcement-actions"> <button id="post-announcement-btn" class="admin-btn">${lang.notifPostBtn}</button> <button id="new-announcement-btn" class="admin-btn">${lang.notifCreateNewBtn}</button> </div> `; } const announcementTime = AppState.announcement?.timestamp ? formatTimestamp(AppState.announcement.timestamp) : ''; const commentsHtml = AppState.comments.map(comment => { const authorColor = getRandomColorForId(comment.authorId || 'default'); return ` <li class="comment-item"> <div class="comment-header"> <span class="comment-author" style="color: ${authorColor};">${comment.authorName}</span> <span class="comment-time">${formatTimestamp(comment.timestamp)}</span> </div> <div class="comment-text">${comment.text}</div> </li> `}).join(''); document.querySelector('.notification-header h3').innerHTML = `<i class="fa-solid fa-bullhorn"></i> ${lang.notifTitle}`; notificationContentEl.innerHTML = ` ${adminHtml} <div id="announcement-content">${AppState.announcement?.content || lang.notifNoAnnouncements}</div> <div class="announcement-meta">${announcementTime}</div> <div class="comment-section"> <h4>${lang.notifComments}</h4> <ul id="comment-list">${commentsHtml}</ul> <div class="comment-input-area"> <input type="text" id="comment-input" placeholder="${lang.notifWriteCommentPlaceholder}"> <button id="send-comment-btn">${lang.notifSendBtn}</button> </div> </div> `; if (AppState.isAdmin) { document.getElementById('post-announcement-btn').onclick = postAnnouncement; document.getElementById('new-announcement-btn').onclick = createNewAnnouncement; } document.getElementById('send-comment-btn').onclick = postComment; document.getElementById('comment-input').addEventListener('keyup', (event) => { if(event.key === 'Enter') { postComment(); } }); }
 document.getElementById('notification-btn').onclick = () => { renderNotificationModal(); notificationModal.style.display = 'flex'; };
 document.getElementById('notification-close-btn').onclick = () => { notificationModal.style.display = 'none'; };
-
-
 async function initializeApp() {
-    try {
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-    } catch (e) { alert("Lỗi khởi tạo Firebase. Vui lòng kiểm tra lại cấu hình."); return; }
+    try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch (e) { alert("Lỗi khởi tạo Firebase. Vui lòng kiểm tra lại cấu hình."); return; }
     await requestNotificationPermission();
-    
     const savedFontSize = localStorage.getItem('appFontSize') || 'font-size-normal';
     if (savedFontSize !== 'font-size-normal') { document.body.classList.add(savedFontSize); }
-    
-    const savedLang = localStorage.getItem('appLanguage') || 'vi';
-    setLanguage(savedLang);
-    
+    const savedLang = localStorage.getItem('appLanguage') || 'vi'; setLanguage(savedLang);
     await loadInitialData();
     const loggedInId = sessionStorage.getItem('loggedInUserId');
     if (loggedInId) { loginWithId(loggedInId); }
-
-    setInterval(checkSchedules, 5000);
+    setInterval(checkSchedules, 60000); // Check for auto-checkin every minute
+    setInterval(renderEmployees, 5000); 
     loadFaceModels();
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { checkExpiredBreaks(); } });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { renderEmployees(); } });
 }
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed: ', err)); }); }
 function waitForFirebase(callback) { const interval = setInterval(() => { if (typeof firebase !== 'undefined' && firebase.firestore) { clearInterval(interval); callback(); } }, 100); }
 waitForFirebase(initializeApp);
-
 </script>
 </body>
 </html>
