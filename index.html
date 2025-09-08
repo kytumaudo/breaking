@@ -36,7 +36,7 @@ header { position:sticky; top:0; background:var(--text-light); border-bottom:1px
 #tab-emp { background-color: var(--primary); }
 #tab-admin { background-color: var(--danger); }
 .tab.active { opacity: 1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
-#logout-btn, #game-btn, #font-size-btn, #notification-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
+#logout-btn, #game-btn, #font-size-btn, #notification-btn, #language-btn { background: none; border: none; font-size: 18px; color: var(--gray-500); cursor: pointer; padding: 8px; }
 main { padding:8px; max-width:480px; margin:0 auto; }
 .card { background:var(--text-light); border-radius:8px; margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.06); overflow:hidden; border: 1px solid var(--gray-200); transition: opacity 0.3s ease-in-out; }
 .card-header { display:flex; justify-content: space-between; align-items: center; gap:8px; padding: 6px 8px; border-bottom:1px solid var(--gray-100); }
@@ -82,7 +82,6 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .admin-emp-code-input { flex: 1 1 15px; max-width: 60px; }
 .admin-controls-row input, .admin-controls-row select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; } 
 .admin-controls-row input[type="time"] { flex: 1; min-width: 65px; }
-/* NEW: Style for the new select dropdown */
 .admin-login-method-select { flex: 1 1 60px; max-width: 80px; }
 .admin-action-buttons { display: flex; gap: 6px; margin-left: auto; }
 .admin-icon-btn { padding: 8px; border: none; border-radius: 6px; cursor: pointer; color: white; width: 32px; height: 32px; text-align: center; line-height: 1; font-size: 14px;}
@@ -158,7 +157,7 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="language-btn" title="Đổi Ngôn ngữ"><i class="fa-solid fa-globe"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -212,6 +211,29 @@ const firebaseConfig = {
   appId: "1:979758577166:web:5950cf18778a4f0c0dee5f" // THAY BẰNG APP ID CỦA BẠN
 };
 let db;
+
+// ===== NEW: Language and Translations =====
+let currentLanguage = 'vi';
+const translations = {
+    'vi': {
+        'langBtnTitle': 'Đổi Ngôn ngữ', 'fontSizeBtnTitle': 'Đổi cỡ chữ', 'notificationBtnTitle': 'Thông báo', 'gameBtnTitle': 'Game', 'logoutBtnTitle': 'Đăng xuất', 'employeeTab': 'Nhân viên', 'adminTab': 'Quản trị', 'ok': 'OK', 'cancel': 'Hủy', 'close': 'Đóng', 'errorTitle': 'Lỗi', 'successTitle': 'Thành công', 'confirmTitle': 'Xác nhận', 'notificationTitle': 'Thông báo', 'loadingLocation': 'Đang lấy vị trí...',
+        'loginTitle': 'Đăng nhập', 'loginFaceBtn': 'Đăng nhập bằng Khuôn mặt', 'loginCodePrompt': 'Hoặc đăng nhập bằng mã số', 'loginCodePlaceholder': 'Nhập mã số hoặc Admin', 'loginCodeBtn': 'Đăng nhập bằng mã', 'loginErrNoCode': 'Vui lòng nhập mã số.', 'loginErrInvalidCode': 'Mã số không hợp lệ.', 'loginErrFaceOnly': 'Tài khoản này chỉ được đăng nhập bằng khuôn mặt.', 'loginErrCodeOnly': 'Tài khoản này chỉ được đăng nhập bằng mã số.',
+        'statusOnBreak': 'Đang nghỉ', 'statusOffHours': 'Ngoài giờ làm', 'statusWorking': 'Đang làm', 'statusScheduled': 'Đã lên lịch', 'statusNoSchedule': 'Chưa có lịch', 'createAlarmBtnTitle': 'Tạo báo thức lịch nghỉ', 'stopBtn': 'Dừng', 'breakBtn': 'Nghỉ', 'timerRemaining': 'Còn lại', 'breakCountLabel': 'Lần', 'totalBreakLabel': 'Tổng', 'breakTypeLabel': 'Nghỉ', 'breakInstance': 'Lần',
+        'adminHeaderEmployees': 'Quản lý Nhân viên', 'adminHeaderAdmins': 'Quản lý Admin', 'adminHeaderAddEmployee': 'Thêm nhân viên mới', 'adminHeaderSettings': 'Cài đặt Vị trí & Thời gian nghỉ', 'adminNoEmployees': 'Chưa có nhân viên nào.', 'adminEmpNamePlaceholder': 'Tên', 'adminEmpCodePlaceholder': 'Mã số', 'adminLoginMethodTitle': 'Chọn phương thức đăng nhập', 'adminFaceRegBtnTitle': 'Đăng ký khuôn mặt qua Camera', 'adminResetBreaksBtnTitle': 'Reset nghỉ', 'adminDeleteBtnTitle': 'Xóa', 'adminStartTimeTitle': 'Giờ start ca', 'adminBreakTimeTitle': 'Giờ nghỉ lần', 'adminAccountLabel': 'Tài khoản Admin', 'adminAddEmpNameLabel': 'Tên nhân viên', 'adminAddEmpCodeLabel': 'Mã số đăng nhập', 'adminAddEmpBtn': 'Thêm nhân viên', 'adminSettingsLatLabel': 'Vĩ độ', 'adminSettingsLonLabel': 'Kinh độ', 'adminSettingsRadiusLabel': 'Bán kính (mét)', 'adminSettingsSaveBtn': 'Lưu Cài đặt',
+        'modalErrFillFields': 'Vui lòng nhập đủ Tên và Mã số.', 'modalErrCodeExists': 'Mã số đăng nhập đã tồn tại.', 'modalSuccessAddEmp': 'Thêm nhân viên thành công!', 'modalErrAddEmp': 'Không thể thêm nhân viên. Vui lòng thử lại.', 'modalConfirmDelete': 'Bạn có chắc muốn xóa nhân viên', 'modalSuccessDelete': 'Đã xóa nhân viên', 'modalConfirmResetBreaks': 'Reset số lần nghỉ của nhân viên này?', 'modalErrNoFixedBreaks': 'Chưa có lịch nghỉ cố định nào được thiết lập.', 'modalConfirmCreateCalendar': 'Thêm lịch nghỉ hôm nay vào Lịch của điện thoại?', 'modalErrEmptyFields': 'Tên và Mã số không được để trống.', 'modalErrCodeInUse': 'Mã số này đã được sử dụng.', 'modalSuccessSaveSettings': 'Đã lưu cài đặt vị trí.', 'modalErrInvalidLocation': 'Vui lòng nhập thông tin vị trí hợp lệ.', 'modalErrLocationSupport': 'Trình duyệt không hỗ trợ định vị.', 'modalErrLocationOutside': 'Bạn đang ở ngoài khu vực cho phép', 'modalErrGetLocation': 'Không thể lấy được vị trí của bạn.', 'modalBreakStatsTitle': 'Thống kê nghỉ', 'modalTotalBreakTime': 'Tổng thời gian đã nghỉ:', 'modalBreakRules': 'Quy định nghỉ', 'modalBreakHistory': 'Lịch sử nghỉ trong ngày', 'modalNoBreakHistory': 'Chưa có dữ liệu nghỉ trong ngày.', 'minutes': 'phút', 'seconds': 'giây', 'modalOutOfBreaks': 'Đã hết số lần nghỉ giải lao trong ngày.', 'modalConfirmStartBreak': 'Bắt đầu nghỉ lần', 'modalVerifyWithCodeTitle': 'Xác thực bằng Mã số', 'modalVerifyWithCodePrompt': 'Nhập mã số của', 'modalVerifyWithCodeContinue': 'để tiếp tục.', 'modalVerifyCodePlaceholder': 'Nhập mã số', 'modalErrWrongCode': 'Mã số không chính xác.',
+        'faceLoadingModels': 'Đang tải model...', 'faceInitCamera': 'Đang khởi tạo camera...', 'facePositionFace': 'Đưa khuôn mặt vào khung hình...', 'faceNoMatch': 'Không khớp. Thử lại!', 'faceHoldStill': 'Giữ yên...', 'faceMoved': 'Khuôn mặt di chuyển...', 'faceSuccessRegistered': 'Đã đăng ký khuôn mặt cho', 'faceErrNoFaceRegistered': 'Nhân viên này chưa đăng ký khuôn mặt.', 'faceErrNoCamera': 'Không thể truy cập camera.', 'faceErrNoOneRegistered': 'Chưa có ai đăng ký khuôn mặt.', 'faceErrTimeout': 'Không nhận diện được khuôn mặt.',
+        'notifTitle': 'Thông Báo Chung', 'notifNoAnnouncements': 'Chưa có thông báo.', 'notifComments': 'Bình luận', 'notifWriteCommentPlaceholder': 'Viết bình luận...', 'notifSendBtn': 'Gửi', 'notifNewAnnouncementPlaceholder': 'Soạn thông báo mới...', 'notifPostBtn': 'Đăng/Cập nhật', 'notifCreateNewBtn': 'Tạo Mới', 'notifConfirmCreateNew': 'Bạn có chắc muốn xóa thông báo và tất cả bình luận hiện tại để tạo thông báo mới?', 'notifBrowserCheckInTitle': 'đến giờ làm việc!', 'notifBrowserCheckInBody': 'Hệ thống đã tự động check-in.', 'notifBrowserBreakOverTitle': 'hết giờ nghỉ!', 'notifBrowserBreakOverBody': 'Đã hết giờ giải lao.',
+    },
+    'en': {
+        'langBtnTitle': 'Change Language', 'fontSizeBtnTitle': 'Change Font Size', 'notificationBtnTitle': 'Notifications', 'gameBtnTitle': 'Game', 'logoutBtnTitle': 'Logout', 'employeeTab': 'Employee', 'adminTab': 'Admin', 'ok': 'OK', 'cancel': 'Cancel', 'close': 'Close', 'errorTitle': 'Error', 'successTitle': 'Success', 'confirmTitle': 'Confirm', 'notificationTitle': 'Notice', 'loadingLocation': 'Getting location...',
+        'loginTitle': 'Login', 'loginFaceBtn': 'Login with Face', 'loginCodePrompt': 'Or login with code', 'loginCodePlaceholder': 'Enter code or Admin', 'loginCodeBtn': 'Login with Code', 'loginErrNoCode': 'Please enter a code.', 'loginErrInvalidCode': 'Invalid code.', 'loginErrFaceOnly': 'This account can only log in with face recognition.', 'loginErrCodeOnly': 'This account can only log in with a code.',
+        'statusOnBreak': 'On Break', 'statusOffHours': 'Off Hours', 'statusWorking': 'Working', 'statusScheduled': 'Scheduled', 'statusNoSchedule': 'No Schedule', 'createAlarmBtnTitle': 'Create break schedule alarms', 'stopBtn': 'Stop', 'breakBtn': 'Break', 'timerRemaining': 'Remaining', 'breakCountLabel': 'Count', 'totalBreakLabel': 'Total', 'breakTypeLabel': 'Break', 'breakInstance': 'Break',
+        'adminHeaderEmployees': 'Employee Management', 'adminHeaderAdmins': 'Admin Management', 'adminHeaderAddEmployee': 'Add New Employee', 'adminHeaderSettings': 'Location & Break Time Settings', 'adminNoEmployees': 'No employees yet.', 'adminEmpNamePlaceholder': 'Name', 'adminEmpCodePlaceholder': 'Code', 'adminLoginMethodTitle': 'Select login method', 'adminFaceRegBtnTitle': 'Register face via Camera', 'adminResetBreaksBtnTitle': 'Reset Breaks', 'adminDeleteBtnTitle': 'Delete', 'adminStartTimeTitle': 'Shift start time', 'adminBreakTimeTitle': 'Break time for break', 'adminAccountLabel': 'Admin Account', 'adminAddEmpNameLabel': 'Employee Name', 'adminAddEmpCodeLabel': 'Login Code', 'adminAddEmpBtn': 'Add Employee', 'adminSettingsLatLabel': 'Latitude', 'adminSettingsLonLabel': 'Longitude', 'adminSettingsRadiusLabel': 'Radius (meters)', 'adminSettingsSaveBtn': 'Save Settings',
+        'modalErrFillFields': 'Please enter both Name and Code.', 'modalErrCodeExists': 'This login code already exists.', 'modalSuccessAddEmp': 'Employee added successfully!', 'modalErrAddEmp': 'Could not add employee. Please try again.', 'modalConfirmDelete': 'Are you sure you want to delete employee', 'modalSuccessDelete': 'Deleted employee', 'modalConfirmResetBreaks': 'Reset the break count for this employee?', 'modalErrNoFixedBreaks': 'No fixed break schedule has been set.', 'modalConfirmCreateCalendar': 'Add today\'s break schedule to your phone\'s Calendar?', 'modalErrEmptyFields': 'Name and Code cannot be empty.', 'modalErrCodeInUse': 'This code is already in use.', 'modalSuccessSaveSettings': 'Location settings saved.', 'modalErrInvalidLocation': 'Please enter valid location information.', 'modalErrLocationSupport': 'Geolocation is not supported by this browser.', 'modalErrLocationOutside': 'You are outside the allowed area', 'modalErrGetLocation': 'Unable to retrieve your location.', 'modalBreakStatsTitle': 'Break Statistics', 'modalTotalBreakTime': 'Total time on break:', 'modalBreakRules': 'Break Rules', 'modalBreakHistory': 'Break History for Today', 'modalNoBreakHistory': 'No break data for today yet.', 'minutes': 'minutes', 'seconds': 'seconds', 'modalOutOfBreaks': 'You have used all available breaks for the day.', 'modalConfirmStartBreak': 'Start break number', 'modalVerifyWithCodeTitle': 'Verify with Code', 'modalVerifyWithCodePrompt': 'Enter the code for', 'modalVerifyWithCodeContinue': 'to continue.', 'modalVerifyCodePlaceholder': 'Enter code', 'modalErrWrongCode': 'Incorrect code.',
+        'faceLoadingModels': 'Loading models...', 'faceInitCamera': 'Initializing camera...', 'facePositionFace': 'Position your face in the frame...', 'faceNoMatch': 'No match. Try again!', 'faceHoldStill': 'Hold still...', 'faceMoved': 'Face moved...', 'faceSuccessRegistered': 'Successfully registered face for', 'faceErrNoFaceRegistered': 'This employee has not registered a face.', 'faceErrNoCamera': 'Cannot access camera.', 'faceErrNoOneRegistered': 'No one has registered a face yet.', 'faceErrTimeout': 'Could not recognize face.',
+        'notifTitle': 'General Announcement', 'notifNoAnnouncements': 'No announcements yet.', 'notifComments': 'Comments', 'notifWriteCommentPlaceholder': 'Write a comment...', 'notifSendBtn': 'Send', 'notifNewAnnouncementPlaceholder': 'Compose new announcement...', 'notifPostBtn': 'Post/Update', 'notifCreateNewBtn': 'Create New', 'notifConfirmCreateNew': 'Are you sure you want to delete the current announcement and all its comments to create a new one?', 'notifBrowserCheckInTitle': 'it\'s time to work!', 'notifBrowserCheckInBody': 'The system has checked you in automatically.', 'notifBrowserBreakOverTitle': 'break time is over!', 'notifBrowserBreakOverBody': 'Your break time has ended.',
+    }
+};
 
 // Biến để lưu trữ các hàm hủy listener
 let employeeListenerUnsubscribe = null;
@@ -299,26 +321,25 @@ function getTimes(empId) { const emp = AppState.employees.find(e => e.id === emp
 function getBreakDurations() { return AppState.settings?.breakDurations || [10, 40, 10, 10]; }
 
 // ===== CÁC HÀM LOGIC CỦA ỨNG DỤNG =====
-async function addEmployee() { const name = document.getElementById('new-emp-name').value; const code = document.getElementById('new-emp-code').value; if (!name || !code) { showModal("<h3>Lỗi</h3><p>Vui lòng nhập đủ Tên và Mã số.</p>"); return; } if (AppState.employees.some(e => e.code == code)) { showModal("<h3>Lỗi</h3><p>Mã số đăng nhập đã tồn tại.</p>"); return; } const id = "E" + Date.now(); const newEmployee = { id, name, code, faceDescriptor: null, times: getTimes(null), breakTimes: ['', '', '', ''], loginMethod: 'both' }; if (await createEmployee(newEmployee)) { showModal("<h3>Thành công</h3><p>Thêm nhân viên thành công!</p>"); document.getElementById('new-emp-name').value = ''; document.getElementById('new-emp-code').value = '';} else { showModal("<h3>Lỗi</h3><p>Không thể thêm nhân viên. Vui lòng thử lại.</p>"); } }
-async function deleteEmployee(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; showModal(`<h3>Xác nhận Xóa</h3><p>Bạn có chắc muốn xóa nhân viên <strong>${emp.name}</strong>?</p>`, async () => { if (await removeEmployee(empId)) showModal(`<h3>Thành công</h3><p>Đã xóa nhân viên ${emp.name}.</p>`); }, true); }
+async function addEmployee() { const lang = translations[currentLanguage]; const name = document.getElementById('new-emp-name').value; const code = document.getElementById('new-emp-code').value; if (!name || !code) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrFillFields}</p>`); return; } if (AppState.employees.some(e => e.code == code)) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrCodeExists}</p>`); return; } const id = "E" + Date.now(); const newEmployee = { id, name, code, faceDescriptor: null, times: getTimes(null), breakTimes: ['', '', '', ''], loginMethod: 'both' }; if (await createEmployee(newEmployee)) { showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessAddEmp}</p>`); document.getElementById('new-emp-name').value = ''; document.getElementById('new-emp-code').value = '';} else { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrAddEmp}</p>`); } }
+async function deleteEmployee(empId) { const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmDelete} <strong>${emp.name}</strong>?</p>`, async () => { if (await removeEmployee(empId)) showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessDelete} ${emp.name}.</p>`); }, true); }
 function saveSchedule(empId) { const input = document.getElementById(`schedule-${empId}`); updateEmployee(empId, { 'times.scheduledTime': input.value || null }); }
-function resetBreaks(empId) { showModal(`<h3>Xác nhận</h3><p>Reset số lần nghỉ của nhân viên này?</p>`, () => { updateEmployee(empId, { 'times.breakIndex': 0, 'times.breakHistory': [], 'times.onBreak': false, 'times.breakStartTime': null }); }, true); }
-async function updateLoginMethod(empId, method) {
-    await updateEmployee(empId, { loginMethod: method });
-}
+function resetBreaks(empId) { const lang = translations[currentLanguage]; showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmResetBreaks}</p>`, () => { updateEmployee(empId, { 'times.breakIndex': 0, 'times.breakHistory': [], 'times.onBreak': false, 'times.breakStartTime': null }); }, true); }
+async function updateLoginMethod(empId, method) { await updateEmployee(empId, { loginMethod: method }); }
 
-function startBreak(empId) { playSound('audio-break-toggle'); const coreAction = () => { const times = getTimes(empId); const idx = times.breakIndex || 0; const breakDurations = getBreakDurations(); if (idx >= breakDurations.length) { showModal('<h3>Thông báo</h3><p>Đã hết số lần nghỉ giải lao trong ngày.</p>'); return; } showModal(`<h3>Xác nhận</h3><p>Bắt đầu nghỉ lần ${idx + 1}: ${breakDurations[idx]} phút?</p>`, () => { updateEmployee(empId, { 'times.onBreak': true, 'times.breakStartTime': new Date().toISOString(), 'times.breakIndex': idx + 1 }); }, true); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
+function startBreak(empId) { const lang = translations[currentLanguage]; playSound('audio-break-toggle'); const coreAction = () => { const times = getTimes(empId); const idx = times.breakIndex || 0; const breakDurations = getBreakDurations(); if (idx >= breakDurations.length) { showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.modalOutOfBreaks}</p>`); return; } showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmStartBreak} ${idx + 1}: ${breakDurations[idx]} ${lang.minutes}?</p>`, () => { updateEmployee(empId, { 'times.onBreak': true, 'times.breakStartTime': new Date().toISOString(), 'times.breakIndex': idx + 1 }); }, true); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
 function stopBreak(empId) { playSound('audio-break-toggle'); const coreAction = async () => { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
 async function autoStopBreak(empId) { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!emp || !times || !times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }
-async function updateEmployeeInfo(empId, field, value) { const trimmedValue = value.trim(); if (!trimmedValue) { showModal("<h3>Lỗi</h3><p>Tên và Mã số không được để trống.</p>"); renderAdminPanel(); return; } if (field === 'code' && AppState.employees.some(e => e.code === trimmedValue && e.id !== empId)) { showModal("<h3>Lỗi</h3><p>Mã số này đã được sử dụng.</p>"); renderAdminPanel(); return; } await updateEmployee(empId, { [field]: trimmedValue }); }
+async function updateEmployeeInfo(empId, field, value) { const lang = translations[currentLanguage]; const trimmedValue = value.trim(); if (!trimmedValue) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrEmptyFields}</p>`); renderAdminPanel(); return; } if (field === 'code' && AppState.employees.some(e => e.code === trimmedValue && e.id !== empId)) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrCodeInUse}</p>`); renderAdminPanel(); return; } await updateEmployee(empId, { [field]: trimmedValue }); }
 function updateBreakTimes(empId) { const breakTimes = Array.from({ length: 4 }, (_, i) => document.getElementById(`break${i + 1}-${emp.id}`).value || ''); updateEmployee(empId, { breakTimes }); }
 
-function checkSchedules() { if (!AppState.employees || AppState.employees.length === 0 || !AppState.loggedInUserId) return; const now = new Date(); const currentWorkDayString = getWorkDayString(now); const batch = db.batch(); let batchHasWrites = false; AppState.employees.forEach(emp => { let times = getTimes(emp.id); if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) { const newTimes = { scheduledTime: times.scheduledTime, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] }; batch.update(db.collection("employees").doc(emp.id), { times: newTimes }); batchHasWrites = true; } else if (times.scheduledTime && !times.checkInTime) { const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`); if (now >= scheduledDateTime) { const checkInData = { 'times.checkInTime': new Date().toISOString(), 'times.lastCheckInDay': currentWorkDayString }; batch.update(db.collection("employees").doc(emp.id), checkInData); batchHasWrites = true; if (AppState.loggedInUserId === emp.id) { showBrowserNotification(`${emp.name}, đến giờ làm việc!`, `Hệ thống đã tự động check-in.`); } } } }); if (batchHasWrites) { batch.commit().catch(error => console.error("Lỗi khi thực hiện batch update: ", error)); } }
-function createCalendarEvents(empId) { const emp = AppState.employees.find(e => e.id === empId); if (!emp || !emp.breakTimes || emp.breakTimes.every(t => !t)) { showModal("<h3>Thông báo</h3><p>Chưa có lịch nghỉ cố định nào được thiết lập.</p>"); return; } showModal(`<h3>Xác nhận</h3><p>Thêm lịch nghỉ hôm nay vào Lịch của điện thoại?</p>`, () => { const today = new Date().toISOString().slice(0, 10); const formatICSDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Check-in App//EN']; emp.breakTimes.forEach((breakTime, index) => { if (!breakTime) return; const breakDuration = getBreakDurations()[index] || 10; const startDate = new Date(`${today}T${breakTime}`); const endDate = new Date(startDate.getTime() + breakDuration * 60000); icsContent.push('BEGIN:VEVENT', `UID:${emp.id}-break${index + 1}-${today}@checkin.app`, `DTSTAMP:${formatICSDate(new Date())}`, `DTSTART:${formatICSDate(startDate)}`, `DTEND:${formatICSDate(endDate)}`, `SUMMARY:Giờ nghỉ lần ${index + 1} (${emp.name})`, 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Đến giờ nghỉ giải lao!', 'TRIGGER:-PT0M', 'END:VALARM', 'END:VEVENT'); }); icsContent.push('END:VCALENDAR'); const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `LichNghi_${today}.ics`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }, true); }
+function checkSchedules() { if (!AppState.employees || AppState.employees.length === 0 || !AppState.loggedInUserId) return; const lang = translations[currentLanguage]; const now = new Date(); const currentWorkDayString = getWorkDayString(now); const batch = db.batch(); let batchHasWrites = false; AppState.employees.forEach(emp => { let times = getTimes(emp.id); if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) { const newTimes = { scheduledTime: times.scheduledTime, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] }; batch.update(db.collection("employees").doc(emp.id), { times: newTimes }); batchHasWrites = true; } else if (times.scheduledTime && !times.checkInTime) { const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`); if (now >= scheduledDateTime) { const checkInData = { 'times.checkInTime': new Date().toISOString(), 'times.lastCheckInDay': currentWorkDayString }; batch.update(db.collection("employees").doc(emp.id), checkInData); batchHasWrites = true; if (AppState.loggedInUserId === emp.id) { showBrowserNotification(`${emp.name}, ${lang.notifBrowserCheckInTitle}`, lang.notifBrowserCheckInBody); } } } }); if (batchHasWrites) { batch.commit().catch(error => console.error("Lỗi khi thực hiện batch update: ", error)); } }
+function createCalendarEvents(empId) { const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if (!emp || !emp.breakTimes || emp.breakTimes.every(t => !t)) { showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.modalErrNoFixedBreaks}</p>`); return; } showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmCreateCalendar}</p>`, () => { const today = new Date().toISOString().slice(0, 10); const formatICSDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Check-in App//EN']; emp.breakTimes.forEach((breakTime, index) => { if (!breakTime) return; const breakDuration = getBreakDurations()[index] || 10; const startDate = new Date(`${today}T${breakTime}`); const endDate = new Date(startDate.getTime() + breakDuration * 60000); icsContent.push('BEGIN:VEVENT', `UID:${emp.id}-break${index + 1}-${today}@checkin.app`, `DTSTAMP:${formatICSDate(new Date())}`, `DTSTART:${formatICSDate(startDate)}`, `DTEND:${formatICSDate(endDate)}`, `SUMMARY:Giờ nghỉ lần ${index + 1} (${emp.name})`, 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Đến giờ nghỉ giải lao!', 'TRIGGER:-PT0M', 'END:VALARM', 'END:VEVENT'); }); icsContent.push('END:VCALENDAR'); const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `LichNghi_${today}.ics`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }, true); }
 
 // ===== RENDER FUNCTIONS =====
 function activateTimers() { if (!AppState.employees) return; AppState.employees.forEach(emp => { const times = getTimes(emp.id); if (times.onBreak && !timers[emp.id]) { startBreakCountdown(emp.id); } else if (!times.onBreak && timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; } }); }
 function generateEmployeeCardHTML(emp) {
+    const lang = translations[currentLanguage];
     const times = getTimes(emp.id);
     const isCheckedIn = !!times.checkInTime;
     const isOnBreak = times.onBreak;
@@ -328,27 +349,27 @@ function generateEmployeeCardHTML(emp) {
 
     let statusHtml = '';
     if (isOnBreak) {
-        statusHtml = `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> Đang nghỉ</div>`;
+        statusHtml = `<div class="status-badge status-on-break"><i class="fa-solid fa-mug-hot"></i> ${lang.statusOnBreak}</div>`;
     } else if (isOutsideWorkingHours) {
-        statusHtml = `<div class="status-badge status-pending">Ngoài giờ làm</div>`;
+        statusHtml = `<div class="status-badge status-pending">${lang.statusOffHours}</div>`;
     } else if (isCheckedIn) {
-        statusHtml = `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> Đang làm</div>`;
+        statusHtml = `<div class="status-badge status-working"><i class="fa-solid fa-person-running"></i> ${lang.statusWorking}</div>`;
     } else if (times.scheduledTime) {
-        statusHtml = `<div class="status-badge status-scheduled">Đã lên lịch</div>`;
+        statusHtml = `<div class="status-badge status-scheduled">${lang.statusScheduled}</div>`;
     } else {
-        statusHtml = `<div class="status-badge status-pending">Chưa có lịch</div>`;
+        statusHtml = `<div class="status-badge status-pending">${lang.statusNoSchedule}</div>`;
     }
 
     let actionButtonsHtml = '';
     if (emp.id === AppState.loggedInUserId && !AppState.isAdmin) {
         const hasFixedBreaks = emp.breakTimes && emp.breakTimes.some(t => t);
-        const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="Tạo báo thức lịch nghỉ"><i class="fa-solid fa-bell"></i></button>` : '';
+        const alarmBtn = hasFixedBreaks ? `<button class="btn btn-alarm" onclick="createCalendarEvents('${emp.id}')" title="${lang.createAlarmBtnTitle}"><i class="fa-solid fa-bell"></i></button>` : '';
         
         let mainBtn = '';
         if (isOnBreak) {
-            mainBtn = `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>`;
+            mainBtn = `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> ${lang.stopBtn}</button>`;
         } else if (isCheckedIn && !isOutsideWorkingHours) { 
-            mainBtn = `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
+            mainBtn = `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> ${lang.breakBtn}</button>`;
         }
         
         actionButtonsHtml = `<div class="action-buttons">${alarmBtn}${mainBtn}</div>`;
@@ -375,16 +396,16 @@ function generateEmployeeCardHTML(emp) {
                             <span class="value">${formatTo12Hour(times.scheduledTime)}</span>
                         </div>
                         <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')">
-                             <span class="label">Lần:</span>
+                             <span class="label">${lang.breakCountLabel}:</span>
                              <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span>
                         </div>
                         <div class="status-item status-item-total-break">
-                             <span class="label">Tổng:</span>
+                             <span class="label">${lang.totalBreakLabel}:</span>
                              <span class="value">${formatSeconds(totalBreakSeconds)}</span>
                         </div>
                         <div class="status-item status-item-break-type">
-                             <span class="label">Nghỉ:</span>
-                             <span class="value">${isOnBreak ? `Lần ${times.breakIndex}` : '--'}</span>
+                             <span class="label">${lang.breakTypeLabel}:</span>
+                             <span class="value">${isOnBreak ? `${lang.breakInstance} ${times.breakIndex}` : '--'}</span>
                         </div>
                     </div>
                 </div>
@@ -397,19 +418,20 @@ function renderSingleEmployee(empId) { const emp = AppState.employees.find(e => 
 function renderEmployees() { const empListEl = document.getElementById('emp-list'); if (!empListEl || !AppState.employees) return; empListEl.innerHTML = AppState.employees.map(emp => generateEmployeeCardHTML(emp)).join(''); activateTimers(); }
 
 function renderAdminPanel() {
+    const lang = translations[currentLanguage];
     const adminContentEl = document.getElementById('admin-content'); if (!adminContentEl) return;
     const adminIds = ['ADMIN1', 'ADMIN2', 'ADMIN3'];
     
-    let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> Quản lý Nhân viên</h3>`;
+    let scheduleHtml = `<div class="admin-section"><h3><i class="fa-solid fa-clock"></i> ${lang.adminHeaderEmployees}</h3>`;
     if (AppState.employees && AppState.employees.length > 0) {
         scheduleHtml += [...AppState.employees].sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
             const faceRegistered = emp.faceDescriptor && Array.isArray(emp.faceDescriptor) && emp.faceDescriptor.length > 0;
             const breakTimes = emp.breakTimes || ['', '', '', ''];
-            const breakInputsString = Array.from({length: 4}, (_, i) => `<input type="time" id="break${i+1}-${emp.id}" value="${breakTimes[i] || ''}" onblur="updateBreakTimes('${emp.id}')" title="Giờ nghỉ lần ${i+1}">`).join('');
+            const breakInputsString = Array.from({length: 4}, (_, i) => `<input type="time" id="break${i+1}-${emp.id}" value="${breakTimes[i] || ''}" onblur="updateBreakTimes('${emp.id}')" title="${lang.adminBreakTimeTitle} ${i+1}">`).join('');
             
             const loginMethod = emp.loginMethod || 'both';
             const loginMethodDropdown = `
-                <select class="admin-login-method-select" onchange="updateLoginMethod('${emp.id}', this.value)" title="Chọn phương thức đăng nhập">
+                <select class="admin-login-method-select" onchange="updateLoginMethod('${emp.id}', this.value)" title="${lang.adminLoginMethodTitle}">
                     <option value="both" ${loginMethod === 'both' ? 'selected' : ''}>F&C</option>
                     <option value="face" ${loginMethod === 'face' ? 'selected' : ''}>Face</option>
                     <option value="code" ${loginMethod === 'code' ? 'selected' : ''}>Code</option>
@@ -418,74 +440,75 @@ function renderAdminPanel() {
 
             return `<div class="schedule-management-item">
                         <div class="admin-controls-row">
-                            <input type="text" class="admin-emp-name-input" value="${emp.name}" onblur="updateEmployeeInfo('${emp.id}', 'name', this.value)" placeholder="Tên">
+                            <input type="text" class="admin-emp-name-input" value="${emp.name}" onblur="updateEmployeeInfo('${emp.id}', 'name', this.value)" placeholder="${lang.adminEmpNamePlaceholder}">
                             ${loginMethodDropdown}
-                            <input type="text" class="admin-emp-code-input" value="${emp.code}" onblur="updateEmployeeInfo('${emp.id}', 'code', this.value)" placeholder="Mã số">
+                            <input type="text" class="admin-emp-code-input" value="${emp.code}" onblur="updateEmployeeInfo('${emp.id}', 'code', this.value)" placeholder="${lang.adminEmpCodePlaceholder}">
                             <div class="admin-action-buttons">
-                                <button class="admin-icon-btn" style="background-color: ${faceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${emp.id}')" title="Đăng ký khuôn mặt qua Camera"><i class="fa-solid ${faceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button>
-                                <button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="Reset nghỉ"><i class="fa-solid fa-rotate-left"></i></button>
-                                <button class="admin-icon-btn btn-delete-emp" onclick="deleteEmployee('${emp.id}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                                <button class="admin-icon-btn" style="background-color: ${faceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${emp.id}')" title="${lang.adminFaceRegBtnTitle}"><i class="fa-solid ${faceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button>
+                                <button class="admin-icon-btn btn-reset-breaks" onclick="resetBreaks('${emp.id}')" title="${lang.adminResetBreaksBtnTitle}"><i class="fa-solid fa-rotate-left"></i></button>
+                                <button class="admin-icon-btn btn-delete-emp" onclick="deleteEmployee('${emp.id}')" title="${lang.adminDeleteBtnTitle}"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="admin-controls-row">
-                            <input type="time" id="schedule-${emp.id}" value="${getTimes(emp.id).scheduledTime || ''}" onchange="saveSchedule('${emp.id}')" title="Giờ start ca">
+                            <input type="time" id="schedule-${emp.id}" value="${getTimes(emp.id).scheduledTime || ''}" onchange="saveSchedule('${emp.id}')" title="${lang.adminStartTimeTitle}">
                             ${breakInputsString}
                         </div>
                     </div>`;
         }).join('');
     } else { 
-        scheduleHtml += '<p>Chưa có nhân viên nào.</p>'; 
+        scheduleHtml += `<p>${lang.adminNoEmployees}</p>`; 
     }
     scheduleHtml += `</div>`;
     
-    let adminManagementHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-shield"></i> Quản lý Admin</h3>`;
+    let adminManagementHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-shield"></i> ${lang.adminHeaderAdmins}</h3>`;
     adminManagementHtml += adminIds.map((adminId, index) => {
         const adminData = AppState.admins.find(a => a.id === adminId);
         const adminFaceRegistered = adminData?.faceDescriptor && adminData.faceDescriptor.length > 0;
         return `<div class="schedule-management-item">
              <div class="admin-controls-row">
-                <span style="font-weight: 600; flex-grow:1;">Tài khoản Admin ${index + 1}</span>
+                <span style="font-weight: 600; flex-grow:1;">${lang.adminAccountLabel} ${index + 1}</span>
                 <div class="admin-action-buttons">
-                    <button class="admin-icon-btn" style="background-color: ${adminFaceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${adminId}')" title="Đăng ký khuôn mặt qua Camera"><i class="fa-solid ${adminFaceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button>
+                    <button class="admin-icon-btn" style="background-color: ${adminFaceRegistered ? 'var(--ok)' : 'var(--primary)'};" onclick="openFaceModalForRegistration('${adminId}')" title="${lang.adminFaceRegBtnTitle}"><i class="fa-solid ${adminFaceRegistered ? 'fa-user-check' : 'fa-camera'}"></i></button>
                 </div>
             </div>
         </div>`;
     }).join('');
     adminManagementHtml += `</div>`;
     
-    let addEmployeeHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-plus"></i> Thêm nhân viên mới</h3><div class="form-group"><label>Tên nhân viên</label><input type="text" id="new-emp-name"></div><div class="form-group"><label>Mã số đăng nhập</label><input type="text" inputmode="numeric" id="new-emp-code"></div><button class="admin-btn" onclick="addEmployee()">Thêm nhân viên</button></div>`;
+    let addEmployeeHtml = `<div class="admin-section"><h3><i class="fa-solid fa-user-plus"></i> ${lang.adminHeaderAddEmployee}</h3><div class="form-group"><label>${lang.adminAddEmpNameLabel}</label><input type="text" id="new-emp-name"></div><div class="form-group"><label>${lang.adminAddEmpCodeLabel}</label><input type="text" inputmode="numeric" id="new-emp-code"></div><button class="admin-btn" onclick="addEmployee()">${lang.adminAddEmpBtn}</button></div>`;
     
-    let locationSettingsHtml = `<div class="admin-section"><h3><i class="fa-solid fa-map-marker-alt"></i> Cài đặt Vị trí & Thời gian nghỉ</h3><div class="form-group"><label>Vĩ độ</label><input type="number" step="any" id="setting-lat"></div><div class="form-group"><label>Kinh độ</label><input type="number" step="any" id="setting-lon"></div><div class="form-group"><label>Bán kính (mét)</label><input type="number" id="setting-radius"></div><button class="admin-btn" onclick="saveLocationSettingsAction()">Lưu Cài đặt</button></div>`;
+    let locationSettingsHtml = `<div class="admin-section"><h3><i class="fa-solid fa-map-marker-alt"></i> ${lang.adminHeaderSettings}</h3><div class="form-group"><label>${lang.adminSettingsLatLabel}</label><input type="number" step="any" id="setting-lat"></div><div class="form-group"><label>${lang.adminSettingsLonLabel}</label><input type="number" step="any" id="setting-lon"></div><div class="form-group"><label>${lang.adminSettingsRadiusLabel}</label><input type="number" id="setting-radius"></div><button class="admin-btn" onclick="saveLocationSettingsAction()">${lang.adminSettingsSaveBtn}</button></div>`;
     
     adminContentEl.innerHTML = scheduleHtml + adminManagementHtml + addEmployeeHtml + locationSettingsHtml;
     
     const settings = AppState.settings?.locationSettings; if (settings) { document.getElementById('setting-lat').value = settings.lat || ''; document.getElementById('setting-lon').value = settings.lon || ''; document.getElementById('setting-radius').value = settings.radius || 30; }
 }
-function startBreakCountdown(empId){ if (timers[empId]) clearInterval(timers[empId]); const tick = () => { const times = getTimes(empId); if (!times.onBreak) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerContainerEl = document.getElementById(`timer-container-${empId}`); if (!timerContainerEl) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerEl = timerContainerEl.querySelector('.timer-text'); const progressEl = timerContainerEl.querySelector('.progress-bar'); const breakDurationSeconds = (getBreakDurations()[times.breakIndex - 1] || 10) * 60; const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000; const remaining = breakDurationSeconds - elapsed; if (remaining <= 0) { clearInterval(timers[empId]); delete timers[empId]; const emp = AppState.employees.find(e => e.id === empId); if(emp) { showBrowserNotification(`${emp.name}, hết giờ nghỉ!`, 'Đã hết giờ giải lao.'); if (AppState.loggedInUserId === emp.id || AppState.isAdmin) { playSound('notif-sound'); } } autoStopBreak(empId); return; } const m = String(Math.floor(remaining/60)).padStart(2,'0'); const s = String(Math.round(remaining%60)).padStart(2,'0'); if (timerEl) timerEl.textContent = `Còn lại: ${m}:${s}`; if (progressEl) progressEl.style.width = (elapsed / breakDurationSeconds) * 100 + '%'; }; timers[empId] = setInterval(tick, 1000); tick(); }
+function startBreakCountdown(empId){ if (timers[empId]) clearInterval(timers[empId]); const lang = translations[currentLanguage]; const tick = () => { const times = getTimes(empId); if (!times.onBreak) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerContainerEl = document.getElementById(`timer-container-${empId}`); if (!timerContainerEl) { clearInterval(timers[empId]); delete timers[empId]; return; } const timerEl = timerContainerEl.querySelector('.timer-text'); const progressEl = timerContainerEl.querySelector('.progress-bar'); const breakDurationSeconds = (getBreakDurations()[times.breakIndex - 1] || 10) * 60; const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000; const remaining = breakDurationSeconds - elapsed; if (remaining <= 0) { clearInterval(timers[empId]); delete timers[empId]; const emp = AppState.employees.find(e => e.id === empId); if(emp) { showBrowserNotification(`${emp.name}, ${lang.notifBrowserBreakOverTitle}`, lang.notifBrowserBreakOverBody); if (AppState.loggedInUserId === emp.id || AppState.isAdmin) { playSound('notif-sound'); } } autoStopBreak(empId); return; } const m = String(Math.floor(remaining/60)).padStart(2,'0'); const s = String(Math.round(remaining%60)).padStart(2,'0'); if (timerEl) timerEl.textContent = `${lang.timerRemaining}: ${m}:${s}`; if (progressEl) progressEl.style.width = (elapsed / breakDurationSeconds) * 100 + '%'; }; timers[empId] = setInterval(tick, 1000); tick(); }
 function viewBreakStatsAdmin(empId) {
+    const lang = translations[currentLanguage];
     const emp = AppState.employees.find(e => e.id === empId); if(!emp) return;
     const times = getTimes(empId);
     const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0);
     
-    let rulesHtml = `<h4>Quy định nghỉ</h4><ul>`;
+    let rulesHtml = `<h4>${lang.modalBreakRules}</h4><ul>`;
     getBreakDurations().forEach((duration, index) => {
-        rulesHtml += `<li>Lần ${index + 1}: <strong>${duration} phút</strong></li>`;
+        rulesHtml += `<li>${lang.breakInstance} ${index + 1}: <strong>${duration} ${lang.minutes}</strong></li>`;
     });
     rulesHtml += `</ul>`;
 
-    let historyHtml = `<h4>Lịch sử nghỉ trong ngày</h4>`;
+    let historyHtml = `<h4>${lang.modalBreakHistory}</h4>`;
     if (!times.breakHistory || times.breakHistory.length === 0) {
-        historyHtml += `<p>Chưa có dữ liệu nghỉ trong ngày.</p>`;
+        historyHtml += `<p>${lang.modalNoBreakHistory}</p>`;
     } else {
         historyHtml += "<ul>";
         times.breakHistory.forEach(item => {
-            historyHtml += `<li>Lần ${item.index}: <strong>${formatSeconds(item.duration, true)}</strong></li>`;
+            historyHtml += `<li>${lang.breakInstance} ${item.index}: <strong>${formatSeconds(item.duration, true)}</strong></li>`;
         });
         historyHtml += "</ul>";
     }
 
-    let contentHtml = `<h3>Thống kê nghỉ - ${emp.name}</h3>
-                       <p><strong>Tổng thời gian đã nghỉ:</strong> ${formatSeconds(totalBreakSeconds, true)}</p>
+    let contentHtml = `<h3>${lang.modalBreakStatsTitle} - ${emp.name}</h3>
+                       <p><strong>${lang.modalTotalBreakTime}</strong> ${formatSeconds(totalBreakSeconds, true)}</p>
                        ${rulesHtml}
                        ${historyHtml}`;
     
@@ -500,16 +523,17 @@ function formatTo12Hour(timeString) {
     let h = parseInt(hours, 10);
     const ampm = h >= 12 ? 'pm' : 'am';
     h = h % 12;
-    h = h ? h : 12; // the hour '0' should be '12'
+    h = h ? h : 12;
     return `${String(h).padStart(2, '0')}:${minutes}${ampm}`;
 }
 function unlockAudioContext() { const sound = document.getElementById('notif-sound'); if (sound && sound.paused) { sound.play().catch(()=>{}); sound.pause(); sound.currentTime = 0; } }
 function loginWithId(userId) { unlockAudioContext(); AppState.isAdmin = userId.startsWith('ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); setupRealtimeListeners(); renderEmployees(); }
 function loginWithCode() { 
+    const lang = translations[currentLanguage];
     const code = document.getElementById('login-code-input').value; 
     const errorEl = document.getElementById('login-error'); 
     if (!code) { 
-        errorEl.textContent = 'Vui lòng nhập mã số.'; 
+        errorEl.textContent = lang.loginErrNoCode; 
         return; 
     } 
     if (code.toUpperCase() === 'ADMIN') { 
@@ -519,58 +543,93 @@ function loginWithCode() {
         if (employee) { 
             const loginMethod = employee.loginMethod || 'both';
             if (loginMethod === 'face') {
-                errorEl.textContent = 'Tài khoản này chỉ được đăng nhập bằng khuôn mặt.';
+                errorEl.textContent = lang.loginErrFaceOnly;
                 return;
             }
             loginWithId(employee.id); 
         } else { 
-            errorEl.textContent = 'Mã số không hợp lệ.'; 
+            errorEl.textContent = lang.loginErrInvalidCode; 
         } 
     } 
 }
 async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); if(breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); if (announcementListenerUnsubscribe) announcementListenerUnsubscribe(); if (commentsListenerUnsubscribe) commentsListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; AppState.breakLog = []; AppState.announcement = null; AppState.comments = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
 function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); if (AppState.isAdmin) { adminTab.style.display = 'block'; } else { adminTab.style.display = 'none'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
 const modalBackdrop = document.getElementById('modal-backdrop'); const modalContent = document.getElementById('modal-content'); const modalOk = document.getElementById('modal-ok'); const modalCancel = document.getElementById('modal-cancel'); let onModalOkCallback = null;
-function showModal(htmlContent, onOk, showCancelButton = false) { modalContent.innerHTML = htmlContent; onModalOkCallback = onOk; if (showCancelButton) { modalCancel.style.display = 'inline-block'; modalOk.textContent = 'OK'; } else { modalCancel.style.display = 'none'; modalOk.textContent = 'Đóng'; } modalBackdrop.style.display = 'flex'; }
+function showModal(htmlContent, onOk, showCancelButton = false) { const lang = translations[currentLanguage]; modalContent.innerHTML = htmlContent; onModalOkCallback = onOk; if (showCancelButton) { modalCancel.style.display = 'inline-block'; modalOk.textContent = lang.ok; modalCancel.textContent = lang.cancel; } else { modalCancel.style.display = 'none'; modalOk.textContent = lang.close; } modalBackdrop.style.display = 'flex'; }
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
 modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
 function formatSeconds(seconds, showFull = false) { 
+    const lang = translations[currentLanguage];
     const minutes = Math.floor(seconds / 60);
     if (showFull) {
         const remainingSeconds = Math.round(seconds % 60);
-        return `${minutes} phút ${remainingSeconds} giây`;
+        return `${minutes} ${lang.minutes} ${remainingSeconds} ${lang.seconds}`;
     }
     if (minutes > 0) return `${minutes}m`;
     return `${Math.round(seconds)}s`;
 }
 function getWorkDayString(date) { const workDate = new Date(date); if (workDate.getHours() < 6) { workDate.setDate(workDate.getDate() - 1); } return workDate.toISOString().slice(0, 10); }
-async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = 'Đang tải model...'; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; }
+async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = translations[currentLanguage].faceLoadingModels; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; }
 async function startVideo() { try { const stream = await navigator.mediaDevices.getUserMedia({ video: {} }); video.srcObject = stream; return new Promise(resolve => { video.onloadedmetadata = () => resolve(video); }); } catch (err) { console.error("Camera Error:", err); return null; } }
 function stopVideoAndCloseModal() { const stream = video.srcObject; if (stream) { stream.getTracks().forEach(track => track.stop()); video.srcObject = null; } faceModalBackdrop.style.display = 'none'; if (faceDetectionInterval) { clearInterval(faceDetectionInterval); faceDetectionInterval = null; } }
 function showCodeLogin() { document.getElementById('code-login-section').style.display = 'block'; }
 document.getElementById('face-modal-close').onclick = () => { stopVideoAndCloseModal(); if (currentFaceAction.actionType === 'login') showCodeLogin(); else if (currentFaceAction.actionType === 'verify') promptForCodeVerification(currentFaceAction.empId, currentFaceAction.callback); };
-async function openFaceModalForVerification(empId, onSuccess, onFailure) { currentFaceAction = { actionType: 'verify', empId: empId, callback: onSuccess }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); const emp = AppState.employees.find(e => e.id === empId); const faceDescriptor = emp?.faceDescriptor; if (!faceDescriptor || !Array.isArray(faceDescriptor) || faceDescriptor.length === 0) { stopVideoAndCloseModal(); showModal("<h3>Lỗi</h3><p>Nhân viên này chưa đăng ký khuôn mặt.</p>"); onFailure(); return; } faceModalMessage.textContent = 'Đang khởi tạo camera...'; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); onFailure(); return; } faceModalMessage.textContent = 'Đưa khuôn mặt vào khung hình...'; const storedDescriptor = new Float32Array(faceDescriptor); const timeout = setTimeout(() => { stopVideoAndCloseModal(); onFailure(); }, 10000); faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { const distance = faceapi.euclideanDistance(detection.descriptor, storedDescriptor); if (distance < 0.45) { clearTimeout(timeout); stopVideoAndCloseModal(); onSuccess(); } else { faceModalMessage.textContent = 'Không khớp. Thử lại!'; } } }, 300); }
-function promptForCodeVerification(empId, onVerified) { const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; const modalContentHtml = `<h3>Xác thực bằng Mã số</h3><p>Nhập mã số của <strong>${emp.name}</strong> để tiếp tục.</p><div class="form-group"><input type="text" id="verification-code-input" inputmode="numeric" placeholder="Nhập mã số" style="text-align:center; font-size: 18px;"></div>`; showModal(modalContentHtml, () => { const enteredCode = document.getElementById('verification-code-input').value; if (emp.code === enteredCode) onVerified(); else showModal("<h3>Lỗi</h3><p>Mã số không chính xác.</p>"); }, true); }
-async function loginWithFace() { currentFaceAction = { actionType: 'login' }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); const labeledDescriptors = []; const validEmployees = AppState.employees.filter(emp => emp.faceDescriptor && Array.isArray(emp.faceDescriptor) && emp.faceDescriptor.length > 0); validEmployees.forEach(emp => labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(emp.id, [new Float32Array(emp.faceDescriptor)]))); AppState.admins.forEach(admin => { if (admin.faceDescriptor && Array.isArray(admin.faceDescriptor) && admin.faceDescriptor.length > 0) { labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(admin.id, [new Float32Array(admin.faceDescriptor)])); }}); if (labeledDescriptors.length === 0) { stopVideoAndCloseModal(); showModal("<h3>Thông báo</h3><p>Chưa có ai đăng ký khuôn mặt.</p>"); showCodeLogin(); return; } const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.45); faceModalMessage.textContent = 'Đang khởi tạo camera...'; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); showModal("<h3>Lỗi Camera</h3><p>Không thể truy cập camera.</p>"); showCodeLogin(); return; } faceModalMessage.textContent = 'Đưa khuôn mặt vào khung hình...'; const timeout = setTimeout(() => { stopVideoAndCloseModal(); showModal("<h3>Thông báo</h3><p>Không nhận diện được khuôn mặt.</p>"); showCodeLogin(); }, 15000); faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { const bestMatch = faceMatcher.findBestMatch(detection.descriptor); if (bestMatch.label !== 'unknown') { 
+async function openFaceModalForVerification(empId, onSuccess, onFailure) { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'verify', empId: empId, callback: onSuccess }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); const emp = AppState.employees.find(e => e.id === empId); const faceDescriptor = emp?.faceDescriptor; if (!faceDescriptor || !Array.isArray(faceDescriptor) || faceDescriptor.length === 0) { stopVideoAndCloseModal(); showModal(`<h3>${lang.errorTitle}</h3><p>${lang.faceErrNoFaceRegistered}</p>`); onFailure(); return; } faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); onFailure(); return; } faceModalMessage.textContent = lang.facePositionFace; const storedDescriptor = new Float32Array(faceDescriptor); const timeout = setTimeout(() => { stopVideoAndCloseModal(); onFailure(); }, 10000); faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { const distance = faceapi.euclideanDistance(detection.descriptor, storedDescriptor); if (distance < 0.45) { clearTimeout(timeout); stopVideoAndCloseModal(); onSuccess(); } else { faceModalMessage.textContent = lang.faceNoMatch; } } }, 300); }
+function promptForCodeVerification(empId, onVerified) { const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; const modalContentHtml = `<h3>${lang.modalVerifyWithCodeTitle}</h3><p>${lang.modalVerifyWithCodePrompt} <strong>${emp.name}</strong> ${lang.modalVerifyWithCodeContinue}</p><div class="form-group"><input type="text" id="verification-code-input" inputmode="numeric" placeholder="${lang.modalVerifyCodePlaceholder}" style="text-align:center; font-size: 18px;"></div>`; showModal(modalContentHtml, () => { const enteredCode = document.getElementById('verification-code-input').value; if (emp.code === enteredCode) onVerified(); else showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrWrongCode}</p>`); }, true); }
+async function loginWithFace() { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'login' }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); const labeledDescriptors = []; const validEmployees = AppState.employees.filter(emp => emp.faceDescriptor && Array.isArray(emp.faceDescriptor) && emp.faceDescriptor.length > 0); validEmployees.forEach(emp => labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(emp.id, [new Float32Array(emp.faceDescriptor)]))); AppState.admins.forEach(admin => { if (admin.faceDescriptor && Array.isArray(admin.faceDescriptor) && admin.faceDescriptor.length > 0) { labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(admin.id, [new Float32Array(admin.faceDescriptor)])); }}); if (labeledDescriptors.length === 0) { stopVideoAndCloseModal(); showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.faceErrNoOneRegistered}</p>`); showCodeLogin(); return; } const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.45); faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); showModal(`<h3>${lang.errorTitle}</h3><p>${lang.faceErrNoCamera}</p>`); showCodeLogin(); return; } faceModalMessage.textContent = lang.facePositionFace; const timeout = setTimeout(() => { stopVideoAndCloseModal(); showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.faceErrTimeout}</p>`); showCodeLogin(); }, 15000); faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { const bestMatch = faceMatcher.findBestMatch(detection.descriptor); if (bestMatch.label !== 'unknown') { 
     const matchedEmployee = AppState.employees.find(e => e.id === bestMatch.label);
     if (matchedEmployee) {
         const loginMethod = matchedEmployee.loginMethod || 'both';
         if (loginMethod === 'code') {
             clearTimeout(timeout);
             stopVideoAndCloseModal();
-            showModal("<h3>Lỗi</h3><p>Tài khoản này chỉ được đăng nhập bằng mã số.</p>");
+            showModal(`<h3>${lang.errorTitle}</h3><p>${lang.loginErrCodeOnly}</p>`);
             showCodeLogin();
             return;
         }
     }
     clearTimeout(timeout); stopVideoAndCloseModal(); loginWithId(bestMatch.label); 
 } } }, 500); }
-async function openFaceModalForRegistration(targetId) { currentFaceAction = { actionType: 'register', empId: targetId }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); faceModalMessage.textContent = 'Đang khởi tạo camera...'; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); return; } faceModalMessage.textContent = 'Giữ yên khuôn mặt trong khung hình...'; let registrationDescriptor = null; let stableCounter = 0; faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { if (!registrationDescriptor) registrationDescriptor = detection.descriptor; const distance = faceapi.euclideanDistance(detection.descriptor, registrationDescriptor); if (distance < 0.1) { stableCounter++; faceModalMessage.textContent = `Giữ yên... ${stableCounter}/5`; if (stableCounter >= 5) { stopVideoAndCloseModal(); const descriptorArray = Array.from(registrationDescriptor); if (targetId.startsWith('ADMIN')) { await updateAdmin(targetId, { faceDescriptor: descriptorArray }); showModal(`<h3>Thành công</h3><p>Đã đăng ký khuôn mặt cho ${targetId}.</p>`); } else { await updateEmployee(targetId, { faceDescriptor: descriptorArray }); const emp = AppState.employees.find(e => e.id === targetId); showModal(`<h3>Thành công</h3><p>Đã đăng ký khuôn mặt cho ${emp.name}.</p>`); } } } else { registrationDescriptor = detection.descriptor; stableCounter = 0; faceModalMessage.textContent = 'Khuôn mặt di chuyển...'; } } }, 400); }
-async function saveLocationSettingsAction() { const lat = parseFloat(document.getElementById('setting-lat').value); const lon = parseFloat(document.getElementById('setting-lon').value); const radius = parseFloat(document.getElementById('setting-radius').value); if (isNaN(lat) || isNaN(lon) || isNaN(radius)) { showModal("<h3>Lỗi</h3><p>Vui lòng nhập thông tin vị trí hợp lệ.</p>"); return; } if(await updateSettings({ locationSettings: { lat, lon, radius } })) showModal("<h3>Thành công</h3><p>Đã lưu cài đặt vị trí.</p>"); }
+async function openFaceModalForRegistration(targetId) { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'register', empId: targetId }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); return; } faceModalMessage.textContent = lang.facePositionFace; let registrationDescriptor = null; let stableCounter = 0; faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { if (!registrationDescriptor) registrationDescriptor = detection.descriptor; const distance = faceapi.euclideanDistance(detection.descriptor, registrationDescriptor); if (distance < 0.1) { stableCounter++; faceModalMessage.textContent = `${lang.faceHoldStill} ${stableCounter}/5`; if (stableCounter >= 5) { stopVideoAndCloseModal(); const descriptorArray = Array.from(registrationDescriptor); if (targetId.startsWith('ADMIN')) { await updateAdmin(targetId, { faceDescriptor: descriptorArray }); showModal(`<h3>${lang.successTitle}</h3><p>${lang.faceSuccessRegistered} ${targetId}.</p>`); } else { await updateEmployee(targetId, { faceDescriptor: descriptorArray }); const emp = AppState.employees.find(e => e.id === targetId); showModal(`<h3>${lang.successTitle}</h3><p>${lang.faceSuccessRegistered} ${emp.name}.</p>`); } } } else { registrationDescriptor = detection.descriptor; stableCounter = 0; faceModalMessage.textContent = lang.faceMoved; } } }, 400); }
+async function saveLocationSettingsAction() { const lang = translations[currentLanguage]; const lat = parseFloat(document.getElementById('setting-lat').value); const lon = parseFloat(document.getElementById('setting-lon').value); const radius = parseFloat(document.getElementById('setting-radius').value); if (isNaN(lat) || isNaN(lon) || isNaN(radius)) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrInvalidLocation}</p>`); return; } if(await updateSettings({ locationSettings: { lat, lon, radius } })) showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessSaveSettings}</p>`); }
 function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180; const Δφ = (lat2-lat1) * Math.PI/180; const Δλ = (lon2-lon1) * Math.PI/180; const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return R * c; }
-function performActionWithLocationCheck(actionCallback) { const settings = AppState.settings?.locationSettings; if (!settings || !settings.lat || !settings.lon || !settings.radius) { actionCallback(); return; } if (!navigator.geolocation) { showModal("<h3>Lỗi</h3><p>Trình duyệt không hỗ trợ định vị.</p>"); return; } showModal("<h3>Đang lấy vị trí...</h3>"); navigator.geolocation.getCurrentPosition( (position) => { const distance = calculateDistance(settings.lat, settings.lon, position.coords.latitude, position.coords.longitude); if (distance <= settings.radius) { modalBackdrop.style.display = 'none'; actionCallback(); } else { showModal(`<h3>Lỗi</h3><p>Bạn đang ở ngoài khu vực cho phép (${Math.round(distance)}m).</p>`); } }, () => showModal(`<h3>Lỗi</h3><p>Không thể lấy được vị trí của bạn.</p>`), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } ); }
+function performActionWithLocationCheck(actionCallback) { const lang = translations[currentLanguage]; const settings = AppState.settings?.locationSettings; if (!settings || !settings.lat || !settings.lon || !settings.radius) { actionCallback(); return; } if (!navigator.geolocation) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrLocationSupport}</p>`); return; } showModal(`<h3>${lang.loadingLocation}</h3>`); navigator.geolocation.getCurrentPosition( (position) => { const distance = calculateDistance(settings.lat, settings.lon, position.coords.latitude, position.coords.longitude); if (distance <= settings.radius) { modalBackdrop.style.display = 'none'; actionCallback(); } else { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrLocationOutside} (${Math.round(distance)}m).</p>`); } }, () => showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrGetLocation}</p>`), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } ); }
 async function requestNotificationPermission() { if ('Notification' in window) await Notification.requestPermission(); }
 function showBrowserNotification(title, body) { if ('Notification'in window && Notification.permission === 'granted') new Notification(title, { body: body }); }
+
+// ===== NEW: Language Functions =====
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('appLanguage', lang);
+    updateUIText();
+    if (document.getElementById('app-container').style.display === 'block') {
+        renderEmployees(); 
+        if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') {
+            renderAdminPanel();
+        }
+        if (document.getElementById('notification-modal-backdrop').style.display === 'flex') {
+            renderNotificationModal();
+        }
+    }
+}
+function updateUIText() {
+    const lang = translations[currentLanguage];
+    document.documentElement.lang = currentLanguage;
+    document.querySelector('.login-box h2').textContent = lang.loginTitle;
+    document.getElementById('start-face-login-btn').innerHTML = `<i class="fa-solid fa-camera"></i>&nbsp; ${lang.loginFaceBtn}`;
+    document.querySelector('#code-login-section p').textContent = lang.loginCodePrompt;
+    document.getElementById('login-code-input').placeholder = lang.loginCodePlaceholder;
+    document.getElementById('login-by-code-btn').textContent = lang.loginCodeBtn;
+    document.getElementById('tab-emp').textContent = lang.employeeTab;
+    document.getElementById('tab-admin').textContent = lang.adminTab;
+    document.getElementById('font-size-btn').title = lang.fontSizeBtnTitle;
+    document.getElementById('notification-btn').title = lang.notificationBtnTitle;
+    document.getElementById('language-btn').title = lang.langBtnTitle;
+    document.getElementById('game-btn').title = lang.gameBtnTitle;
+    document.getElementById('logout-btn').title = lang.logoutBtnTitle;
+    document.getElementById('modal-cancel').textContent = lang.cancel;
+}
+
 document.getElementById('tab-emp').onclick = ()=>{ document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; document.getElementById('tab-emp').classList.add('active'); document.getElementById('tab-admin').classList.remove('active'); };
 document.getElementById('tab-admin').onclick = ()=>{ document.getElementById('view-emp').style.display='none'; document.getElementById('view-admin').style.display='block'; document.getElementById('tab-admin').classList.add('active'); document.getElementById('tab-emp').classList.remove('active'); renderAdminPanel(); };
 document.getElementById('start-face-login-btn').onclick = loginWithFace;
@@ -581,23 +640,19 @@ document.getElementById('font-size-btn').onclick = () => {
     const currentIndex = fontSizes.indexOf(currentSize);
     const nextIndex = (currentIndex + 1) % fontSizes.length;
     const newSize = fontSizes[nextIndex];
-    
     fontSizes.forEach(size => document.body.classList.remove(size));
-    if (newSize !== 'font-size-normal') {
-       document.body.classList.add(newSize);
-    }
+    if (newSize !== 'font-size-normal') { document.body.classList.add(newSize); }
     localStorage.setItem('appFontSize', newSize);
     playSound('audio-click');
 };
+document.getElementById('language-btn').onclick = () => {
+    const newLang = currentLanguage === 'vi' ? 'en' : 'vi';
+    setLanguage(newLang);
+    playSound('audio-click');
+};
 document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
-document.getElementById('game-btn').onclick = () => {
-    tetrisModal.style.display = 'flex';
-    startGame();
-};
-document.getElementById('tetris-close-btn').onclick = () => {
-    tetrisModal.style.display = 'none';
-    if (animationFrameId) cancelAnimationFrame(animationFrameId);
-};
+document.getElementById('game-btn').onclick = () => { tetrisModal.style.display = 'flex'; startGame(); };
+document.getElementById('tetris-close-btn').onclick = () => { tetrisModal.style.display = 'none'; if (animationFrameId) cancelAnimationFrame(animationFrameId); };
 document.getElementById('tetris-left').onclick = () => playerMove(-1);
 document.getElementById('tetris-right').onclick = () => playerMove(1);
 document.getElementById('tetris-down').onclick = () => playerDrop();
@@ -623,6 +678,7 @@ async function loadInitialData() {
 }
 function checkExpiredBreaks() {
     if (!AppState.employees || !AppState.loggedInUserId) return;
+    const lang = translations[currentLanguage];
     AppState.employees.forEach(emp => {
         const times = getTimes(emp.id);
         if (times.onBreak) {
@@ -630,7 +686,7 @@ function checkExpiredBreaks() {
             const elapsed = (new Date() - new Date(times.breakStartTime)) / 1000;
             if (breakDurationSeconds - elapsed <= 0) {
                 if (timers[emp.id]) { clearInterval(timers[emp.id]); delete timers[emp.id]; }
-                showBrowserNotification(`${emp.name}, hết giờ nghỉ!`, 'Đã hết giờ giải lao.');
+                showBrowserNotification(`${emp.name}, ${lang.notifBrowserBreakOverTitle}`, lang.notifBrowserBreakOverBody);
                 if (AppState.loggedInUserId === emp.id || AppState.isAdmin) { playSound('notif-sound'); }
                 autoStopBreak(emp.id);
             }
@@ -656,257 +712,46 @@ const arena = createMatrix(12, 20);
 const player = { pos: { x: 0, y: 0 }, matrix: null, score: 0, level: 0, rows: 0 };
 const colors = [ null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF' ];
 
-function arenaSweep() {
-    let rowCount = 1;
-    outer: for (let y = arena.length - 1; y > 0; --y) {
-        for (let x = 0; x < arena[y].length; ++x) {
-            if (arena[y][x] === 0) {
-                continue outer;
-            }
-        }
-        const row = arena.splice(y, 1)[0].fill(0);
-        arena.unshift(row);
-        ++y;
-        player.score += rowCount * 10;
-        player.rows++;
-        rowCount *= 2;
-        if (player.rows > 0 && player.rows % 10 === 0) {
-            player.level++;
-            dropInterval *= 0.9;
-            tetrisLevelEl.innerText = player.level;
-        }
-    }
-}
-
-function collide(arena, player) {
-    const [m, o] = [player.matrix, player.pos];
-    for (let y = 0; y < m.length; ++y) {
-        for (let x = 0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-function createMatrix(w, h) {
-    const matrix = [];
-    while (h--) {
-        matrix.push(new Array(w).fill(0));
-    }
-    return matrix;
-}
-
-function createPiece(type) {
-    if (type === 'T') { return [[0, 0, 0], [1, 1, 1], [0, 1, 0]]; }
-    else if (type === 'O') { return [[2, 2], [2, 2]]; }
-    else if (type === 'L') { return [[0, 3, 0], [0, 3, 0], [0, 3, 3]]; }
-    else if (type === 'J') { return [[0, 4, 0], [0, 4, 0], [4, 4, 0]]; }
-    else if (type === 'I') { return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]]; }
-    else if (type === 'S') { return [[0, 6, 6], [6, 6, 0], [0, 0, 0]]; }
-    else if (type === 'Z') { return [[7, 7, 0], [0, 7, 7], [0, 0, 0]]; }
-}
-
-function drawMatrix(matrix, offset) {
-    matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value !== 0) {
-                tetrisCtx.fillStyle = colors[value];
-                tetrisCtx.fillRect(x + offset.x, y + offset.y, 1, 1);
-            }
-        });
-    });
-}
-
-function draw() {
-    tetrisCtx.fillStyle = '#000';
-    tetrisCtx.fillRect(0, 0, tetrisCanvas.width, tetrisCanvas.height);
-    drawMatrix(arena, { x: 0, y: 0 });
-    drawMatrix(player.matrix, player.pos);
-}
-
-function merge(arena, player) {
-    player.matrix.forEach((row, y) => {
-        row.forEach((value, x) => {
-            if (value !== 0) {
-                arena[y + player.pos.y][x + player.pos.x] = value;
-            }
-        });
-    });
-}
-
-function rotate(matrix, dir) {
-    for (let y = 0; y < matrix.length; ++y) {
-        for (let x = 0; x < y; ++x) {
-            [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
-        }
-    }
-    if (dir > 0) { matrix.forEach(row => row.reverse()); }
-    else { matrix.reverse(); }
-}
-
-function playerDrop() {
-    player.pos.y++;
-    if (collide(arena, player)) {
-        player.pos.y--;
-        merge(arena, player);
-        playerReset();
-        arenaSweep();
-        updateScore();
-    }
-    dropCounter = 0;
-}
-
-function playerMove(offset) {
-    player.pos.x += offset;
-    if (collide(arena, player)) {
-        player.pos.x -= offset;
-    }
-}
-
-function playerReset() {
-    const pieces = 'ILJOTSZ';
-    player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
-    player.pos.y = 0;
-    player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
-    if (collide(arena, player)) {
-        arena.forEach(row => row.fill(0));
-        player.score = 0;
-        player.level = 0;
-        player.rows = 0;
-        dropInterval = 1000;
-        updateScore();
-    }
-}
-
-function playerRotate(dir) {
-    const pos = player.pos.x;
-    let offset = 1;
-    rotate(player.matrix, dir);
-    while (collide(arena, player)) {
-        player.pos.x += offset;
-        offset = -(offset + (offset > 0 ? 1 : -1));
-        if (offset > player.matrix[0].length) {
-            rotate(player.matrix, -dir);
-            player.pos.x = pos;
-            return;
-        }
-    }
-}
-
-function update(time = 0) {
-    const deltaTime = time - lastTime;
-    lastTime = time;
-    dropCounter += deltaTime;
-    if (dropCounter > dropInterval) {
-        playerDrop();
-    }
-    draw();
-    animationFrameId = requestAnimationFrame(update);
-}
-
-function updateScore() {
-    tetrisScoreEl.innerText = player.score;
-    tetrisLevelEl.innerText = player.level;
-}
-
-function startGame() {
-    playerReset();
-    updateScore();
-    if(animationFrameId) cancelAnimationFrame(animationFrameId);
-    update();
-}
-
-document.addEventListener('keydown', event => {
-    if (tetrisModal.style.display !== 'flex') return;
-    if (event.key === 'ArrowLeft') playerMove(-1);
-    else if (event.key === 'ArrowRight') playerMove(1);
-    else if (event.key === 'ArrowDown') playerDrop();
-    else if (event.key === 'ArrowUp') playerRotate(1);
-});
+function arenaSweep() { let rowCount = 1; outer: for (let y = arena.length - 1; y > 0; --y) { for (let x = 0; x < arena[y].length; ++x) { if (arena[y][x] === 0) { continue outer; } } const row = arena.splice(y, 1)[0].fill(0); arena.unshift(row); ++y; player.score += rowCount * 10; player.rows++; rowCount *= 2; if (player.rows > 0 && player.rows % 10 === 0) { player.level++; dropInterval *= 0.9; tetrisLevelEl.innerText = player.level; } } }
+function collide(arena, player) { const [m, o] = [player.matrix, player.pos]; for (let y = 0; y < m.length; ++y) { for (let x = 0; x < m[y].length; ++x) { if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) { return true; } } } return false; }
+function createMatrix(w, h) { const matrix = []; while (h--) { matrix.push(new Array(w).fill(0)); } return matrix; }
+function createPiece(type) { if (type === 'T') { return [[0, 0, 0], [1, 1, 1], [0, 1, 0]]; } else if (type === 'O') { return [[2, 2], [2, 2]]; } else if (type === 'L') { return [[0, 3, 0], [0, 3, 0], [0, 3, 3]]; } else if (type === 'J') { return [[0, 4, 0], [0, 4, 0], [4, 4, 0]]; } else if (type === 'I') { return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]]; } else if (type === 'S') { return [[0, 6, 6], [6, 6, 0], [0, 0, 0]]; } else if (type === 'Z') { return [[7, 7, 0], [0, 7, 7], [0, 0, 0]]; } }
+function drawMatrix(matrix, offset) { matrix.forEach((row, y) => { row.forEach((value, x) => { if (value !== 0) { tetrisCtx.fillStyle = colors[value]; tetrisCtx.fillRect(x + offset.x, y + offset.y, 1, 1); } }); }); }
+function draw() { tetrisCtx.fillStyle = '#000'; tetrisCtx.fillRect(0, 0, tetrisCanvas.width, tetrisCanvas.height); drawMatrix(arena, { x: 0, y: 0 }); drawMatrix(player.matrix, player.pos); }
+function merge(arena, player) { player.matrix.forEach((row, y) => { row.forEach((value, x) => { if (value !== 0) { arena[y + player.pos.y][x + player.pos.x] = value; } }); }); }
+function rotate(matrix, dir) { for (let y = 0; y < matrix.length; ++y) { for (let x = 0; x < y; ++x) { [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]]; } } if (dir > 0) { matrix.forEach(row => row.reverse()); } else { matrix.reverse(); } }
+function playerDrop() { player.pos.y++; if (collide(arena, player)) { player.pos.y--; merge(arena, player); playerReset(); arenaSweep(); updateScore(); } dropCounter = 0; }
+function playerMove(offset) { player.pos.x += offset; if (collide(arena, player)) { player.pos.x -= offset; } }
+function playerReset() { const pieces = 'ILJOTSZ'; player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]); player.pos.y = 0; player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0); if (collide(arena, player)) { arena.forEach(row => row.fill(0)); player.score = 0; player.level = 0; player.rows = 0; dropInterval = 1000; updateScore(); } }
+function playerRotate(dir) { const pos = player.pos.x; let offset = 1; rotate(player.matrix, dir); while (collide(arena, player)) { player.pos.x += offset; offset = -(offset + (offset > 0 ? 1 : -1)); if (offset > player.matrix[0].length) { rotate(player.matrix, -dir); player.pos.x = pos; return; } } }
+function update(time = 0) { const deltaTime = time - lastTime; lastTime = time; dropCounter += deltaTime; if (dropCounter > dropInterval) { playerDrop(); } draw(); animationFrameId = requestAnimationFrame(update); }
+function updateScore() { tetrisScoreEl.innerText = player.score; tetrisLevelEl.innerText = player.level; }
+function startGame() { playerReset(); updateScore(); if(animationFrameId) cancelAnimationFrame(animationFrameId); update(); }
+document.addEventListener('keydown', event => { if (tetrisModal.style.display !== 'flex') return; if (event.key === 'ArrowLeft') playerMove(-1); else if (event.key === 'ArrowRight') playerMove(1); else if (event.key === 'ArrowDown') playerDrop(); else if (event.key === 'ArrowUp') playerRotate(1); });
 
 // ===== NOTIFICATION LOGIC =====
 const notificationModal = document.getElementById('notification-modal-backdrop');
 const notificationContentEl = document.getElementById('notification-content');
 
-function formatTimestamp(timestamp) {
-    if (!timestamp) return '';
-    const date = timestamp.toDate();
-    return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-}
-
-function getRandomColorForId(id) {
-    let hash = 0;
-    if (!id || id.length === 0) return '#000000';
-    for (let i = 0; i < id.length; i++) {
-        hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-    return "#" + "00000".substring(0, 6 - c.length) + c;
-}
-
-async function postAnnouncement() {
-    const textarea = document.getElementById('announcement-textarea');
-    const content = textarea.value.trim();
-    if (!content) return;
-    const adminName = AppState.isAdmin ? "Admin" : "Unknown";
-    const announcementData = {
-        content,
-        postedBy: adminName,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    await db.collection("app_state").doc("announcement").set(announcementData, { merge: true });
-    renderNotificationModal();
-}
-
-async function createNewAnnouncement() {
-    showModal("<h3>Xác nhận</h3><p>Bạn có chắc muốn xóa thông báo và tất cả bình luận hiện tại để tạo thông báo mới?</p>", async () => {
-        const batch = db.batch();
-        AppState.comments.forEach(comment => {
-            const commentRef = db.collection("app_state").doc("announcement").collection("comments").doc(comment.id);
-            batch.delete(commentRef);
-        });
-        await batch.commit();
-        
-        const announcementData = { content: "", postedBy: "Admin", timestamp: firebase.firestore.FieldValue.serverTimestamp() };
-        await db.collection("app_state").doc("announcement").set(announcementData);
-        
-        renderNotificationModal();
-    }, true);
-}
-
-
-async function postComment() {
-    const input = document.getElementById('comment-input');
-    const text = input.value.trim();
-    if (!text) return;
-    
-    const user = AppState.employees.find(e => e.id === AppState.loggedInUserId) || {name: "Admin"};
-
-    const commentData = {
-        text,
-        authorId: AppState.loggedInUserId,
-        authorName: user.name,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    await db.collection("app_state").doc("announcement").collection("comments").add(commentData);
-    input.value = '';
-}
+function formatTimestamp(timestamp) { if (!timestamp) return ''; const date = timestamp.toDate(); return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+function getRandomColorForId(id) { let hash = 0; if (!id || id.length === 0) return '#000000'; for (let i = 0; i < id.length; i++) { hash = id.charCodeAt(i) + ((hash << 5) - hash); } const c = (hash & 0x00FFFFFF).toString(16).toUpperCase(); return "#" + "00000".substring(0, 6 - c.length) + c; }
+async function postAnnouncement() { const textarea = document.getElementById('announcement-textarea'); const content = textarea.value.trim(); if (!content) return; const adminName = AppState.isAdmin ? "Admin" : "Unknown"; const announcementData = { content, postedBy: adminName, timestamp: firebase.firestore.FieldValue.serverTimestamp() }; await db.collection("app_state").doc("announcement").set(announcementData, { merge: true }); renderNotificationModal(); }
+async function createNewAnnouncement() { const lang = translations[currentLanguage]; showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.notifConfirmCreateNew}</p>`, async () => { const batch = db.batch(); AppState.comments.forEach(comment => { const commentRef = db.collection("app_state").doc("announcement").collection("comments").doc(comment.id); batch.delete(commentRef); }); await batch.commit(); const announcementData = { content: "", postedBy: "Admin", timestamp: firebase.firestore.FieldValue.serverTimestamp() }; await db.collection("app_state").doc("announcement").set(announcementData); renderNotificationModal(); }, true); }
+async function postComment() { const input = document.getElementById('comment-input'); const text = input.value.trim(); if (!text) return; const user = AppState.employees.find(e => e.id === AppState.loggedInUserId) || {name: "Admin"}; const commentData = { text, authorId: AppState.loggedInUserId, authorName: user.name, timestamp: firebase.firestore.FieldValue.serverTimestamp() }; await db.collection("app_state").doc("announcement").collection("comments").add(commentData); input.value = ''; }
 
 function renderNotificationModal() {
+    const lang = translations[currentLanguage];
     let adminHtml = '';
     if (AppState.isAdmin) {
         adminHtml = `
-            <textarea id="announcement-textarea" placeholder="Soạn thông báo mới...">${AppState.announcement?.content || ''}</textarea>
+            <textarea id="announcement-textarea" placeholder="${lang.notifNewAnnouncementPlaceholder}">${AppState.announcement?.content || ''}</textarea>
             <div class="admin-announcement-actions">
-                <button id="post-announcement-btn" class="admin-btn">Đăng/Cập nhật</button>
-                <button id="new-announcement-btn" class="admin-btn">Tạo Mới</button>
+                <button id="post-announcement-btn" class="admin-btn">${lang.notifPostBtn}</button>
+                <button id="new-announcement-btn" class="admin-btn">${lang.notifCreateNewBtn}</button>
             </div>
         `;
     }
     const announcementTime = AppState.announcement?.timestamp ? formatTimestamp(AppState.announcement.timestamp) : '';
-
     const commentsHtml = AppState.comments.map(comment => {
         const authorColor = getRandomColorForId(comment.authorId || 'default');
         return `
@@ -919,16 +764,17 @@ function renderNotificationModal() {
         </li>
     `}).join('');
 
+    document.querySelector('.notification-header h3').innerHTML = `<i class="fa-solid fa-bullhorn"></i> ${lang.notifTitle}`;
     notificationContentEl.innerHTML = `
         ${adminHtml}
-        <div id="announcement-content">${AppState.announcement?.content || 'Chưa có thông báo.'}</div>
+        <div id="announcement-content">${AppState.announcement?.content || lang.notifNoAnnouncements}</div>
         <div class="announcement-meta">${announcementTime}</div>
         <div class="comment-section">
-            <h4>Bình luận</h4>
+            <h4>${lang.notifComments}</h4>
             <ul id="comment-list">${commentsHtml}</ul>
             <div class="comment-input-area">
-                <input type="text" id="comment-input" placeholder="Viết bình luận...">
-                <button id="send-comment-btn">Gửi</button>
+                <input type="text" id="comment-input" placeholder="${lang.notifWriteCommentPlaceholder}">
+                <button id="send-comment-btn">${lang.notifSendBtn}</button>
             </div>
         </div>
     `;
@@ -938,20 +784,11 @@ function renderNotificationModal() {
         document.getElementById('new-announcement-btn').onclick = createNewAnnouncement;
     }
     document.getElementById('send-comment-btn').onclick = postComment;
-    document.getElementById('comment-input').addEventListener('keyup', (event) => {
-        if(event.key === 'Enter') {
-            postComment();
-        }
-    });
+    document.getElementById('comment-input').addEventListener('keyup', (event) => { if(event.key === 'Enter') { postComment(); } });
 }
 
-document.getElementById('notification-btn').onclick = () => {
-    renderNotificationModal();
-    notificationModal.style.display = 'flex';
-};
-document.getElementById('notification-close-btn').onclick = () => {
-    notificationModal.style.display = 'none';
-};
+document.getElementById('notification-btn').onclick = () => { renderNotificationModal(); notificationModal.style.display = 'flex'; };
+document.getElementById('notification-close-btn').onclick = () => { notificationModal.style.display = 'none'; };
 
 
 async function initializeApp() {
@@ -962,63 +799,22 @@ async function initializeApp() {
     await requestNotificationPermission();
     
     const savedFontSize = localStorage.getItem('appFontSize') || 'font-size-normal';
-    if (savedFontSize !== 'font-size-normal') {
-        document.body.classList.add(savedFontSize);
-    }
+    if (savedFontSize !== 'font-size-normal') { document.body.classList.add(savedFontSize); }
+    
+    const savedLang = localStorage.getItem('appLanguage') || 'vi';
+    setLanguage(savedLang);
     
     await loadInitialData();
     const loggedInId = sessionStorage.getItem('loggedInUserId');
-    if (loggedInId) {
-        loginWithId(loggedInId);
-    }
+    if (loggedInId) { loginWithId(loggedInId); }
 
     setInterval(checkSchedules, 5000);
     loadFaceModels();
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            checkExpiredBreaks();
-        }
-    });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { checkExpiredBreaks(); } });
 }
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed: ', err)); }); }
 function waitForFirebase(callback) { const interval = setInterval(() => { if (typeof firebase !== 'undefined' && firebase.firestore) { clearInterval(interval); callback(); } }, 100); }
 waitForFirebase(initializeApp);
-
-// Event Listeners
-document.getElementById('tab-emp').onclick = ()=>{ document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; document.getElementById('tab-emp').classList.add('active'); document.getElementById('tab-admin').classList.remove('active'); };
-document.getElementById('tab-admin').onclick = ()=>{ document.getElementById('view-emp').style.display='none'; document.getElementById('view-admin').style.display='block'; document.getElementById('tab-admin').classList.add('active'); document.getElementById('tab-emp').classList.remove('active'); renderAdminPanel(); };
-document.getElementById('start-face-login-btn').onclick = loginWithFace;
-document.getElementById('login-by-code-btn').onclick = loginWithCode;
-document.getElementById('logout-btn').onclick = logout;
-document.getElementById('font-size-btn').onclick = () => {
-    const currentSize = fontSizes.find(size => document.body.classList.contains(size)) || fontSizes[0];
-    const currentIndex = fontSizes.indexOf(currentSize);
-    const nextIndex = (currentIndex + 1) % fontSizes.length;
-    const newSize = fontSizes[nextIndex];
-    
-    fontSizes.forEach(size => document.body.classList.remove(size));
-    if (newSize !== 'font-size-normal') {
-       document.body.classList.add(newSize);
-    }
-    localStorage.setItem('appFontSize', newSize);
-    playSound('audio-click');
-};
-document.getElementById('login-code-input').addEventListener('keyup', (event) => { if (event.key === 'Enter') loginWithCode(); });
-document.getElementById('game-btn').onclick = () => {
-    tetrisModal.style.display = 'flex';
-    startGame();
-};
-document.getElementById('tetris-close-btn').onclick = () => {
-    tetrisModal.style.display = 'none';
-    if (animationFrameId) cancelAnimationFrame(animationFrameId);
-};
-document.getElementById('tetris-left').onclick = () => playerMove(-1);
-document.getElementById('tetris-right').onclick = () => playerMove(1);
-document.getElementById('tetris-down').onclick = () => playerDrop();
-document.getElementById('tetris-rotate').onclick = () => playerRotate(1);
-
-function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
-document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
 
 </script>
 </body>
