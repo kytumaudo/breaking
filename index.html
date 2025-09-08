@@ -99,19 +99,29 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 /* Font Size Adjustment Classes */
 body.font-size-small { font-size: 12px; }
 body.font-size-large { font-size: 16px; }
+body.font-size-very-large { font-size: 18px; }
+
 body.font-size-small .emp-name { font-size: 13px; }
 body.font-size-large .emp-name { font-size: 15px; }
+body.font-size-very-large .emp-name { font-size: 16px; }
+
 body.font-size-small .status-item .label { font-size: 9px; }
 body.font-size-large .status-item .label { font-size: 11px; }
+body.font-size-very-large .status-item .label { font-size: 12px; }
+
 body.font-size-small .status-item .value { font-size: 10px; }
 body.font-size-large .status-item .value { font-size: 13px; }
+body.font-size-very-large .status-item .value { font-size: 14px; }
+
 body.font-size-small .admin-controls-row input, body.font-size-small .admin-icon-btn { font-size: 12px; }
 body.font-size-large .admin-controls-row input, body.font-size-large .admin-icon-btn { font-size: 14px; }
+body.font-size-very-large .admin-controls-row input, body.font-size-very-large .admin-icon-btn { font-size: 15px; }
+
 </style>
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="history-log-btn" title="Lịch sử nghỉ"><i class="fa-solid fa-clock-rotate-left"></i></button><button id="change-password-btn" title="Đổi mã đăng nhập"><i class="fa-solid fa-key"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -147,7 +157,7 @@ const canvas = document.getElementById('canvas');
 let modelsLoaded = false;
 let currentFaceAction = { empId: null, actionType: null, callback: null };
 let faceDetectionInterval = null;
-const fontSizes = ['font-size-normal', 'font-size-large', 'font-size-small'];
+const fontSizes = ['font-size-normal', 'font-size-large', 'font-size-very-large', 'font-size-small'];
 
 // ===== CÁC HÀM LÕI VỚI FIRESTORE =====
 function setupRealtimeListeners() {
@@ -245,7 +255,7 @@ function generateEmployeeCardHTML(emp) {
         let mainBtn = '';
         if (isOnBreak) {
             mainBtn = `<button class="btn btn-stop-break" onclick="stopBreak('${emp.id}')"><i class="fa-solid fa-stop"></i> Dừng</button>`;
-        } else if (isCheckedIn) {
+        } else if (isCheckedIn) { // Only show break button if checked in
             mainBtn = `<button class="btn btn-start-break" onclick="startBreak('${emp.id}')"><i class="fa-solid fa-mug-hot"></i> Nghỉ</button>`;
         }
         
@@ -270,7 +280,6 @@ function generateEmployeeCardHTML(emp) {
                 <div class="card-body">
                     <div class="status-section">
                         <div class="status-item status-item-start">
-                            <span class="label">Start:</span>
                             <span class="value">${formatTo12Hour(times.scheduledTime)}</span>
                         </div>
                         <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')">
@@ -282,7 +291,7 @@ function generateEmployeeCardHTML(emp) {
                              <span class="value">${formatSeconds(totalBreakSeconds).replace(' giây', 's').replace(' phút', 'm')}</span>
                         </div>
                         <div class="status-item status-item-break-type">
-                             <span class="label">Loại nghỉ:</span>
+                             <span class="label">Nghỉ:</span>
                              <span class="value">${isOnBreak ? `Lần ${times.breakIndex}` : '--'}</span>
                         </div>
                     </div>
@@ -380,20 +389,6 @@ function viewBreakStatsAdmin(empId) {
     
     showModal(contentHtml);
 }
-function showHistoryLogModal() {
-    let contentHtml = `<h3>Lịch sử nghỉ trong ngày</h3>`;
-    if (!AppState.breakLog || AppState.breakLog.length === 0) {
-        contentHtml += `<p>Chưa có dữ liệu nghỉ trong ngày.</p>`;
-    } else {
-        contentHtml += "<ul>";
-        AppState.breakLog.forEach(log => {
-            const time = new Date(log.timestamp).toLocaleTimeString('vi-VN');
-            contentHtml += `<li><strong>${log.empName}</strong> - Lần ${log.breakIndex} (${formatSeconds(log.duration)}) lúc ${time}</li>`;
-        });
-        contentHtml += "</ul>";
-    }
-    showModal(contentHtml);
-}
 
 
 // ===== CÁC HÀM TIỆN ÍCH & KHỞI TẠO =====
@@ -410,7 +405,7 @@ function unlockAudioContext() { const sound = document.getElementById('notif-sou
 function loginWithId(userId) { unlockAudioContext(); AppState.isAdmin = userId.startsWith('ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); setupRealtimeListeners(); renderEmployees(); }
 function loginWithCode() { const code = document.getElementById('login-code-input').value; const errorEl = document.getElementById('login-error'); if (!code) { errorEl.textContent = 'Vui lòng nhập mã số.'; return; } if (code.toUpperCase() === 'ADMIN') { loginWithId('ADMIN1'); } else { const employee = AppState.employees.find(e => e.code == code); if (employee) { loginWithId(employee.id); } else { errorEl.textContent = 'Mã số không hợp lệ.'; } } }
 async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); if(breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; AppState.breakLog = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
-function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); const changePassBtn = document.getElementById('change-password-btn'); if (AppState.isAdmin) { adminTab.style.display = 'block'; changePassBtn.style.display = 'none'; } else { adminTab.style.display = 'none'; changePassBtn.style.display = 'block'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
+function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); if (AppState.isAdmin) { adminTab.style.display = 'block'; } else { adminTab.style.display = 'none'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
 const modalBackdrop = document.getElementById('modal-backdrop'); const modalContent = document.getElementById('modal-content'); const modalOk = document.getElementById('modal-ok'); const modalCancel = document.getElementById('modal-cancel'); let onModalOkCallback = null;
 function showModal(htmlContent, onOk, showCancelButton = false) { modalContent.innerHTML = htmlContent; onModalOkCallback = onOk; if (showCancelButton) { modalCancel.style.display = 'inline-block'; modalOk.textContent = 'OK'; } else { modalCancel.style.display = 'none'; modalOk.textContent = 'Đóng'; } modalBackdrop.style.display = 'flex'; }
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
@@ -436,8 +431,6 @@ document.getElementById('tab-admin').onclick = ()=>{ document.getElementById('vi
 document.getElementById('start-face-login-btn').onclick = loginWithFace;
 document.getElementById('login-by-code-btn').onclick = loginWithCode;
 document.getElementById('logout-btn').onclick = logout;
-document.getElementById('change-password-btn').onclick = () => { /* Logic đổi mật khẩu */ };
-document.getElementById('history-log-btn').onclick = showHistoryLogModal;
 document.getElementById('font-size-btn').onclick = () => {
     const currentSize = fontSizes.find(size => document.body.classList.contains(size)) || fontSizes[0];
     const currentIndex = fontSizes.indexOf(currentSize);
@@ -445,7 +438,9 @@ document.getElementById('font-size-btn').onclick = () => {
     const newSize = fontSizes[nextIndex];
     
     fontSizes.forEach(size => document.body.classList.remove(size));
-    document.body.classList.add(newSize);
+    if (newSize !== 'font-size-normal') {
+       document.body.classList.add(newSize);
+    }
     localStorage.setItem('appFontSize', newSize);
     playSound('audio-click');
 };
@@ -493,7 +488,9 @@ async function initializeApp() {
     await requestNotificationPermission();
     
     const savedFontSize = localStorage.getItem('appFontSize') || 'font-size-normal';
-    document.body.classList.add(savedFontSize);
+    if (savedFontSize !== 'font-size-normal') {
+        document.body.classList.add(savedFontSize);
+    }
     
     await loadInitialData();
     const loggedInId = sessionStorage.getItem('loggedInUserId');
