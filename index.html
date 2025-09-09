@@ -332,7 +332,17 @@ function showModal(htmlContent, onOk, showCancelButton = false) { const lang = t
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
 modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
 function formatSeconds(seconds, showFull = false) { const lang = translations[currentLanguage]; const minutes = Math.floor(seconds / 60); if (showFull) { const remainingSeconds = Math.round(seconds % 60); return `${minutes} ${lang.minutes} ${remainingSeconds} ${lang.seconds}`; } if (minutes > 0) return `${minutes}m`; return `${Math.round(seconds)}s`; }
-function getWorkDayString(date) { const workDate = new Date(date); if (workDate.getHours() < 6) { workDate.setDate(workDate.getDate() - 1); } return workDate.toISOString().slice(0, 10); }
+function getWorkDayString(date) {
+    const workDate = new Date(date);
+    if (workDate.getHours() < 6) { // Shift cutoff is 6 AM
+        workDate.setDate(workDate.getDate() - 1);
+    }
+    // Use local date components to build the string, avoiding UTC conversion from toISOString()
+    const year = workDate.getFullYear();
+    const month = String(workDate.getMonth() + 1).padStart(2, '0');
+    const day = String(workDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
 async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = translations[currentLanguage].faceLoadingModels; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; }
 async function startVideo() { try { const stream = await navigator.mediaDevices.getUserMedia({ video: {} }); video.srcObject = stream; return new Promise(resolve => { video.onloadedmetadata = () => resolve(video); }); } catch (err) { console.error("Camera Error:", err); return null; } }
 function stopVideoAndCloseModal() { const stream = video.srcObject; if (stream) { stream.getTracks().forEach(track => track.stop()); video.srcObject = null; } faceModalBackdrop.style.display = 'none'; if (faceDetectionInterval) { clearInterval(faceDetectionInterval); faceDetectionInterval = null; } }
@@ -349,7 +359,33 @@ async function loginWithFace() { const lang = translations[currentLanguage]; cur
     clearTimeout(timeout); stopVideoAndCloseModal(); loginWithId(bestMatch.label); 
 } } }, 500); }
 async function openFaceModalForRegistration(targetId) { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'register', empId: targetId }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); return; } faceModalMessage.textContent = lang.facePositionFace; let registrationDescriptor = null; let stableCounter = 0; faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { if (!registrationDescriptor) registrationDescriptor = detection.descriptor; const distance = faceapi.euclideanDistance(detection.descriptor, registrationDescriptor); if (distance < 0.1) { stableCounter++; faceModalMessage.textContent = `${lang.faceHoldStill} ${stableCounter}/5`; if (stableCounter >= 5) { stopVideoAndCloseModal(); const descriptorArray = Array.from(registrationDescriptor); if (targetId.startsWith('ADMIN')) { await updateAdmin(targetId, { faceDescriptor: descriptorArray }); showModal(`<h3>${lang.successTitle}</h3><p>${lang.faceSuccessRegistered} ${targetId}.</p>`); } else { await updateEmployee(targetId, { faceDescriptor: descriptorArray }); const emp = AppState.employees.find(e => e.id === targetId); showModal(`<h3>${lang.successTitle}</h3><p>${lang.faceSuccessRegistered} ${emp.name}.</p>`); } } } else { registrationDescriptor = detection.descriptor; stableCounter = 0; faceModalMessage.textContent = lang.faceMoved; } } }, 400); }
-async function saveLocationSettingsAction() { const lang = translations[currentLanguage]; const lat = parseFloat(document.getElementById('setting-lat').value); const lon = parseFloat(document.getElementById('setting-lon').value); const radius = parseFloat(document.getElementById('setting-radius').value); if (isNaN(lat) || isNaN(lon) || isNaN(radius)) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrInvalidLocation}</p>`); return; } if(await updateSettings({ locationSettings: { lat, lon, radius } })) showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessSaveSettings}</p>`); }
+async function saveLocationSettingsAction() {
+    const lang = translations[currentLanguage];
+    const latInput = document.getElementById('setting-lat').value;
+    const lonInput = document.getElementById('setting-lon').value;
+    const radiusInput = document.getElementById('setting-radius').value;
+
+    // If all fields are empty, allow saving to disable location checks
+    if (latInput === '' && lonInput === '' && radiusInput === '') {
+        if (await updateSettings({ locationSettings: { lat: null, lon: null, radius: null } })) {
+            showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessSaveSettings}</p>`);
+        }
+        return;
+    }
+
+    const lat = parseFloat(latInput);
+    const lon = parseFloat(lonInput);
+    const radius = parseFloat(radiusInput);
+
+    // Otherwise, all fields must be valid numbers
+    if (isNaN(lat) || isNaN(lon) || isNaN(radius)) {
+        showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrInvalidLocation}</p>`);
+        return;
+    }
+    if(await updateSettings({ locationSettings: { lat, lon, radius } })) {
+        showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessSaveSettings}</p>`);
+    }
+}
 function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180; const Δφ = (lat2-lat1) * Math.PI/180; const Δλ = (lon2-lon1) * Math.PI/180; const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return R * c; }
 function performActionWithLocationCheck(actionCallback) { const lang = translations[currentLanguage]; const settings = AppState.settings?.locationSettings; if (!settings || !settings.lat || !settings.lon || !settings.radius) { actionCallback(); return; } if (!navigator.geolocation) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrLocationSupport}</p>`); return; } showModal(`<h3>${lang.loadingLocation}</h3>`); navigator.geolocation.getCurrentPosition( (position) => { const distance = calculateDistance(settings.lat, settings.lon, position.coords.latitude, position.coords.longitude); if (distance <= settings.radius) { modalBackdrop.style.display = 'none'; actionCallback(); } else { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrLocationOutside} (${Math.round(distance)}m).</p>`); } }, () => showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrGetLocation}</p>`), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } ); }
 async function requestNotificationPermission() { if ('Notification' in window) await Notification.requestPermission(); }
