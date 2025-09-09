@@ -423,7 +423,7 @@ async function initializeApp() {
     const loggedInId = sessionStorage.getItem('loggedInUserId');
     if (loggedInId) { loginWithId(loggedInId); }
     setInterval(checkSchedules, 60000); // Check for auto-checkin every minute
-    setInterval(renderEmployees, 5000); 
+    
     loadFaceModels();
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { renderEmployees(); } });
 }
