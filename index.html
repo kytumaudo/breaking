@@ -147,7 +147,7 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="language-btn" title="Đổi Ngôn ngữ"><i class="fa-solid fa-globe"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div class="filter-controls"><label for="sort-filter-select">Sắp xếp:</label><select id="sort-filter-select"><option value="name">Theo Tên</option><option value="onBreak">Đang Nghỉ</option><option value="totalBreak">Tổng TG Nghỉ</option></select></div><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="language-btn" title="Đổi Ngôn ngữ"><i class="fa-solid fa-globe"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div class="filter-controls"><label for="sort-filter-select">Sắp xếp:</label><select id="sort-filter-select"><option value="name">Theo Tên</option><option value="onBreak">Đang Nghỉ</option><option value="totalBreak">Tổng TG Nghỉ</option></select><label for="history-filter-select">Xem LS nghỉ:</label><select id="history-filter-select"><option value="today">Hôm nay</option><option value="yesterday">Hôm qua</option><option value="last2days">2 ngày qua</option></select></div><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -171,6 +171,7 @@ const translations = {
         'loginTitle': 'Đăng nhập', 'loginFaceBtn': 'Đăng nhập bằng Khuôn mặt', 'loginCodePrompt': 'Hoặc đăng nhập bằng mã số', 'loginCodePlaceholder': 'Nhập mã số hoặc Admin', 'loginCodeBtn': 'Đăng nhập bằng mã', 'loginErrNoCode': 'Vui lòng nhập mã số.', 'loginErrInvalidCode': 'Mã số không hợp lệ.', 'loginErrFaceOnly': 'Tài khoản này chỉ được đăng nhập bằng khuôn mặt.', 'loginErrCodeOnly': 'Tài khoản này chỉ được đăng nhập bằng mã số.',
         'statusOnBreak': 'Đang nghỉ', 'statusOffHours': 'Ngoài giờ làm', 'statusWorking': 'Đang làm', 'statusScheduled': 'Đã lên lịch', 'statusNoSchedule': 'Chưa có lịch', 'createAlarmBtnTitle': 'Tạo báo thức lịch nghỉ', 'stopBtn': 'Dừng', 'breakBtn': 'Nghỉ', 'timerRemaining': 'Còn lại', 'timerOvertime': 'Quá giờ', 'breakCountLabel': 'Lần', 'totalBreakLabel': 'Tổng', 'breakTypeLabel': 'Nghỉ', 'breakInstance': 'Lần',
         'sortByLabel': 'Sắp xếp:', 'sortByName': 'Theo Tên', 'sortByOnBreak': 'Đang Nghỉ', 'sortByTotalBreak': 'Tổng TG Nghỉ',
+        'historyFilterLabel': 'Xem LS nghỉ:', 'historyToday': 'Hôm nay', 'historyYesterday': 'Hôm qua', 'historyLast2Days': '2 ngày qua', 'modalHistoryTitle': 'Lịch sử nghỉ', 'modalHistoryForDate': 'Dữ liệu cho ngày', 'modalNoHistoryForDate': 'Không có dữ liệu nghỉ cho ngày đã chọn.',
         'adminHeaderEmployees': 'Quản lý Nhân viên', 'adminHeaderAdmins': 'Quản lý Admin', 'adminHeaderAddEmployee': 'Thêm nhân viên mới', 'adminHeaderSettings': 'Cài đặt Vị trí & Thời gian nghỉ', 'adminNoEmployees': 'Chưa có nhân viên nào.', 'adminEmpNamePlaceholder': 'Tên', 'adminEmpCodePlaceholder': 'Mã số', 'adminLoginMethodTitle': 'Chọn phương thức đăng nhập', 'adminFaceRegBtnTitle': 'Đăng ký khuôn mặt qua Camera', 'adminResetBreaksBtnTitle': 'Reset nghỉ', 'adminDeleteBtnTitle': 'Xóa', 'adminStartTimeTitle': 'Giờ start ca', 'adminBreakTimeTitle': 'Giờ nghỉ lần', 'adminAccountLabel': 'Tài khoản Admin', 'adminAddEmpNameLabel': 'Tên nhân viên', 'adminAddEmpCodeLabel': 'Mã số đăng nhập', 'adminAddEmpBtn': 'Thêm nhân viên', 'adminSettingsLatLabel': 'Vĩ độ', 'adminSettingsLonLabel': 'Kinh độ', 'adminSettingsRadiusLabel': 'Bán kính (mét)', 'adminSettingsSaveBtn': 'Lưu Cài đặt',
         'modalErrFillFields': 'Vui lòng nhập đủ Tên và Mã số.', 'modalErrCodeExists': 'Mã số đăng nhập đã tồn tại.', 'modalSuccessAddEmp': 'Thêm nhân viên thành công!', 'modalErrAddEmp': 'Không thể thêm nhân viên. Vui lòng thử lại.', 'modalConfirmDelete': 'Bạn có chắc muốn xóa nhân viên', 'modalSuccessDelete': 'Đã xóa nhân viên', 'modalConfirmResetBreaks': 'Reset số lần nghỉ của nhân viên này?', 'modalErrNoFixedBreaks': 'Chưa có lịch nghỉ cố định nào được thiết lập.', 'modalConfirmCreateCalendar': 'Thêm lịch nghỉ hôm nay vào Lịch của điện thoại?', 'modalErrEmptyFields': 'Tên và Mã số không được để trống.', 'modalErrCodeInUse': 'Mã số này đã được sử dụng.', 'modalSuccessSaveSettings': 'Đã lưu cài đặt vị trí.', 'modalErrInvalidLocation': 'Vui lòng nhập thông tin vị trí hợp lệ.', 'modalErrLocationSupport': 'Trình duyệt không hỗ trợ định vị.', 'modalErrLocationOutside': 'Bạn đang ở ngoài khu vực cho phép', 'modalErrGetLocation': 'Không thể lấy được vị trí của bạn.', 'modalBreakStatsTitle': 'Thống kê nghỉ', 'modalTotalBreakTime': 'Tổng thời gian đã nghỉ:', 'modalBreakRules': 'Quy định nghỉ', 'modalBreakHistory': 'Lịch sử nghỉ trong ngày', 'modalNoBreakHistory': 'Chưa có dữ liệu nghỉ trong ngày.', 'minutes': 'phút', 'seconds': 'giây', 'modalOutOfBreaks': 'Đã hết số lần nghỉ giải lao trong ngày.', 'modalConfirmStartBreak': 'Bắt đầu nghỉ lần', 'modalVerifyWithCodeTitle': 'Xác thực bằng Mã số', 'modalVerifyWithCodePrompt': 'Nhập mã số của', 'modalVerifyWithCodeContinue': 'để tiếp tục.', 'modalVerifyCodePlaceholder': 'Nhập mã số', 'modalErrWrongCode': 'Mã số không chính xác.',
         'faceLoadingModels': 'Đang tải model...', 'faceInitCamera': 'Đang khởi tạo camera...', 'facePositionFace': 'Đưa khuôn mặt vào khung hình...', 'faceNoMatch': 'Không khớp. Thử lại!', 'faceHoldStill': 'Giữ yên...', 'faceMoved': 'Khuôn mặt di chuyển...', 'faceSuccessRegistered': 'Đã đăng ký khuôn mặt cho', 'faceErrNoFaceRegistered': 'Nhân viên này chưa đăng ký khuôn mặt.', 'faceErrNoCamera': 'Không thể truy cập camera.', 'faceErrNoOneRegistered': 'Chưa có ai đăng ký khuôn mặt.', 'faceErrTimeout': 'Không nhận diện được khuôn mặt.',
@@ -181,6 +182,7 @@ const translations = {
         'loginTitle': 'Login', 'loginFaceBtn': 'Login with Face', 'loginCodePrompt': 'Or login with code', 'loginCodePlaceholder': 'Enter code or Admin', 'loginCodeBtn': 'Login with Code', 'loginErrNoCode': 'Please enter a code.', 'loginErrInvalidCode': 'Invalid code.', 'loginErrFaceOnly': 'This account can only log in with face recognition.', 'loginErrCodeOnly': 'This account can only log in with a code.',
         'statusOnBreak': 'On Break', 'statusOffHours': 'Off Hours', 'statusWorking': 'Working', 'statusScheduled': 'Scheduled', 'statusNoSchedule': 'No Schedule', 'createAlarmBtnTitle': 'Create break schedule alarms', 'stopBtn': 'Stop', 'breakBtn': 'Break', 'timerRemaining': 'Remaining', 'timerOvertime': 'Overtime', 'breakCountLabel': 'Count', 'totalBreakLabel': 'Total', 'breakTypeLabel': 'Break', 'breakInstance': 'Break',
         'sortByLabel': 'Sort by:', 'sortByName': 'By Name', 'sortByOnBreak': 'On Break', 'sortByTotalBreak': 'Total Break Time',
+        'historyFilterLabel': 'View History:', 'historyToday': 'Today', 'historyYesterday': 'Yesterday', 'historyLast2Days': 'Last 2 days', 'modalHistoryTitle': 'Break History', 'modalHistoryForDate': 'Data for date', 'modalNoHistoryForDate': 'No break data for the selected date.',
         'adminHeaderEmployees': 'Employee Management', 'adminHeaderAdmins': 'Admin Management', 'adminHeaderAddEmployee': 'Add New Employee', 'adminHeaderSettings': 'Location & Break Time Settings', 'adminNoEmployees': 'No employees yet.', 'adminEmpNamePlaceholder': 'Name', 'adminEmpCodePlaceholder': 'Code', 'adminLoginMethodTitle': 'Select login method', 'adminFaceRegBtnTitle': 'Register face via Camera', 'adminResetBreaksBtnTitle': 'Reset Breaks', 'adminDeleteBtnTitle': 'Delete', 'adminStartTimeTitle': 'Shift start time', 'adminBreakTimeTitle': 'Break time for break', 'adminAccountLabel': 'Admin Account', 'adminAddEmpNameLabel': 'Employee Name', 'adminAddEmpCodeLabel': 'Login Code', 'adminAddEmpBtn': 'Add Employee', 'adminSettingsLatLabel': 'Latitude', 'adminSettingsLonLabel': 'Longitude', 'adminSettingsRadiusLabel': 'Radius (meters)', 'adminSettingsSaveBtn': 'Save Settings',
         'modalErrFillFields': 'Please enter both Name and Code.', 'modalErrCodeExists': 'This login code already exists.', 'modalSuccessAddEmp': 'Employee added successfully!', 'modalErrAddEmp': 'Could not add employee. Please try again.', 'modalConfirmDelete': 'Are you sure you want to delete employee', 'modalSuccessDelete': 'Deleted employee', 'modalConfirmResetBreaks': 'Reset the break count for this employee?', 'modalErrNoFixedBreaks': 'No fixed break schedule has been set.', 'modalConfirmCreateCalendar': 'Add today\'s break schedule to your phone\'s Calendar?', 'modalErrEmptyFields': 'Name and Code cannot be empty.', 'modalErrCodeInUse': 'This code is already in use.', 'modalSuccessSaveSettings': 'Location settings saved.', 'modalErrInvalidLocation': 'Please enter valid location information.', 'modalErrLocationSupport': 'Geolocation is not supported by this browser.', 'modalErrLocationOutside': 'You are outside the allowed area', 'modalErrGetLocation': 'Unable to retrieve your location.', 'modalBreakStatsTitle': 'Break Statistics', 'modalTotalBreakTime': 'Total time on break:', 'modalBreakRules': 'Break Rules', 'modalBreakHistory': 'Break History for Today', 'modalNoBreakHistory': 'No break data for today yet.', 'minutes': 'minutes', 'seconds': 'seconds', 'modalOutOfBreaks': 'You have used all available breaks for the day.', 'modalConfirmStartBreak': 'Start break number', 'modalVerifyWithCodeTitle': 'Verify with Code', 'modalVerifyWithCodePrompt': 'Enter the code for', 'modalVerifyWithCodeContinue': 'to continue.', 'modalVerifyCodePlaceholder': 'Enter code', 'modalErrWrongCode': 'Incorrect code.',
         'faceLoadingModels': 'Loading models...', 'faceInitCamera': 'Initializing camera...', 'facePositionFace': 'Position your face in the frame...', 'faceNoMatch': 'No match. Try again!', 'faceHoldStill': 'Hold still...', 'faceMoved': 'Face moved...', 'faceSuccessRegistered': 'Successfully registered face for', 'faceErrNoFaceRegistered': 'This employee has not registered a face.', 'faceErrNoCamera': 'Cannot access camera.', 'faceErrNoOneRegistered': 'No one has registered a face yet.', 'faceErrTimeout': 'Could not recognize face.',
@@ -188,6 +190,7 @@ const translations = {
     }
 };
 let currentSortMethod = 'name';
+let currentHistoryFilterDate = 'today';
 let employeeListenerUnsubscribe = null, settingsListenerUnsubscribe = null, adminListenerUnsubscribe = null, breakLogListenerUnsubscribe = null, announcementListenerUnsubscribe = null, commentsListenerUnsubscribe = null;
 const timers = {};
 let AppState = { employees: [], admins: [], settings: null, breakLog: [], loggedInUserId: null, isAdmin: false, announcement: null, comments: [] };
@@ -248,7 +251,7 @@ function generateEmployeeCardHTML(emp) {
     }
     let breakTimerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : '';
     const breakDurations = getBreakDurations(); const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0);
-    return `<div class="card" data-emp-id="${emp.id}"> <div class="card-header"> <div class="emp-info"> <div class="emp-name">${emp.name}</div> </div> <div class="header-actions"> ${actionButtonsHtml} ${statusHtml} </div> </div> <div class="card-body"> <div class="status-section"> <div class="status-item status-item-start"> <span class="value">${formatTo12Hour(times.scheduledTime)}</span> </div> <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')"> <span class="label">${lang.breakCountLabel}:</span> <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span> </div> <div class="status-item status-item-total-break"> <span class="label">${lang.totalBreakLabel}:</span> <span class="value">${formatSeconds(totalBreakSeconds)}</span> </div> <div class="status-item status-item-break-type"> <span class="label">${lang.breakTypeLabel}:</span> <span class="value">${isOnBreak ? `${lang.breakInstance} ${times.breakIndex}` : '--'}</span> </div> </div> </div> <div class="break-visualizer"> ${breakTimerHtml} </div> </div>`;
+    return `<div class="card" data-emp-id="${emp.id}"> <div class="card-header"> <div class="emp-info"> <div class="emp-name">${emp.name}</div> </div> <div class="header-actions"> ${actionButtonsHtml} ${statusHtml} </div> </div> <div class="card-body"> <div class="status-section"> <div class="status-item status-item-start"> <span class="value">${formatTo12Hour(times.scheduledTime)}</span> </div> <div class="status-item status-item-break-count clickable" onclick="viewBreakHistory('${emp.id}')"> <span class="label">${lang.breakCountLabel}:</span> <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span> </div> <div class="status-item status-item-total-break"> <span class="label">${lang.totalBreakLabel}:</span> <span class="value">${formatSeconds(totalBreakSeconds)}</span> </div> <div class="status-item status-item-break-type"> <span class="label">${lang.breakTypeLabel}:</span> <span class="value">${isOnBreak ? `${lang.breakInstance} ${times.breakIndex}` : '--'}</span> </div> </div> </div> <div class="break-visualizer"> ${breakTimerHtml} </div> </div>`;
 }
 function renderEmployees() {
     const empListEl = document.getElementById('emp-list'); if (!empListEl || !AppState.employees) return;
@@ -321,6 +324,75 @@ function viewBreakStatsAdmin(empId) {
     let contentHtml = `<h3>${lang.modalBreakStatsTitle} - ${emp.name}</h3> <p><strong>${lang.modalTotalBreakTime}</strong> ${formatSeconds(totalBreakSeconds, true)}</p> ${rulesHtml} ${historyHtml}`;
     showModal(contentHtml);
 }
+async function viewBreakHistory(empId) {
+    const lang = translations[currentLanguage];
+    const emp = AppState.employees.find(e => e.id === empId);
+    if (!emp) return;
+
+    if (currentHistoryFilterDate === 'today') {
+        viewBreakStatsAdmin(empId);
+        return;
+    }
+
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const todayStr = getWorkDayString(today);
+    const yesterdayStr = getWorkDayString(yesterday);
+    
+    let dateRange;
+    if (currentHistoryFilterDate === 'yesterday') {
+        dateRange = [yesterdayStr];
+    } else { // last2days
+        dateRange = [todayStr, yesterdayStr];
+    }
+
+    try {
+        const querySnapshot = await db.collection("break_log")
+            .where("empId", "==", empId)
+            .where("logDate", "in", dateRange)
+            .orderBy("timestamp", "desc")
+            .get();
+
+        const logs = querySnapshot.docs.map(doc => doc.data());
+
+        if (logs.length === 0) {
+            showModal(`<h3>${lang.modalHistoryTitle} - ${emp.name}</h3><p>${lang.modalNoHistoryForDate}</p>`);
+            return;
+        }
+
+        const groupedByDate = logs.reduce((acc, log) => {
+            (acc[log.logDate] = acc[log.logDate] || []).push(log);
+            return acc;
+        }, {});
+
+        let historyHtml = `<h3>${lang.modalHistoryTitle} - ${emp.name}</h3>`;
+        let totalBreakSecondsAllDays = 0;
+
+        Object.keys(groupedByDate).sort().reverse().forEach(date => {
+            const logsForDate = groupedByDate[date];
+            const totalSecondsForDate = logsForDate.reduce((sum, item) => sum + item.duration, 0);
+            totalBreakSecondsAllDays += totalSecondsForDate;
+
+            historyHtml += `<h4>${lang.modalHistoryForDate} ${date} (${formatSeconds(totalSecondsForDate, true)})</h4>`;
+            historyHtml += `<ul>`;
+            logsForDate.forEach(item => {
+                historyHtml += `<li>${lang.breakInstance} ${item.breakIndex}: <strong>${formatSeconds(item.duration, true)}</strong></li>`;
+            });
+            historyHtml += `</ul>`;
+        });
+        
+        const totalFormatted = formatSeconds(totalBreakSecondsAllDays, true);
+        historyHtml = `<h3>${lang.modalHistoryTitle} - ${emp.name}</h3><p><strong>${lang.totalBreakLabel}: ${totalFormatted}</strong></p>` + historyHtml.replace(`<h3>${lang.modalHistoryTitle} - ${emp.name}</h3>`, '');
+
+        showModal(historyHtml);
+
+    } catch (error) {
+        console.error("Lỗi khi lấy lịch sử nghỉ:", error);
+        showModal(`<h3>${lang.errorTitle}</h3><p>Không thể tải lịch sử nghỉ. Vui lòng thử lại.</p>`);
+    }
+}
 function formatTo12Hour(timeString) { if (!timeString || !timeString.includes(':')) return '--'; let [hours, minutes] = timeString.split(':'); let h = parseInt(hours, 10); const ampm = h >= 12 ? 'pm' : 'am'; h = h % 12; h = h ? h : 12; return `${String(h).padStart(2, '0')}:${minutes}${ampm}`; }
 function unlockAudioContext() { const sound = document.getElementById('notif-sound'); if (sound && sound.paused) { sound.play().catch(()=>{}); sound.pause(); sound.currentTime = 0; } }
 function loginWithId(userId) { unlockAudioContext(); AppState.isAdmin = userId.startsWith('ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); setupRealtimeListeners(); renderEmployees(); }
@@ -337,7 +409,6 @@ function getWorkDayString(date) {
     if (workDate.getHours() < 6) { // Shift cutoff is 6 AM
         workDate.setDate(workDate.getDate() - 1);
     }
-    // Use local date components to build the string, avoiding UTC conversion from toISOString()
     const year = workDate.getFullYear();
     const month = String(workDate.getMonth() + 1).padStart(2, '0');
     const day = String(workDate.getDate()).padStart(2, '0');
@@ -365,7 +436,6 @@ async function saveLocationSettingsAction() {
     const lonInput = document.getElementById('setting-lon').value;
     const radiusInput = document.getElementById('setting-radius').value;
 
-    // If all fields are empty, allow saving to disable location checks
     if (latInput === '' && lonInput === '' && radiusInput === '') {
         if (await updateSettings({ locationSettings: { lat: null, lon: null, radius: null } })) {
             showModal(`<h3>${lang.successTitle}</h3><p>${lang.modalSuccessSaveSettings}</p>`);
@@ -377,7 +447,6 @@ async function saveLocationSettingsAction() {
     const lon = parseFloat(lonInput);
     const radius = parseFloat(radiusInput);
 
-    // Otherwise, all fields must be valid numbers
     if (isNaN(lat) || isNaN(lon) || isNaN(radius)) {
         showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrInvalidLocation}</p>`);
         return;
@@ -400,7 +469,12 @@ function setLanguage(lang) {
 }
 function updateUIText() {
     const lang = translations[currentLanguage]; document.documentElement.lang = currentLanguage;
-    document.querySelector('.login-box h2').textContent = lang.loginTitle; document.getElementById('start-face-login-btn').innerHTML = `<i class="fa-solid fa-camera"></i>&nbsp; ${lang.loginFaceBtn}`; document.querySelector('#code-login-section p').textContent = lang.loginCodePrompt; document.getElementById('login-code-input').placeholder = lang.loginCodePlaceholder; document.getElementById('login-by-code-btn').textContent = lang.loginCodeBtn; document.getElementById('tab-emp').textContent = lang.employeeTab; document.getElementById('tab-admin').textContent = lang.adminTab; document.getElementById('font-size-btn').title = lang.fontSizeBtnTitle; document.getElementById('notification-btn').title = lang.notificationBtnTitle; document.getElementById('language-btn').title = lang.langBtnTitle; document.getElementById('game-btn').title = lang.gameBtnTitle; document.getElementById('logout-btn').title = lang.logoutBtnTitle; document.querySelector('.filter-controls label').textContent = lang.sortByLabel; document.querySelector('#sort-filter-select option[value="name"]').textContent = lang.sortByName; document.querySelector('#sort-filter-select option[value="onBreak"]').textContent = lang.sortByOnBreak; document.querySelector('#sort-filter-select option[value="totalBreak"]').textContent = lang.sortByTotalBreak; document.getElementById('modal-cancel').textContent = lang.cancel;
+    document.querySelector('.login-box h2').textContent = lang.loginTitle; document.getElementById('start-face-login-btn').innerHTML = `<i class="fa-solid fa-camera"></i>&nbsp; ${lang.loginFaceBtn}`; document.querySelector('#code-login-section p').textContent = lang.loginCodePrompt; document.getElementById('login-code-input').placeholder = lang.loginCodePlaceholder; document.getElementById('login-by-code-btn').textContent = lang.loginCodeBtn; document.getElementById('tab-emp').textContent = lang.employeeTab; document.getElementById('tab-admin').textContent = lang.adminTab; document.getElementById('font-size-btn').title = lang.fontSizeBtnTitle; document.getElementById('notification-btn').title = lang.notificationBtnTitle; document.getElementById('language-btn').title = lang.langBtnTitle; document.getElementById('game-btn').title = lang.gameBtnTitle; document.getElementById('logout-btn').title = lang.logoutBtnTitle; document.querySelector('.filter-controls label').textContent = lang.sortByLabel; document.querySelector('#sort-filter-select option[value="name"]').textContent = lang.sortByName; document.querySelector('#sort-filter-select option[value="onBreak"]').textContent = lang.sortByOnBreak; document.querySelector('#sort-filter-select option[value="totalBreak"]').textContent = lang.sortByTotalBreak;
+    document.querySelector('label[for="history-filter-select"]').textContent = lang.historyFilterLabel;
+    document.querySelector('#history-filter-select option[value="today"]').textContent = lang.historyToday;
+    document.querySelector('#history-filter-select option[value="yesterday"]').textContent = lang.historyYesterday;
+    document.querySelector('#history-filter-select option[value="last2days"]').textContent = lang.historyLast2Days;
+    document.getElementById('modal-cancel').textContent = lang.cancel;
 }
 document.getElementById('tab-emp').onclick = ()=>{ document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; document.getElementById('tab-emp').classList.add('active'); document.getElementById('tab-admin').classList.remove('active'); };
 document.getElementById('tab-admin').onclick = ()=>{ document.getElementById('view-emp').style.display='none'; document.getElementById('view-admin').style.display='block'; document.getElementById('tab-admin').classList.add('active'); document.getElementById('tab-emp').classList.remove('active'); renderAdminPanel(); };
@@ -412,6 +486,7 @@ document.getElementById('game-btn').onclick = () => { tetrisModal.style.display 
 document.getElementById('tetris-close-btn').onclick = () => { tetrisModal.style.display = 'none'; if (animationFrameId) cancelAnimationFrame(animationFrameId); };
 document.getElementById('tetris-left').onclick = () => playerMove(-1); document.getElementById('tetris-right').onclick = () => playerMove(1); document.getElementById('tetris-down').onclick = () => playerDrop(); document.getElementById('tetris-rotate').onclick = () => playerRotate(1);
 document.getElementById('sort-filter-select').addEventListener('change', (event) => { currentSortMethod = event.target.value; renderEmployees(); });
+document.getElementById('history-filter-select').addEventListener('change', (event) => { currentHistoryFilterDate = event.target.value; });
 function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
 document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
 async function loadInitialData() {
