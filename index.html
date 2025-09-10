@@ -395,7 +395,23 @@ async function viewBreakHistory(empId) {
 }
 function formatTo12Hour(timeString) { if (!timeString || !timeString.includes(':')) return '--'; let [hours, minutes] = timeString.split(':'); let h = parseInt(hours, 10); const ampm = h >= 12 ? 'pm' : 'am'; h = h % 12; h = h ? h : 12; return `${String(h).padStart(2, '0')}:${minutes}${ampm}`; }
 function unlockAudioContext() { const sound = document.getElementById('notif-sound'); if (sound && sound.paused) { sound.play().catch(()=>{}); sound.pause(); sound.currentTime = 0; } }
-function loginWithId(userId) { unlockAudioContext(); AppState.isAdmin = userId.startsWith('ADMIN'); AppState.loggedInUserId = userId; sessionStorage.setItem('loggedInUserId', userId); document.getElementById('login-view').style.display = 'none'; document.getElementById('app-container').style.display = 'block'; updateUIVisibility(); setupRealtimeListeners(); renderEmployees(); }
+
+function loginWithId(userId) {
+    unlockAudioContext();
+    AppState.isAdmin = userId.startsWith('ADMIN');
+    AppState.loggedInUserId = userId;
+    sessionStorage.setItem('loggedInUserId', userId);
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
+    
+    // CẬP NHẬT: Chạy kiểm tra lịch ngay khi đăng nhập để đảm bảo trạng thái đúng ngay từ đầu
+    checkSchedules();
+
+    updateUIVisibility();
+    setupRealtimeListeners();
+    renderEmployees();
+}
+
 function loginWithCode() { const lang = translations[currentLanguage]; const code = document.getElementById('login-code-input').value; const errorEl = document.getElementById('login-error'); if (!code) { errorEl.textContent = lang.loginErrNoCode; return; } if (code.toUpperCase() === 'ADMIN') { loginWithId('ADMIN1'); } else { const employee = AppState.employees.find(e => e.code == code); if (employee) { const loginMethod = employee.loginMethod || 'both'; if (loginMethod === 'face') { errorEl.textContent = lang.loginErrFaceOnly; return; } loginWithId(employee.id); } else { errorEl.textContent = lang.loginErrInvalidCode; } } }
 async function logout() { if (employeeListenerUnsubscribe) employeeListenerUnsubscribe(); if (settingsListenerUnsubscribe) settingsListenerUnsubscribe(); if(adminListenerUnsubscribe) adminListenerUnsubscribe(); if(breakLogListenerUnsubscribe) breakLogListenerUnsubscribe(); if (announcementListenerUnsubscribe) announcementListenerUnsubscribe(); if (commentsListenerUnsubscribe) commentsListenerUnsubscribe(); AppState.loggedInUserId = null; AppState.isAdmin = false; AppState.employees = []; AppState.admins = []; AppState.settings = null; AppState.breakLog = []; AppState.announcement = null; AppState.comments = []; sessionStorage.removeItem('loggedInUserId'); document.getElementById('app-container').style.display = 'none'; document.getElementById('login-view').style.display = 'flex'; document.getElementById('login-code-input').value = ''; document.getElementById('login-error').textContent = ''; document.getElementById('code-login-section').style.display = 'none'; document.getElementById('emp-list').innerHTML = ''; updateUIVisibility(); await loadInitialData(); }
 function updateUIVisibility() { const adminTab = document.getElementById('tab-admin'); const empTab = document.getElementById('tab-emp'); if (AppState.isAdmin) { adminTab.style.display = 'block'; } else { adminTab.style.display = 'none'; document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; empTab.classList.add('active'); adminTab.classList.remove('active'); } }
@@ -536,7 +552,17 @@ async function initializeApp() {
     setInterval(checkSchedules, 60000); // Check for auto-checkin every minute
     
     loadFaceModels();
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { renderEmployees(); } });
+
+    // CẬP NHẬT: Luôn kiểm tra lịch và làm mới giao diện khi người dùng mở lại app
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            // Khi app được hiển thị, ngay lập tức kiểm tra lại lịch trình
+            // để cập nhật các trạng thái check-in có thể đã bị bỏ lỡ.
+            checkSchedules();
+            // Vẽ lại danh sách nhân viên để đảm bảo giao diện luôn mới nhất.
+            renderEmployees();
+        }
+    });
 }
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed: ', err)); }); }
 function waitForFirebase(callback) { const interval = setInterval(() => { if (typeof firebase !== 'undefined' && firebase.firestore) { clearInterval(interval); callback(); } }, 100); }
