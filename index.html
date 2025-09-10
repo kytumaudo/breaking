@@ -70,7 +70,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .break-visualizer { padding: 4px 8px; min-height: 12px; }
 .timer-container { display: none; width: 100%; background-color: #fef2f2; padding: 4px 8px; border-radius: 4px; }
 .timer-display { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.timer-text { font-size:12px; color:var(--danger); font-weight:500; flex-shrink: 0; font-variant-numeric: tabular-nums; min-width: 70px; }
+.timer-text { font-size:12px; color:var(--danger); font-weight:500; flex-shrink: 0; font-variant-numeric: tabular-nums; width: 120px; white-space: nowrap; }
 .progress-container { flex-grow: 1; height:6px; background:#e0e0e0; border-radius:5px; overflow:hidden; } 
 .progress-bar { height:100%; width:0%; background:var(--danger); }
 @keyframes pulse {
@@ -404,8 +404,7 @@ function loginWithId(userId) {
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
     
-    // CẬP NHẬT: Chạy kiểm tra lịch ngay khi đăng nhập để đảm bảo trạng thái đúng ngay từ đầu
-    checkSchedules();
+    checkSchedules(); 
 
     updateUIVisibility();
     setupRealtimeListeners();
@@ -420,9 +419,10 @@ function showModal(htmlContent, onOk, showCancelButton = false) { const lang = t
 modalOk.onclick = () => { modalBackdrop.style.display = 'none'; if (typeof onModalOkCallback === 'function') onModalOkCallback(); };
 modalCancel.onclick = () => { modalBackdrop.style.display = 'none'; };
 function formatSeconds(seconds, showFull = false) { const lang = translations[currentLanguage]; const minutes = Math.floor(seconds / 60); if (showFull) { const remainingSeconds = Math.round(seconds % 60); return `${minutes} ${lang.minutes} ${remainingSeconds} ${lang.seconds}`; } if (minutes > 0) return `${minutes}m`; return `${Math.round(seconds)}s`; }
+
 function getWorkDayString(date) {
     const workDate = new Date(date);
-    if (workDate.getHours() < 6) { // Shift cutoff is 6 AM
+    if (workDate.getHours() < 6) {
         workDate.setDate(workDate.getDate() - 1);
     }
     const year = workDate.getFullYear();
@@ -430,6 +430,7 @@ function getWorkDayString(date) {
     const day = String(workDate.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
+
 async function loadFaceModels() { if (modelsLoaded) return; faceModalMessage.textContent = translations[currentLanguage].faceLoadingModels; const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'; await Promise.all([ faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL), faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL) ]); modelsLoaded = true; }
 async function startVideo() { try { const stream = await navigator.mediaDevices.getUserMedia({ video: {} }); video.srcObject = stream; return new Promise(resolve => { video.onloadedmetadata = () => resolve(video); }); } catch (err) { console.error("Camera Error:", err); return null; } }
 function stopVideoAndCloseModal() { const stream = video.srcObject; if (stream) { stream.getTracks().forEach(track => track.stop()); video.srcObject = null; } faceModalBackdrop.style.display = 'none'; if (faceDetectionInterval) { clearInterval(faceDetectionInterval); faceDetectionInterval = null; } }
@@ -549,17 +550,13 @@ async function initializeApp() {
     await loadInitialData();
     const loggedInId = sessionStorage.getItem('loggedInUserId');
     if (loggedInId) { loginWithId(loggedInId); }
-    setInterval(checkSchedules, 60000); // Check for auto-checkin every minute
+    setInterval(checkSchedules, 60000);
     
     loadFaceModels();
 
-    // CẬP NHẬT: Luôn kiểm tra lịch và làm mới giao diện khi người dùng mở lại app
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-            // Khi app được hiển thị, ngay lập tức kiểm tra lại lịch trình
-            // để cập nhật các trạng thái check-in có thể đã bị bỏ lỡ.
             checkSchedules();
-            // Vẽ lại danh sách nhân viên để đảm bảo giao diện luôn mới nhất.
             renderEmployees();
         }
     });
