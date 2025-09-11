@@ -54,12 +54,12 @@ main { padding:8px; max-width:480px; margin:0 auto; }
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     text-align: center;
 }
-.status-item-start { background-color: #eef2ff; } 
-.status-item-break-count { background-color: #f0fdf4; } 
+.status-item-start { background-color: #eef2ff; }
+.status-item-break-count { background-color: #f0fdf4; }
 .status-item-total-break { background-color: #fefce8; }
 .status-item-break-type { background-color: #faf5ff; }
 .status-item.clickable { cursor: pointer; transition: background-color 0.2s; } .status-item.clickable:hover { background-color: #e5e7eb; }
-.status-item .label { font-weight: 500; color: var(--gray-500); font-size: 10px; } 
+.status-item .label { font-weight: 500; color: var(--gray-500); font-size: 10px; }
 .status-item .value { font-weight: 700; color: var(--text-dark); font-size: 11px; }
 .status-item .value.break-count-value { color: var(--danger) !important; }
 .status-item .value.break-total-value { color: var(--text-dark) !important; }
@@ -71,7 +71,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .timer-container { display: none; width: 100%; background-color: #fef2f2; padding: 4px 8px; border-radius: 4px; }
 .timer-display { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .timer-text { font-size:12px; color:var(--danger); font-weight:500; flex-shrink: 0; font-variant-numeric: tabular-nums; width: 120px; white-space: nowrap; }
-.progress-container { flex-grow: 1; height:6px; background:#e0e0e0; border-radius:5px; overflow:hidden; } 
+.progress-container { flex-grow: 1; height:6px; background:#e0e0e0; border-radius:5px; overflow:hidden; }
 .progress-bar { height:100%; width:0%; background:var(--danger); }
 @keyframes pulse {
   0% { opacity: 1; }
@@ -89,7 +89,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 .admin-controls-row { display: flex; align-items: center; gap: 6px; width: 100%; }
 .admin-emp-name-input { font-weight: 600; flex: 3 1 20px; max-width: 100px; }
 .admin-emp-code-input { flex: 1 1 15px; max-width: 60px; }
-.admin-controls-row input, .admin-controls-row select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; } 
+.admin-controls-row input, .admin-controls-row select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
 .admin-controls-row input[type="time"] { flex: 1; min-width: 65px; }
 .admin-login-method-select { flex: 1 1 60px; max-width: 80px; }
 .admin-action-buttons { display: flex; gap: 6px; margin-left: auto; }
@@ -98,7 +98,7 @@ main { padding:8px; max-width:480px; margin:0 auto; }
 #modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
 #modal { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 #modal-content { font-size: 15px; margin-bottom: 20px; color: var(--gray-700); text-align: left; }
-#modal-content h3, #modal-content h4 { font-size: 16px; margin-bottom: 12px; text-align: center; } 
+#modal-content h3, #modal-content h4 { font-size: 16px; margin-bottom: 12px; text-align: center; }
 #modal-content h4 { font-size: 14px; margin-top: 16px; border-top: 1px solid var(--gray-200); paddingTop: 12px; }
 #modal-content p { margin-bottom: 10px; } #modal-content ul { list-style-type: none; padding-left: 0; } #modal-content li { background-color: var(--gray-100); padding: 8px; border-radius: 6px; margin-bottom: 5px; }
 #modal-buttons { display: flex; gap: 10px; justify-content: center; }
@@ -147,7 +147,7 @@ body.font-size-very-large .admin-controls-row input, body.font-size-very-large .
 </head>
 <body>
 <div id="login-view"><div class="login-box"><h2>Đăng nhập</h2><button id="start-face-login-btn"><i class="fa-solid fa-camera"></i>&nbsp; Đăng nhập bằng Khuôn mặt</button><div id="code-login-section" style="display:none;"><p style="margin: 16px 0 8px; color: var(--gray-500); font-weight: 500;">Hoặc đăng nhập bằng mã số</p><input type="text" id="login-code-input" placeholder="Nhập mã số hoặc Admin"><button id="login-by-code-btn">Đăng nhập bằng mã</button></div><p id="login-error"></p></div></div>
-<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="language-btn" title="Đổi Ngôn ngữ"><i class="fa-solid fa-globe"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div class="filter-controls"><label for="sort-filter-select">Sắp xếp:</label><select id="sort-filter-select"><option value="name">Theo Tên</option><option value="onBreak">Đang Nghỉ</option><option value="totalBreak">Tổng TG Nghỉ</option></select><label for="history-filter-select">Xem LS nghỉ:</label><select id="history-filter-select"><option value="today">Hôm nay</option><option value="yesterday">Hôm qua</option><option value="last2days">2 ngày qua</option></select></div><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
+<div id="app-container"><header><div class="tabs-container"><div id="tab-emp" class="tab active">Nhân viên</div><div id="tab-admin" class="tab">Quản trị</div></div><button id="font-size-btn" title="Đổi cỡ chữ"><i class="fa-solid fa-text-height"></i></button><button id="notification-btn" title="Thông báo"><i class="fa-solid fa-bullhorn"></i></button><button id="language-btn" title="Đổi Ngôn ngữ"><i class="fa-solid fa-globe"></i></button><button id="game-btn" title="Game"><i class="fa-solid fa-gamepad"></i></button><button id="logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button></header><main><section id="view-emp"><div class="filter-controls"><label for="sort-filter-select">Sắp xếp:</label><select id="sort-filter-select"><option value="name">Theo Tên</option><option value="onBreak">Đang Nghỉ</option><option value="totalBreak">Tổng TG Nghỉ</option></select></div><div id="emp-list"></div></section><section id="view-admin" style="display:none"><div id="admin-content"></div></section></main></div>
 <div id="modal-backdrop"><div id="modal"><div id="modal-content"></div><div id="modal-buttons"><button id="modal-cancel">Hủy</button><button id="modal-ok">OK</button></div></div></div>
 <audio id="notif-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 <div id="face-modal-backdrop" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white;"><div id="face-modal-content" style="position: relative; background: #333; padding: 20px; border-radius: 12px; text-align: center;"><video id="video" width="300" height="225" autoplay muted playsinline style="transform: scaleX(-1);"></video><canvas id="canvas" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%);"></canvas><p id="face-modal-message" style="margin-top: 15px; font-size: 16px; min-height: 24px;">Đang tải model...</p><button id="face-modal-close" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button></div></div>
@@ -171,7 +171,6 @@ const translations = {
         'loginTitle': 'Đăng nhập', 'loginFaceBtn': 'Đăng nhập bằng Khuôn mặt', 'loginCodePrompt': 'Hoặc đăng nhập bằng mã số', 'loginCodePlaceholder': 'Nhập mã số hoặc Admin', 'loginCodeBtn': 'Đăng nhập bằng mã', 'loginErrNoCode': 'Vui lòng nhập mã số.', 'loginErrInvalidCode': 'Mã số không hợp lệ.', 'loginErrFaceOnly': 'Tài khoản này chỉ được đăng nhập bằng khuôn mặt.', 'loginErrCodeOnly': 'Tài khoản này chỉ được đăng nhập bằng mã số.',
         'statusOnBreak': 'Đang nghỉ', 'statusOffHours': 'Ngoài giờ làm', 'statusWorking': 'Đang làm', 'statusScheduled': 'Đã lên lịch', 'statusNoSchedule': 'Chưa có lịch', 'createAlarmBtnTitle': 'Tạo báo thức lịch nghỉ', 'stopBtn': 'Dừng', 'breakBtn': 'Nghỉ', 'timerRemaining': 'Còn lại', 'timerOvertime': 'Quá giờ', 'breakCountLabel': 'Lần', 'totalBreakLabel': 'Tổng', 'breakTypeLabel': 'Nghỉ', 'breakInstance': 'Lần',
         'sortByLabel': 'Sắp xếp:', 'sortByName': 'Theo Tên', 'sortByOnBreak': 'Đang Nghỉ', 'sortByTotalBreak': 'Tổng TG Nghỉ',
-        'historyFilterLabel': 'Xem LS nghỉ:', 'historyToday': 'Hôm nay', 'historyYesterday': 'Hôm qua', 'historyLast2Days': '2 ngày qua', 'modalHistoryTitle': 'Lịch sử nghỉ', 'modalHistoryForDate': 'Dữ liệu cho ngày', 'modalNoHistoryForDate': 'Không có dữ liệu nghỉ cho ngày đã chọn.',
         'adminHeaderEmployees': 'Quản lý Nhân viên', 'adminHeaderAdmins': 'Quản lý Admin', 'adminHeaderAddEmployee': 'Thêm nhân viên mới', 'adminHeaderSettings': 'Cài đặt Vị trí & Thời gian nghỉ', 'adminNoEmployees': 'Chưa có nhân viên nào.', 'adminEmpNamePlaceholder': 'Tên', 'adminEmpCodePlaceholder': 'Mã số', 'adminLoginMethodTitle': 'Chọn phương thức đăng nhập', 'adminFaceRegBtnTitle': 'Đăng ký khuôn mặt qua Camera', 'adminResetBreaksBtnTitle': 'Reset nghỉ', 'adminDeleteBtnTitle': 'Xóa', 'adminStartTimeTitle': 'Giờ start ca', 'adminBreakTimeTitle': 'Giờ nghỉ lần', 'adminAccountLabel': 'Tài khoản Admin', 'adminAddEmpNameLabel': 'Tên nhân viên', 'adminAddEmpCodeLabel': 'Mã số đăng nhập', 'adminAddEmpBtn': 'Thêm nhân viên', 'adminSettingsLatLabel': 'Vĩ độ', 'adminSettingsLonLabel': 'Kinh độ', 'adminSettingsRadiusLabel': 'Bán kính (mét)', 'adminSettingsSaveBtn': 'Lưu Cài đặt',
         'modalErrFillFields': 'Vui lòng nhập đủ Tên và Mã số.', 'modalErrCodeExists': 'Mã số đăng nhập đã tồn tại.', 'modalSuccessAddEmp': 'Thêm nhân viên thành công!', 'modalErrAddEmp': 'Không thể thêm nhân viên. Vui lòng thử lại.', 'modalConfirmDelete': 'Bạn có chắc muốn xóa nhân viên', 'modalSuccessDelete': 'Đã xóa nhân viên', 'modalConfirmResetBreaks': 'Reset số lần nghỉ của nhân viên này?', 'modalErrNoFixedBreaks': 'Chưa có lịch nghỉ cố định nào được thiết lập.', 'modalConfirmCreateCalendar': 'Thêm lịch nghỉ hôm nay vào Lịch của điện thoại?', 'modalErrEmptyFields': 'Tên và Mã số không được để trống.', 'modalErrCodeInUse': 'Mã số này đã được sử dụng.', 'modalSuccessSaveSettings': 'Đã lưu cài đặt vị trí.', 'modalErrInvalidLocation': 'Vui lòng nhập thông tin vị trí hợp lệ.', 'modalErrLocationSupport': 'Trình duyệt không hỗ trợ định vị.', 'modalErrLocationOutside': 'Bạn đang ở ngoài khu vực cho phép', 'modalErrGetLocation': 'Không thể lấy được vị trí của bạn.', 'modalBreakStatsTitle': 'Thống kê nghỉ', 'modalTotalBreakTime': 'Tổng thời gian đã nghỉ:', 'modalBreakRules': 'Quy định nghỉ', 'modalBreakHistory': 'Lịch sử nghỉ trong ngày', 'modalNoBreakHistory': 'Chưa có dữ liệu nghỉ trong ngày.', 'minutes': 'phút', 'seconds': 'giây', 'modalOutOfBreaks': 'Đã hết số lần nghỉ giải lao trong ngày.', 'modalConfirmStartBreak': 'Bắt đầu nghỉ lần', 'modalVerifyWithCodeTitle': 'Xác thực bằng Mã số', 'modalVerifyWithCodePrompt': 'Nhập mã số của', 'modalVerifyWithCodeContinue': 'để tiếp tục.', 'modalVerifyCodePlaceholder': 'Nhập mã số', 'modalErrWrongCode': 'Mã số không chính xác.',
         'faceLoadingModels': 'Đang tải model...', 'faceInitCamera': 'Đang khởi tạo camera...', 'facePositionFace': 'Đưa khuôn mặt vào khung hình...', 'faceNoMatch': 'Không khớp. Thử lại!', 'faceHoldStill': 'Giữ yên...', 'faceMoved': 'Khuôn mặt di chuyển...', 'faceSuccessRegistered': 'Đã đăng ký khuôn mặt cho', 'faceErrNoFaceRegistered': 'Nhân viên này chưa đăng ký khuôn mặt.', 'faceErrNoCamera': 'Không thể truy cập camera.', 'faceErrNoOneRegistered': 'Chưa có ai đăng ký khuôn mặt.', 'faceErrTimeout': 'Không nhận diện được khuôn mặt.',
@@ -182,7 +181,6 @@ const translations = {
         'loginTitle': 'Login', 'loginFaceBtn': 'Login with Face', 'loginCodePrompt': 'Or login with code', 'loginCodePlaceholder': 'Enter code or Admin', 'loginCodeBtn': 'Login with Code', 'loginErrNoCode': 'Please enter a code.', 'loginErrInvalidCode': 'Invalid code.', 'loginErrFaceOnly': 'This account can only log in with face recognition.', 'loginErrCodeOnly': 'This account can only log in with a code.',
         'statusOnBreak': 'On Break', 'statusOffHours': 'Off Hours', 'statusWorking': 'Working', 'statusScheduled': 'Scheduled', 'statusNoSchedule': 'No Schedule', 'createAlarmBtnTitle': 'Create break schedule alarms', 'stopBtn': 'Stop', 'breakBtn': 'Break', 'timerRemaining': 'Remaining', 'timerOvertime': 'Overtime', 'breakCountLabel': 'Count', 'totalBreakLabel': 'Total', 'breakTypeLabel': 'Break', 'breakInstance': 'Break',
         'sortByLabel': 'Sort by:', 'sortByName': 'By Name', 'sortByOnBreak': 'On Break', 'sortByTotalBreak': 'Total Break Time',
-        'historyFilterLabel': 'View History:', 'historyToday': 'Today', 'historyYesterday': 'Yesterday', 'historyLast2Days': 'Last 2 days', 'modalHistoryTitle': 'Break History', 'modalHistoryForDate': 'Data for date', 'modalNoHistoryForDate': 'No break data for the selected date.',
         'adminHeaderEmployees': 'Employee Management', 'adminHeaderAdmins': 'Admin Management', 'adminHeaderAddEmployee': 'Add New Employee', 'adminHeaderSettings': 'Location & Break Time Settings', 'adminNoEmployees': 'No employees yet.', 'adminEmpNamePlaceholder': 'Name', 'adminEmpCodePlaceholder': 'Code', 'adminLoginMethodTitle': 'Select login method', 'adminFaceRegBtnTitle': 'Register face via Camera', 'adminResetBreaksBtnTitle': 'Reset Breaks', 'adminDeleteBtnTitle': 'Delete', 'adminStartTimeTitle': 'Shift start time', 'adminBreakTimeTitle': 'Break time for break', 'adminAccountLabel': 'Admin Account', 'adminAddEmpNameLabel': 'Employee Name', 'adminAddEmpCodeLabel': 'Login Code', 'adminAddEmpBtn': 'Add Employee', 'adminSettingsLatLabel': 'Latitude', 'adminSettingsLonLabel': 'Longitude', 'adminSettingsRadiusLabel': 'Radius (meters)', 'adminSettingsSaveBtn': 'Save Settings',
         'modalErrFillFields': 'Please enter both Name and Code.', 'modalErrCodeExists': 'This login code already exists.', 'modalSuccessAddEmp': 'Employee added successfully!', 'modalErrAddEmp': 'Could not add employee. Please try again.', 'modalConfirmDelete': 'Are you sure you want to delete employee', 'modalSuccessDelete': 'Deleted employee', 'modalConfirmResetBreaks': 'Reset the break count for this employee?', 'modalErrNoFixedBreaks': 'No fixed break schedule has been set.', 'modalConfirmCreateCalendar': 'Add today\'s break schedule to your phone\'s Calendar?', 'modalErrEmptyFields': 'Name and Code cannot be empty.', 'modalErrCodeInUse': 'This code is already in use.', 'modalSuccessSaveSettings': 'Location settings saved.', 'modalErrInvalidLocation': 'Please enter valid location information.', 'modalErrLocationSupport': 'Geolocation is not supported by this browser.', 'modalErrLocationOutside': 'You are outside the allowed area', 'modalErrGetLocation': 'Unable to retrieve your location.', 'modalBreakStatsTitle': 'Break Statistics', 'modalTotalBreakTime': 'Total time on break:', 'modalBreakRules': 'Break Rules', 'modalBreakHistory': 'Break History for Today', 'modalNoBreakHistory': 'No break data for today yet.', 'minutes': 'minutes', 'seconds': 'seconds', 'modalOutOfBreaks': 'You have used all available breaks for the day.', 'modalConfirmStartBreak': 'Start break number', 'modalVerifyWithCodeTitle': 'Verify with Code', 'modalVerifyWithCodePrompt': 'Enter the code for', 'modalVerifyWithCodeContinue': 'to continue.', 'modalVerifyCodePlaceholder': 'Enter code', 'modalErrWrongCode': 'Incorrect code.',
         'faceLoadingModels': 'Loading models...', 'faceInitCamera': 'Initializing camera...', 'facePositionFace': 'Position your face in the frame...', 'faceNoMatch': 'No match. Try again!', 'faceHoldStill': 'Hold still...', 'faceMoved': 'Face moved...', 'faceSuccessRegistered': 'Successfully registered face for', 'faceErrNoFaceRegistered': 'This employee has not registered a face.', 'faceErrNoCamera': 'Cannot access camera.', 'faceErrNoOneRegistered': 'No one has registered a face yet.', 'faceErrTimeout': 'Could not recognize face.',
@@ -190,7 +188,6 @@ const translations = {
     }
 };
 let currentSortMethod = 'name';
-let currentHistoryFilterDate = 'today';
 let employeeListenerUnsubscribe = null, settingsListenerUnsubscribe = null, adminListenerUnsubscribe = null, breakLogListenerUnsubscribe = null, announcementListenerUnsubscribe = null, commentsListenerUnsubscribe = null;
 const timers = {};
 let AppState = { employees: [], admins: [], settings: null, breakLog: [], loggedInUserId: null, isAdmin: false, announcement: null, comments: [] };
@@ -231,10 +228,10 @@ async function deleteEmployee(empId) { const lang = translations[currentLanguage
 function saveSchedule(empId) { const input = document.getElementById(`schedule-${empId}`); updateEmployee(empId, { 'times.scheduledTime': input.value || null }); }
 function resetBreaks(empId) { const lang = translations[currentLanguage]; showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmResetBreaks}</p>`, () => { updateEmployee(empId, { 'times.breakIndex': 0, 'times.breakHistory': [], 'times.onBreak': false, 'times.breakStartTime': null }); }, true); }
 async function updateLoginMethod(empId, method) { await updateEmployee(empId, { loginMethod: method }); }
-function startBreak(empId) { const lang = translations[currentLanguage]; playSound('audio-break-toggle'); const coreAction = () => { const times = getTimes(empId); const idx = times.breakIndex || 0; const breakDurations = getBreakDurations(); if (idx >= breakDurations.length) { showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.modalOutOfBreaks}</p>`); return; } showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmStartBreak} ${idx + 1}: ${breakDurations[idx]} ${lang.minutes}?</p>`, () => { updateEmployee(empId, { 'times.onBreak': true, 'times.breakStartTime': new Date().toISOString(), 'times.breakIndex': idx + 1 }); }, true); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
-function stopBreak(empId) { playSound('audio-break-toggle'); const coreAction = async () => { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
+function startBreak(empId) { const lang = translations[currentLanguage]; playSound('audio-break-toggle'); const coreAction = () => { const times = getTimes(empId); const idx = times.breakIndex || 0; const breakDurations = getBreakDurations(); if (idx >= breakDurations.length) { showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.modalOutOfBreaks}</p>`); return; } showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmStartBreak} ${idx + 1}: ${breakDurations[idx]} ${lang.minutes}?</p>`, () => { updateEmployee(empId, { 'times.onBreak': true, 'times.breakStartTime': new Date().toISOString(), 'times.breakIndex': idx + 1, 'times.lastCheckInDay': getWorkDayString(new Date()) }); }, true); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
+function stopBreak(empId) { playSound('audio-break-toggle'); const coreAction = async () => { const emp = AppState.employees.find(e => e.id === empId); const times = getTimes(empId); if (!times.onBreak) return; const duration = Math.round((new Date() - new Date(times.breakStartTime)) / 1000); const newHistory = [...(times.breakHistory || []), { index: times.breakIndex, duration: duration }]; await updateEmployee(empId, { 'times.onBreak': false, 'times.breakHistory': newHistory, 'times.lastCheckInDay': getWorkDayString(new Date()) }); addBreakLog({ empId, empName: emp.name, breakIndex: times.breakIndex, duration, timestamp: new Date().toISOString(), logDate: getWorkDayString(new Date()) }); }; performActionWithLocationCheck(() => openFaceModalForVerification(empId, coreAction, () => promptForCodeVerification(empId, coreAction))); }
 async function updateEmployeeInfo(empId, field, value) { const lang = translations[currentLanguage]; const trimmedValue = value.trim(); if (!trimmedValue) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrEmptyFields}</p>`); renderAdminPanel(); return; } if (field === 'code' && AppState.employees.some(e => e.code === trimmedValue && e.id !== empId)) { showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrCodeInUse}</p>`); renderAdminPanel(); return; } await updateEmployee(empId, { [field]: trimmedValue }); }
-function updateBreakTimes(empId) { const breakTimes = Array.from({ length: 4 }, (_, i) => document.getElementById(`break${i + 1}-${emp.id}`).value || ''); updateEmployee(empId, { breakTimes }); }
+function updateBreakTimes(empId) { const breakTimes = Array.from({ length: 4 }, (_, i) => document.getElementById(`break${i + 1}-${empId}`).value || ''); updateEmployee(empId, { breakTimes }); }
 function checkSchedules() { if (!AppState.employees || AppState.employees.length === 0 || !AppState.loggedInUserId) return; const lang = translations[currentLanguage]; const now = new Date(); const currentWorkDayString = getWorkDayString(now); const batch = db.batch(); let batchHasWrites = false; AppState.employees.forEach(emp => { let times = getTimes(emp.id); if (times.lastCheckInDay && times.lastCheckInDay !== currentWorkDayString) { const newTimes = { scheduledTime: times.scheduledTime, lastCheckInDay: null, checkInTime: null, onBreak: false, breakStartTime: null, breakIndex: 0, breakHistory: [] }; batch.update(db.collection("employees").doc(emp.id), { times: newTimes }); batchHasWrites = true; } else if (times.scheduledTime && !times.checkInTime) { const scheduledDateTime = new Date(`${currentWorkDayString}T${times.scheduledTime}`); if (now >= scheduledDateTime) { const checkInData = { 'times.checkInTime': new Date().toISOString(), 'times.lastCheckInDay': currentWorkDayString }; batch.update(db.collection("employees").doc(emp.id), checkInData); batchHasWrites = true; if (AppState.loggedInUserId === emp.id) { showBrowserNotification(`${emp.name}, ${lang.notifBrowserCheckInTitle}`, lang.notifBrowserCheckInBody); } } } }); if (batchHasWrites) { batch.commit().catch(error => console.error("Lỗi khi thực hiện batch update: ", error)); } }
 function createCalendarEvents(empId) { const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if (!emp || !emp.breakTimes || emp.breakTimes.every(t => !t)) { showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.modalErrNoFixedBreaks}</p>`); return; } showModal(`<h3>${lang.confirmTitle}</h3><p>${lang.modalConfirmCreateCalendar}</p>`, () => { const today = new Date().toISOString().slice(0, 10); const formatICSDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Check-in App//EN']; emp.breakTimes.forEach((breakTime, index) => { if (!breakTime) return; const breakDuration = getBreakDurations()[index] || 10; const startDate = new Date(`${today}T${breakTime}`); const endDate = new Date(startDate.getTime() + breakDuration * 60000); icsContent.push('BEGIN:VEVENT', `UID:${emp.id}-break${index + 1}-${today}@checkin.app`, `DTSTAMP:${formatICSDate(new Date())}`, `DTSTART:${formatICSDate(startDate)}`, `DTEND:${formatICSDate(endDate)}`, `SUMMARY:Giờ nghỉ lần ${index + 1} (${emp.name})`, 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Đến giờ nghỉ giải lao!', 'TRIGGER:-PT0M', 'END:VALARM', 'END:VEVENT'); }); icsContent.push('END:VCALENDAR'); const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `LichNghi_${today}.ics`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); }, true); }
 function activateTimers() { if (!AppState.employees) return; AppState.employees.forEach(emp => { const times = getTimes(emp.id); if (times.onBreak && !timers[emp.id]) { startBreakCountdown(emp.id); } else if (!times.onBreak && timers[emp.id]) { clearInterval(timers[emp.id].interval); delete timers[emp.id]; } }); }
@@ -251,7 +248,7 @@ function generateEmployeeCardHTML(emp) {
     }
     let breakTimerHtml = (isOnBreak) ? `<div class="timer-container" id="timer-container-${emp.id}" style="display: block;"><div class="timer-display"><span class="timer-text"></span><div class="progress-container"><div class="progress-bar"></div></div></div></div>` : '';
     const breakDurations = getBreakDurations(); const totalBreakSeconds = (times.breakHistory || []).reduce((sum, item) => sum + item.duration, 0);
-    return `<div class="card" data-emp-id="${emp.id}"> <div class="card-header"> <div class="emp-info"> <div class="emp-name">${emp.name}</div> </div> <div class="header-actions"> ${actionButtonsHtml} ${statusHtml} </div> </div> <div class="card-body"> <div class="status-section"> <div class="status-item status-item-start"> <span class="value">${formatTo12Hour(times.scheduledTime)}</span> </div> <div class="status-item status-item-break-count clickable" onclick="viewBreakHistory('${emp.id}')"> <span class="label">${lang.breakCountLabel}:</span> <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span> </div> <div class="status-item status-item-total-break"> <span class="label">${lang.totalBreakLabel}:</span> <span class="value">${formatSeconds(totalBreakSeconds)}</span> </div> <div class="status-item status-item-break-type"> <span class="label">${lang.breakTypeLabel}:</span> <span class="value">${isOnBreak ? `${lang.breakInstance} ${times.breakIndex}` : '--'}</span> </div> </div> </div> <div class="break-visualizer"> ${breakTimerHtml} </div> </div>`;
+    return `<div class="card" data-emp-id="${emp.id}"> <div class="card-header"> <div class="emp-info"> <div class="emp-name">${emp.name}</div> </div> <div class="header-actions"> ${actionButtonsHtml} ${statusHtml} </div> </div> <div class="card-body"> <div class="status-section"> <div class="status-item status-item-start"> <span class="value">${formatTo12Hour(times.scheduledTime)}</span> </div> <div class="status-item status-item-break-count clickable" onclick="viewBreakStatsAdmin('${emp.id}')"> <span class="label">${lang.breakCountLabel}:</span> <span class="value break-count-value">${times.breakIndex || 0}</span><span class="value">/</span><span class="value break-total-value">${breakDurations.length}</span> </div> <div class="status-item status-item-total-break"> <span class="label">${lang.totalBreakLabel}:</span> <span class="value">${formatSeconds(totalBreakSeconds)}</span> </div> <div class="status-item status-item-break-type"> <span class="label">${lang.breakTypeLabel}:</span> <span class="value">${isOnBreak ? `${lang.breakInstance} ${times.breakIndex}` : '--'}</span> </div> </div> </div> <div class="break-visualizer"> ${breakTimerHtml} </div> </div>`;
 }
 function renderEmployees() {
     const empListEl = document.getElementById('emp-list'); if (!empListEl || !AppState.employees) return;
@@ -319,79 +316,10 @@ function viewBreakStatsAdmin(empId) {
     getBreakDurations().forEach((duration, index) => { rulesHtml += `<li>${lang.breakInstance} ${index + 1}: <strong>${duration} ${lang.minutes}</strong></li>`; });
     rulesHtml += `</ul>`;
     let historyHtml = `<h4>${lang.modalBreakHistory}</h4>`;
-    if (!times.breakHistory || times.breakHistory.length === 0) { historyHtml += `<p>${lang.modalNoBreakHistory}</p>`; } 
+    if (!times.breakHistory || times.breakHistory.length === 0) { historyHtml += `<p>${lang.modalNoBreakHistory}</p>`; }
     else { historyHtml += "<ul>"; times.breakHistory.forEach(item => { historyHtml += `<li>${lang.breakInstance} ${item.index}: <strong>${formatSeconds(item.duration, true)}</strong></li>`; }); historyHtml += "</ul>"; }
     let contentHtml = `<h3>${lang.modalBreakStatsTitle} - ${emp.name}</h3> <p><strong>${lang.modalTotalBreakTime}</strong> ${formatSeconds(totalBreakSeconds, true)}</p> ${rulesHtml} ${historyHtml}`;
     showModal(contentHtml);
-}
-async function viewBreakHistory(empId) {
-    const lang = translations[currentLanguage];
-    const emp = AppState.employees.find(e => e.id === empId);
-    if (!emp) return;
-
-    if (currentHistoryFilterDate === 'today') {
-        viewBreakStatsAdmin(empId);
-        return;
-    }
-
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-
-    const todayStr = getWorkDayString(today);
-    const yesterdayStr = getWorkDayString(yesterday);
-    
-    let dateRange;
-    if (currentHistoryFilterDate === 'yesterday') {
-        dateRange = [yesterdayStr];
-    } else { // last2days
-        dateRange = [todayStr, yesterdayStr];
-    }
-
-    try {
-        const querySnapshot = await db.collection("break_log")
-            .where("empId", "==", empId)
-            .where("logDate", "in", dateRange)
-            .orderBy("timestamp", "desc")
-            .get();
-
-        const logs = querySnapshot.docs.map(doc => doc.data());
-
-        if (logs.length === 0) {
-            showModal(`<h3>${lang.modalHistoryTitle} - ${emp.name}</h3><p>${lang.modalNoHistoryForDate}</p>`);
-            return;
-        }
-
-        const groupedByDate = logs.reduce((acc, log) => {
-            (acc[log.logDate] = acc[log.logDate] || []).push(log);
-            return acc;
-        }, {});
-
-        let historyHtml = `<h3>${lang.modalHistoryTitle} - ${emp.name}</h3>`;
-        let totalBreakSecondsAllDays = 0;
-
-        Object.keys(groupedByDate).sort().reverse().forEach(date => {
-            const logsForDate = groupedByDate[date];
-            const totalSecondsForDate = logsForDate.reduce((sum, item) => sum + item.duration, 0);
-            totalBreakSecondsAllDays += totalSecondsForDate;
-
-            historyHtml += `<h4>${lang.modalHistoryForDate} ${date} (${formatSeconds(totalSecondsForDate, true)})</h4>`;
-            historyHtml += `<ul>`;
-            logsForDate.forEach(item => {
-                historyHtml += `<li>${lang.breakInstance} ${item.breakIndex}: <strong>${formatSeconds(item.duration, true)}</strong></li>`;
-            });
-            historyHtml += `</ul>`;
-        });
-        
-        const totalFormatted = formatSeconds(totalBreakSecondsAllDays, true);
-        historyHtml = `<h3>${lang.modalHistoryTitle} - ${emp.name}</h3><p><strong>${lang.totalBreakLabel}: ${totalFormatted}</strong></p>` + historyHtml.replace(`<h3>${lang.modalHistoryTitle} - ${emp.name}</h3>`, '');
-
-        showModal(historyHtml);
-
-    } catch (error) {
-        console.error("Lỗi khi lấy lịch sử nghỉ:", error);
-        showModal(`<h3>${lang.errorTitle}</h3><p>Không thể tải lịch sử nghỉ. Vui lòng thử lại.</p>`);
-    }
 }
 function formatTo12Hour(timeString) { if (!timeString || !timeString.includes(':')) return '--'; let [hours, minutes] = timeString.split(':'); let h = parseInt(hours, 10); const ampm = h >= 12 ? 'pm' : 'am'; h = h % 12; h = h ? h : 12; return `${String(h).padStart(2, '0')}:${minutes}${ampm}`; }
 function unlockAudioContext() { const sound = document.getElementById('notif-sound'); if (sound && sound.paused) { sound.play().catch(()=>{}); sound.pause(); sound.currentTime = 0; } }
@@ -403,8 +331,8 @@ function loginWithId(userId) {
     sessionStorage.setItem('loggedInUserId', userId);
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
-    
-    checkSchedules(); 
+
+    checkSchedules();
 
     updateUIVisibility();
     setupRealtimeListeners();
@@ -438,13 +366,13 @@ function showCodeLogin() { document.getElementById('code-login-section').style.d
 document.getElementById('face-modal-close').onclick = () => { stopVideoAndCloseModal(); if (currentFaceAction.actionType === 'login') showCodeLogin(); else if (currentFaceAction.actionType === 'verify') promptForCodeVerification(currentFaceAction.empId, currentFaceAction.callback); };
 async function openFaceModalForVerification(empId, onSuccess, onFailure) { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'verify', empId: empId, callback: onSuccess }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); const emp = AppState.employees.find(e => e.id === empId); const faceDescriptor = emp?.faceDescriptor; if (!faceDescriptor || !Array.isArray(faceDescriptor) || faceDescriptor.length === 0) { stopVideoAndCloseModal(); showModal(`<h3>${lang.errorTitle}</h3><p>${lang.faceErrNoFaceRegistered}</p>`); onFailure(); return; } faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); onFailure(); return; } faceModalMessage.textContent = lang.facePositionFace; const storedDescriptor = new Float32Array(faceDescriptor); const timeout = setTimeout(() => { stopVideoAndCloseModal(); onFailure(); }, 10000); faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { const distance = faceapi.euclideanDistance(detection.descriptor, storedDescriptor); if (distance < 0.45) { clearTimeout(timeout); stopVideoAndCloseModal(); onSuccess(); } else { faceModalMessage.textContent = lang.faceNoMatch; } } }, 300); }
 function promptForCodeVerification(empId, onVerified) { const lang = translations[currentLanguage]; const emp = AppState.employees.find(e => e.id === empId); if (!emp) return; const modalContentHtml = `<h3>${lang.modalVerifyWithCodeTitle}</h3><p>${lang.modalVerifyWithCodePrompt} <strong>${emp.name}</strong> ${lang.modalVerifyWithCodeContinue}</p><div class="form-group"><input type="text" id="verification-code-input" inputmode="numeric" placeholder="${lang.modalVerifyCodePlaceholder}" style="text-align:center; font-size: 18px;"></div>`; showModal(modalContentHtml, () => { const enteredCode = document.getElementById('verification-code-input').value; if (emp.code === enteredCode) onVerified(); else showModal(`<h3>${lang.errorTitle}</h3><p>${lang.modalErrWrongCode}</p>`); }, true); }
-async function loginWithFace() { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'login' }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); const labeledDescriptors = []; const validEmployees = AppState.employees.filter(emp => emp.faceDescriptor && Array.isArray(emp.faceDescriptor) && emp.faceDescriptor.length > 0); validEmployees.forEach(emp => labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(emp.id, [new Float32Array(emp.faceDescriptor)]))); AppState.admins.forEach(admin => { if (admin.faceDescriptor && Array.isArray(admin.faceDescriptor) && admin.faceDescriptor.length > 0) { labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(admin.id, [new Float32Array(admin.faceDescriptor)])); }}); if (labeledDescriptors.length === 0) { stopVideoAndCloseModal(); showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.faceErrNoOneRegistered}</p>`); showCodeLogin(); return; } const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.45); faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); showModal(`<h3>${lang.errorTitle}</h3><p>${lang.faceErrNoCamera}</p>`); showCodeLogin(); return; } faceModalMessage.textContent = lang.facePositionFace; const timeout = setTimeout(() => { stopVideoAndCloseModal(); showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.faceErrTimeout}</p>`); showCodeLogin(); }, 15000); faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { const bestMatch = faceMatcher.findBestMatch(detection.descriptor); if (bestMatch.label !== 'unknown') { 
+async function loginWithFace() { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'login' }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); const labeledDescriptors = []; const validEmployees = AppState.employees.filter(emp => emp.faceDescriptor && Array.isArray(emp.faceDescriptor) && emp.faceDescriptor.length > 0); validEmployees.forEach(emp => labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(emp.id, [new Float32Array(emp.faceDescriptor)]))); AppState.admins.forEach(admin => { if (admin.faceDescriptor && Array.isArray(admin.faceDescriptor) && admin.faceDescriptor.length > 0) { labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(admin.id, [new Float32Array(admin.faceDescriptor)])); }}); if (labeledDescriptors.length === 0) { stopVideoAndCloseModal(); showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.faceErrNoOneRegistered}</p>`); showCodeLogin(); return; } const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.45); faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); showModal(`<h3>${lang.errorTitle}</h3><p>${lang.faceErrNoCamera}</p>`); showCodeLogin(); return; } faceModalMessage.textContent = lang.facePositionFace; const timeout = setTimeout(() => { stopVideoAndCloseModal(); showModal(`<h3>${lang.notificationTitle}</h3><p>${lang.faceErrTimeout}</p>`); showCodeLogin(); }, 15000); faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { const bestMatch = faceMatcher.findBestMatch(detection.descriptor); if (bestMatch.label !== 'unknown') {
     const matchedEmployee = AppState.employees.find(e => e.id === bestMatch.label);
     if (matchedEmployee) {
         const loginMethod = matchedEmployee.loginMethod || 'both';
         if (loginMethod === 'code') { clearTimeout(timeout); stopVideoAndCloseModal(); showModal(`<h3>${lang.errorTitle}</h3><p>${lang.loginErrCodeOnly}</p>`); showCodeLogin(); return; }
     }
-    clearTimeout(timeout); stopVideoAndCloseModal(); loginWithId(bestMatch.label); 
+    clearTimeout(timeout); stopVideoAndCloseModal(); loginWithId(bestMatch.label);
 } } }, 500); }
 async function openFaceModalForRegistration(targetId) { const lang = translations[currentLanguage]; currentFaceAction = { actionType: 'register', empId: targetId }; faceModalBackdrop.style.display = 'flex'; if (!modelsLoaded) await loadFaceModels(); faceModalMessage.textContent = lang.faceInitCamera; const videoEl = await startVideo(); if (!videoEl) { stopVideoAndCloseModal(); return; } faceModalMessage.textContent = lang.facePositionFace; let registrationDescriptor = null; let stableCounter = 0; faceDetectionInterval = setInterval(async () => { const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor(); if (detection) { if (!registrationDescriptor) registrationDescriptor = detection.descriptor; const distance = faceapi.euclideanDistance(detection.descriptor, registrationDescriptor); if (distance < 0.1) { stableCounter++; faceModalMessage.textContent = `${lang.faceHoldStill} ${stableCounter}/5`; if (stableCounter >= 5) { stopVideoAndCloseModal(); const descriptorArray = Array.from(registrationDescriptor); if (targetId.startsWith('ADMIN')) { await updateAdmin(targetId, { faceDescriptor: descriptorArray }); showModal(`<h3>${lang.successTitle}</h3><p>${lang.faceSuccessRegistered} ${targetId}.</p>`); } else { await updateEmployee(targetId, { faceDescriptor: descriptorArray }); const emp = AppState.employees.find(e => e.id === targetId); showModal(`<h3>${lang.successTitle}</h3><p>${lang.faceSuccessRegistered} ${emp.name}.</p>`); } } } else { registrationDescriptor = detection.descriptor; stableCounter = 0; faceModalMessage.textContent = lang.faceMoved; } } }, 400); }
 async function saveLocationSettingsAction() {
@@ -479,7 +407,7 @@ function showBrowserNotification(title, body) { if ('Notification'in window && N
 function setLanguage(lang) {
     currentLanguage = lang; localStorage.setItem('appLanguage', lang); updateUIText();
     if (document.getElementById('app-container').style.display === 'block') {
-        renderEmployees(); 
+        renderEmployees();
         if (AppState.isAdmin && document.getElementById('view-admin').style.display === 'block') { renderAdminPanel(); }
         if (document.getElementById('notification-modal-backdrop').style.display === 'flex') { renderNotificationModal(); }
     }
@@ -487,10 +415,6 @@ function setLanguage(lang) {
 function updateUIText() {
     const lang = translations[currentLanguage]; document.documentElement.lang = currentLanguage;
     document.querySelector('.login-box h2').textContent = lang.loginTitle; document.getElementById('start-face-login-btn').innerHTML = `<i class="fa-solid fa-camera"></i>&nbsp; ${lang.loginFaceBtn}`; document.querySelector('#code-login-section p').textContent = lang.loginCodePrompt; document.getElementById('login-code-input').placeholder = lang.loginCodePlaceholder; document.getElementById('login-by-code-btn').textContent = lang.loginCodeBtn; document.getElementById('tab-emp').textContent = lang.employeeTab; document.getElementById('tab-admin').textContent = lang.adminTab; document.getElementById('font-size-btn').title = lang.fontSizeBtnTitle; document.getElementById('notification-btn').title = lang.notificationBtnTitle; document.getElementById('language-btn').title = lang.langBtnTitle; document.getElementById('game-btn').title = lang.gameBtnTitle; document.getElementById('logout-btn').title = lang.logoutBtnTitle; document.querySelector('.filter-controls label').textContent = lang.sortByLabel; document.querySelector('#sort-filter-select option[value="name"]').textContent = lang.sortByName; document.querySelector('#sort-filter-select option[value="onBreak"]').textContent = lang.sortByOnBreak; document.querySelector('#sort-filter-select option[value="totalBreak"]').textContent = lang.sortByTotalBreak;
-    document.querySelector('label[for="history-filter-select"]').textContent = lang.historyFilterLabel;
-    document.querySelector('#history-filter-select option[value="today"]').textContent = lang.historyToday;
-    document.querySelector('#history-filter-select option[value="yesterday"]').textContent = lang.historyYesterday;
-    document.querySelector('#history-filter-select option[value="last2days"]').textContent = lang.historyLast2Days;
     document.getElementById('modal-cancel').textContent = lang.cancel;
 }
 document.getElementById('tab-emp').onclick = ()=>{ document.getElementById('view-emp').style.display='block'; document.getElementById('view-admin').style.display='none'; document.getElementById('tab-emp').classList.add('active'); document.getElementById('tab-admin').classList.remove('active'); };
@@ -503,7 +427,6 @@ document.getElementById('game-btn').onclick = () => { tetrisModal.style.display 
 document.getElementById('tetris-close-btn').onclick = () => { tetrisModal.style.display = 'none'; if (animationFrameId) cancelAnimationFrame(animationFrameId); };
 document.getElementById('tetris-left').onclick = () => playerMove(-1); document.getElementById('tetris-right').onclick = () => playerMove(1); document.getElementById('tetris-down').onclick = () => playerDrop(); document.getElementById('tetris-rotate').onclick = () => playerRotate(1);
 document.getElementById('sort-filter-select').addEventListener('change', (event) => { currentSortMethod = event.target.value; renderEmployees(); });
-document.getElementById('history-filter-select').addEventListener('change', (event) => { currentHistoryFilterDate = event.target.value; });
 function playSound(soundId) { const audioElement = document.getElementById(soundId); if (audioElement) { audioElement.currentTime = 0; audioElement.play().catch(error => { console.warn(`Âm thanh '${soundId}' không thể phát tự động:`, error); }); } }
 document.body.addEventListener('click', (event) => { const target = event.target.closest('button, .btn, .clickable, .tab'); if (!target) return; if (target.classList.contains('btn-start-break') || target.classList.contains('btn-stop-break')) { return; } playSound('audio-click'); });
 async function loadInitialData() {
@@ -551,7 +474,7 @@ async function initializeApp() {
     const loggedInId = sessionStorage.getItem('loggedInUserId');
     if (loggedInId) { loginWithId(loggedInId); }
     setInterval(checkSchedules, 60000);
-    
+
     loadFaceModels();
 
     document.addEventListener('visibilitychange', () => {
