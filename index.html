@@ -320,10 +320,10 @@ async function fetchAndDisplayBreakHistoryForDate(empId, dateString) {
         const querySnapshot = await db.collection("break_log")
             .where("empId", "==", empId)
             .where("logDate", "==", dateString)
-            .orderBy("timestamp", "asc")
             .get();
 
         const breakHistory = querySnapshot.docs.map(doc => doc.data());
+        breakHistory.sort((a, b) => a.breakIndex - b.breakIndex);
         
         let totalBreakSeconds = 0;
         let historyHtml = `<h4>${lang.modalBreakHistory} (${dateString})</h4>`;
